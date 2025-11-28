@@ -98,20 +98,10 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbarColorScheme(.dark, for: .navigationBar)
             .navigationDestination(for: AnalysisResult.self) { analysis in
-                // Placeholder for AnalysisDetailView (Phase 5)
-                ZStack {
-                    Color.black.ignoresSafeArea()
-                    Text("Analysis Detail - Phase 5")
-                        .foregroundColor(.white)
-                }
+                AnalysisDetailView(analysis: analysis)
             }
             .navigationDestination(for: Recipe.self) { recipe in
-                // Placeholder for RecipeDetailView (Phase 5)
-                ZStack {
-                    Color.black.ignoresSafeArea()
-                    Text("Recipe Detail - Phase 5")
-                        .foregroundColor(.white)
-                }
+                RecipeDetailView(recipe: recipe)
             }
             .onAppear {
                 viewModel.loadData()

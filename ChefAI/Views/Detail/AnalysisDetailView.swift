@@ -71,6 +71,9 @@ struct AnalysisDetailView: View {
         .navigationTitle("Fridge Analysis")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .navigationDestination(for: Recipe.self) { recipe in
+            RecipeDetailView(recipe: recipe)
+        }
     }
 }
 
