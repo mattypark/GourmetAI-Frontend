@@ -9,9 +9,16 @@ import SwiftUI
 
 @main
 struct ChefAIApp: App {
+    @AppStorage(StorageKeys.hasCompletedOnboarding)
+    private var hasCompletedOnboarding = false
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if hasCompletedOnboarding {
+                MainTabView()
+            } else {
+                OnboardingContainerView()
+            }
         }
     }
 }

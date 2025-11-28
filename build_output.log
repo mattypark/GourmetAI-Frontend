@@ -1,0 +1,569 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project ChefAI.xcodeproj -scheme ChefAI -sdk iphonesimulator -destination "platform=iOS Simulator,id=64C5DB64-E269-4213-881F-0A0FC2C43572" clean build
+
+Build settings from command line:
+    SDKROOT = iphonesimulator26.0
+
+2025-11-28 17:40:17.367 xcodebuild[66585:9344462] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+** CLEAN SUCCEEDED **
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'ChefAI' in project 'ChefAI' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.0.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 37ba48eabead50d265fc1b9ea28e7b69
+Build description path: /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/XCBuildData/37ba48eabead50d265fc1b9ea28e7b69.xcbuilddata
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.0.sdk /Users/matthewpark/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.0-23A339-26257891a6c027eb51374368541b8346.sdkstatcache
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.0.sdk -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.0-23A339-26257891a6c027eb51374368541b8346.sdkstatcache
+
+CreateBuildDirectory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI.xcodeproj
+    builtin-create-build-directory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products
+
+CreateBuildDirectory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI.xcodeproj
+    builtin-create-build-directory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex
+
+CreateBuildDirectory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI.xcodeproj
+    builtin-create-build-directory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator
+
+CreateBuildDirectory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI.xcodeproj
+    builtin-create-build-directory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ExplicitPrecompiledModules
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI.xcodeproj
+    builtin-create-build-directory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+CreateBuildDirectory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI.xcodeproj
+    builtin-create-build-directory /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/EagerLinkingTBDs/Debug-iphonesimulator
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI-c4b39aa2e4686c4d11c4323427969743-VFS-iphonesimulator/all-product-headers.yaml
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI.xcodeproj
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI-c4b39aa2e4686c4d11c4323427969743-VFS-iphonesimulator/all-product-headers.yaml
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/empty-ChefAI.plist (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/empty-ChefAI.plist
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.hmap (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.hmap
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.SwiftFileList (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.SwiftFileList
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.SwiftConstValuesFileList (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI_const_extract_protocols.json (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI-OutputFileMap.json (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/Entitlements-Simulated.plist (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/Entitlements-Simulated.plist
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.LinkFileList (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.LinkFileList
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.DependencyStaticMetadataFileList (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.DependencyMetadataFileList (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-project-headers.hmap (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-project-headers.hmap
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-own-target-headers.hmap (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-generated-files.hmap (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-generated-files.hmap
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-all-target-headers.hmap (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-all-non-framework-target-headers.hmap (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-all-non-framework-target-headers.hmap
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-DebugDylibPath-normal-arm64.txt (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-DebugDylibPath-normal-arm64.txt
+
+WriteAuxiliaryFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-DebugDylibInstallName-normal-arm64.txt (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    write-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-DebugDylibInstallName-normal-arm64.txt
+
+MkDir /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    /bin/mkdir -p /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app
+
+ProcessProductPackaging "" /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.app-Simulated.xcent (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+    Entitlements:
+    
+    {
+    "application-identifier" = "55GG676S9R.com.MP.ChefAI";
+}
+    
+    builtin-productPackagingUtility -entitlements -format xml -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.app-Simulated.xcent
+
+ProcessProductPackagingDER /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.app-Simulated.xcent /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.app-Simulated.xcent.der (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    /usr/bin/derq query -f xml -i /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.app-Simulated.xcent -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.app-Simulated.xcent.der --raw
+
+Ld /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app/__preview.dylib normal (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -Xlinker -reproducible -target arm64-apple-ios26.0-simulator -dynamiclib -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.0.sdk -O0 -L/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator -F/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator -install_name @rpath/ChefAI.debug.dylib -dead_strip -rdynamic -Xlinker -no_deduplicate -Xlinker -objc_abi_version -Xlinker 2 -Xlinker -dependency_info -Xlinker /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI_dependency_info.dat -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.app-Simulated.xcent -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __ents_der -Xlinker /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI.app-Simulated.xcent.der -Xlinker -no_adhoc_codesign -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app/__preview.dylib
+
+MkDir /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_output/thinned (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    /bin/mkdir -p /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_output/thinned
+
+MkDir /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_output/unthinned (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    /bin/mkdir -p /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_output/unthinned
+
+GenerateAssetSymbols /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Assets.xcassets (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Assets.xcassets --compile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app --output-format human-readable-text --notices --warnings --export-dependency-info /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_dependencies --output-partial-info-plist /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_generated_info.plist --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 26.0 --platform iphonesimulator --bundle-identifier com.MP.ChefAI --generate-swift-asset-symbols /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+CompileAssetCatalogVariant thinned /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Assets.xcassets (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Assets.xcassets --compile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --accent-color AccentColor --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPhone18,3 --filter-for-device-os-version 26.0.1 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 26.0 --platform iphonesimulator
+/* com.apple.actool.compilation-results */
+/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_generated_info.plist_thinned
+
+
+SwiftDriver ChefAI normal arm64 com.apple.xcode.tools.swift.compiler (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name ChefAI -Onone -enforce-exclusivity\=checked @/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.0.sdk -target arm64-apple-ios26.0-simulator -g -module-cache-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator -F /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/matthewpark/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.0-23A339-26257891a6c027eb51374368541b8346.sdkstatcache -output-file-map /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI_const_extract_protocols.json -Xcc -iquote -Xcc /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-generated-files.hmap -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-own-target-headers.hmap -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-all-target-headers.hmap -Xcc -iquote -Xcc /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-project-headers.hmap -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources-normal/arm64 -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/arm64 -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI-Swift.h -working-directory /Users/matthewpark/Downloads/current-projects/ChefAI -experimental-emit-module-separately -disable-cmo
+
+SwiftCompile normal arm64 Compiling\ StorageService.swift,\ AppConstants.swift,\ StorageKeys.swift,\ Color+Theme.swift,\ Date+Extensions.swift,\ View+Extensions.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Constants/AppConstants.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Constants/StorageKeys.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Extensions/Color+Theme.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Extensions/Date+Extensions.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Extensions/View+Extensions.swift (in target 'ChefAI' from project 'ChefAI')
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Constants/AppConstants.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Constants/StorageKeys.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Extensions/Color+Theme.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Extensions/Date+Extensions.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Extensions/View+Extensions.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ ChefAI (in target 'ChefAI' from project 'ChefAI')
+EmitSwiftModule normal arm64 (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/CameraViewModel.swift:29:43: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+        storageService: StorageService = .shared
+                                          ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/HomeViewModel.swift:20:44: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+    init(storageService: StorageService = .shared) {
+                                           ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/OnboardingViewModel.swift:42:44: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+    init(storageService: StorageService = .shared) {
+                                           ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+
+SwiftCompile normal arm64 Compiling\ Recipe.swift,\ UserProfile.swift,\ MockData.swift,\ AIService.swift,\ CameraService.swift,\ ImagePickerService.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Recipe.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/UserProfile.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Resources/MockData.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/CameraService.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/ImagePickerService.swift (in target 'ChefAI' from project 'ChefAI')
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Recipe.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/UserProfile.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Resources/MockData.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift:36:16: warning: main actor-isolated initializer 'init(id:extractedIngredients:suggestedRecipes:date:imageData:manuallyAddedItems:)' cannot be called from outside of the actor; this is an error in the Swift 6 language mode
+        return AnalysisResult(
+               ^~~~~~~~~~~~~~~
+               await 
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift:51:13: warning: call to main actor-isolated initializer 'init(id:name:category:confidence:)' in a synchronous nonisolated context
+            Ingredient(name: "Eggs", category: .dairy, confidence: 0.95),
+            ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Ingredient.swift:16:5: note: calls to initializer 'init(id:name:category:confidence:)' from outside of its actor context are implicitly asynchronous
+    init(
+    ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift:52:13: warning: call to main actor-isolated initializer 'init(id:name:category:confidence:)' in a synchronous nonisolated context
+            Ingredient(name: "Milk", category: .dairy, confidence: 0.92),
+            ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Ingredient.swift:16:5: note: calls to initializer 'init(id:name:category:confidence:)' from outside of its actor context are implicitly asynchronous
+    init(
+    ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift:53:13: warning: call to main actor-isolated initializer 'init(id:name:category:confidence:)' in a synchronous nonisolated context
+            Ingredient(name: "Chicken Breast", category: .meat, confidence: 0.88),
+            ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Ingredient.swift:16:5: note: calls to initializer 'init(id:name:category:confidence:)' from outside of its actor context are implicitly asynchronous
+    init(
+    ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift:54:13: warning: call to main actor-isolated initializer 'init(id:name:category:confidence:)' in a synchronous nonisolated context
+            Ingredient(name: "Broccoli", category: .produce, confidence: 0.90),
+            ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Ingredient.swift:16:5: note: calls to initializer 'init(id:name:category:confidence:)' from outside of its actor context are implicitly asynchronous
+    init(
+    ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift:55:13: warning: call to main actor-isolated initializer 'init(id:name:category:confidence:)' in a synchronous nonisolated context
+            Ingredient(name: "Rice", category: .grains, confidence: 0.85)
+            ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Ingredient.swift:16:5: note: calls to initializer 'init(id:name:category:confidence:)' from outside of its actor context are implicitly asynchronous
+    init(
+    ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift:63:13: warning: call to main actor-isolated initializer 'init(id:name:instructions:ingredients:imageURL:savedImageData:isLiked:tags:prepTime:cookTime:servings:difficulty:)' in a synchronous nonisolated context
+            Recipe(
+            ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Recipe.swift:24:5: note: calls to initializer 'init(id:name:instructions:ingredients:imageURL:savedImageData:isLiked:tags:prepTime:cookTime:servings:difficulty:)' from outside of its actor context are implicitly asynchronous
+    init(
+    ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift:84:13: warning: call to main actor-isolated initializer 'init(id:name:instructions:ingredients:imageURL:savedImageData:isLiked:tags:prepTime:cookTime:servings:difficulty:)' in a synchronous nonisolated context
+            Recipe(
+            ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Recipe.swift:24:5: note: calls to initializer 'init(id:name:instructions:ingredients:imageURL:savedImageData:isLiked:tags:prepTime:cookTime:servings:difficulty:)' from outside of its actor context are implicitly asynchronous
+    init(
+    ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift:104:13: warning: call to main actor-isolated initializer 'init(id:name:instructions:ingredients:imageURL:savedImageData:isLiked:tags:prepTime:cookTime:servings:difficulty:)' in a synchronous nonisolated context
+            Recipe(
+            ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Recipe.swift:24:5: note: calls to initializer 'init(id:name:instructions:ingredients:imageURL:savedImageData:isLiked:tags:prepTime:cookTime:servings:difficulty:)' from outside of its actor context are implicitly asynchronous
+    init(
+    ^
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/CameraService.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/ImagePickerService.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 Compiling\ ImagePicker.swift,\ CameraViewModel.swift,\ HomeViewModel.swift,\ OnboardingViewModel.swift,\ CameraSheetView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Helpers/ImagePicker.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/CameraViewModel.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/HomeViewModel.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/OnboardingViewModel.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/CameraSheetView.swift (in target 'ChefAI' from project 'ChefAI')
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Helpers/ImagePicker.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/CameraViewModel.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/CameraViewModel.swift:29:43: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+        storageService: StorageService = .shared
+                                          ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/HomeViewModel.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/HomeViewModel.swift:20:44: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+    init(storageService: StorageService = .shared) {
+                                           ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/OnboardingViewModel.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/OnboardingViewModel.swift:42:44: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+    init(storageService: StorageService = .shared) {
+                                           ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/CameraSheetView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 Compiling\ SavedRecipeImagesView.swift,\ FloatingPlusButton.swift,\ MainTabView.swift,\ OnboardingContainerView.swift,\ OnboardingProgressIndicator.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/SavedRecipeImagesView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Main/FloatingPlusButton.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Main/MainTabView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Onboarding/OnboardingContainerView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Onboarding/OnboardingProgressIndicator.swift (in target 'ChefAI' from project 'ChefAI')
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/SavedRecipeImagesView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Main/FloatingPlusButton.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Main/MainTabView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Onboarding/OnboardingContainerView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/OnboardingViewModel.swift:42:44: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+    init(storageService: StorageService = .shared) {
+                                           ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Onboarding/OnboardingProgressIndicator.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 Compiling\ ImagePreviewView.swift,\ ManualItemInputView.swift,\ AnalysisCardView.swift,\ HomeView.swift,\ LikedRecipeCardView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/ImagePreviewView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/ManualItemInputView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/AnalysisCardView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/HomeView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/LikedRecipeCardView.swift (in target 'ChefAI' from project 'ChefAI')
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/ImagePreviewView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/CameraViewModel.swift:29:43: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+        storageService: StorageService = .shared
+                                          ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/ManualItemInputView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/AnalysisCardView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/HomeView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/HomeViewModel.swift:20:44: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+    init(storageService: StorageService = .shared) {
+                                           ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/HomeView.swift:41:49: error: initializer 'init(value:label:)' requires that 'AnalysisResult' conform to 'Hashable'
+                                                NavigationLink(value: analysis) {
+                                                ^
+SwiftUI.NavigationLink.init:2:20: note: where 'P' = 'AnalysisResult'
+nonisolated public init<P>(value: P?, @ViewBuilder label: () -> Label) where P : Decodable, P : Encodable, P : Hashable}
+                   ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/HomeView.swift:100:14: error: instance method 'navigationDestination(for:destination:)' requires that 'AnalysisResult' conform to 'Hashable'
+            .navigationDestination(for: AnalysisResult.self) { analysis in
+             ^
+SwiftUI.View.navigationDestination:2:25: note: where 'D' = 'AnalysisResult'
+nonisolated public func navigationDestination<D, C>(for data: D.Type, @ViewBuilder destination: @escaping (D) -> C) -> some View where D : Hashable, C : View
+                        ^
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/LikedRecipeCardView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+Failed frontend command:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Buttons/PrimaryButton.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Buttons/SecondaryButton.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Buttons/SkipButton.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Cards/BaseCard.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Cards/ImageCard.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Common/EmptyStateView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Forms/MultipleChoiceSelector.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Forms/TagPicker.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Forms/TextFieldWithLabel.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/AnalysisResult.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Ingredient.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/OnboardingQuestion.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Recipe.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/UserProfile.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Resources/MockData.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/AIService.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/CameraService.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/ImagePickerService.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Constants/AppConstants.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Constants/StorageKeys.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Extensions/Color+Theme.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Extensions/Date+Extensions.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Extensions/View+Extensions.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Utilities/Helpers/ImagePicker.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/CameraViewModel.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/HomeViewModel.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/OnboardingViewModel.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/CameraSheetView.swift -primary-file /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/ImagePreviewView.swift -primary-file /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/ManualItemInputView.swift -primary-file /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/AnalysisCardView.swift -primary-file /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/HomeView.swift -primary-file /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/LikedRecipeCardView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/SavedRecipeImagesView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Main/FloatingPlusButton.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Main/MainTabView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Onboarding/OnboardingContainerView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Onboarding/OnboardingProgressIndicator.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Onboarding/OnboardingQuestionView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Settings/SettingsView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ChefAIApp.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ContentView.swift /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/GeneratedAssetSymbols.swift -supplementary-output-file-map /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/supplementaryOutputs-6 -emit-localized-strings -emit-localized-strings-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64 -target arm64-apple-ios26.0-simulator -module-can-import-version DeveloperToolsSupport 23.0.4 23.0.4 -module-can-import-version SwiftUI 7.0.84.1 7.0.84 -module-can-import-version UIKit 9088.1.113 9088.1.113 -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libPreviewsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#PreviewsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftUIMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftUIMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI-dependencies-1.json -Xllvm -aarch64-use-tbi -enable-objc-interop -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.0.sdk -I /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator -F /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=5 -module-cache-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -swift-version 5 -enforce-exclusivity\=checked -Onone -D DEBUG -serialize-debugging-options -const-gather-protocols-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI_const_extract_protocols.json -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -default-isolation\=MainActor -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -working-directory -Xcc /Users/matthewpark/Downloads/current-projects/ChefAI -enable-anonymous-context-mangled-names -file-compilation-dir /Users/matthewpark/Downloads/current-projects/ChefAI -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /Users/matthewpark/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.0-23A339-26257891a6c027eb51374368541b8346.sdkstatcache -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/swift-overrides.hmap -Xcc -iquote -Xcc /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-generated-files.hmap -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-own-target-headers.hmap -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-all-target-headers.hmap -Xcc -iquote -Xcc /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-project-headers.hmap -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources-normal/arm64 -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/arm64 -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name ChefAI -frontend-parseable-output -disable-clang-spi -target-sdk-version 26.0 -target-sdk-name iphonesimulator26.0 -clang-target arm64-apple-ios26.0-simulator -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ImagePreviewView.o -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ManualItemInputView.o -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/AnalysisCardView.o -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/HomeView.o -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/LikedRecipeCardView.o -index-unit-output-path /ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ImagePreviewView.o -index-unit-output-path /ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ManualItemInputView.o -index-unit-output-path /ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/AnalysisCardView.o -index-unit-output-path /ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/HomeView.o -index-unit-output-path /ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/LikedRecipeCardView.o -index-store-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Index.noindex/DataStore -index-system-modules
+SwiftCompile normal arm64 Compiling\ OnboardingQuestionView.swift,\ SettingsView.swift,\ ChefAIApp.swift,\ ContentView.swift,\ GeneratedAssetSymbols.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Onboarding/OnboardingQuestionView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Settings/SettingsView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ChefAIApp.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ContentView.swift /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'ChefAI' from project 'ChefAI')
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Onboarding/OnboardingQuestionView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ViewModels/OnboardingViewModel.swift:42:44: warning: main actor-isolated static property 'shared' can not be referenced from a nonisolated context
+    init(storageService: StorageService = .shared) {
+                                           ^
+/Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Services/StorageService.swift:12:16: note: static property declared here
+    static let shared = StorageService()
+               ^
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Settings/SettingsView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ChefAIApp.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/ContentView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 Compiling\ MultipleChoiceSelector.swift,\ TagPicker.swift,\ TextFieldWithLabel.swift,\ AnalysisResult.swift,\ Ingredient.swift,\ OnboardingQuestion.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Forms/MultipleChoiceSelector.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Forms/TagPicker.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Forms/TextFieldWithLabel.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/AnalysisResult.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Ingredient.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/OnboardingQuestion.swift (in target 'ChefAI' from project 'ChefAI')
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Forms/MultipleChoiceSelector.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Forms/TagPicker.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Forms/TextFieldWithLabel.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/AnalysisResult.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/Ingredient.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Models/OnboardingQuestion.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+LinkAssetCatalog /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Assets.xcassets (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    builtin-linkAssetCatalog --thinned /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_output/thinned --thinned-dependencies /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_generated_info.plist_thinned --unthinned /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_output/unthinned --unthinned-dependencies /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_generated_info.plist_unthinned --output /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app --plist-output /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_generated_info.plist
+
+SwiftDriverJobDiscovery normal arm64 Compiling StorageService.swift, AppConstants.swift, StorageKeys.swift, Color+Theme.swift, Date+Extensions.swift, View+Extensions.swift (in target 'ChefAI' from project 'ChefAI')
+
+SwiftCompile normal arm64 Compiling\ PrimaryButton.swift,\ SecondaryButton.swift,\ SkipButton.swift,\ BaseCard.swift,\ ImageCard.swift,\ EmptyStateView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Buttons/PrimaryButton.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Buttons/SecondaryButton.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Buttons/SkipButton.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Cards/BaseCard.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Cards/ImageCard.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Common/EmptyStateView.swift (in target 'ChefAI' from project 'ChefAI')
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Buttons/PrimaryButton.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Buttons/SecondaryButton.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Buttons/SkipButton.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Cards/BaseCard.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Cards/ImageCard.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Components/Common/EmptyStateView.swift (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    
+
+ProcessInfoPlistFile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app/Info.plist /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/empty-ChefAI.plist (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    builtin-infoPlistUtility /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/empty-ChefAI.plist -producttype com.apple.product-type.application -genpkginfo /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/assetcatalog_generated_info.plist -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.app/Info.plist
+
+SwiftDriverJobDiscovery normal arm64 Compiling Recipe.swift, UserProfile.swift, MockData.swift, AIService.swift, CameraService.swift, ImagePickerService.swift (in target 'ChefAI' from project 'ChefAI')
+
+SwiftDriverJobDiscovery normal arm64 Emitting module for ChefAI (in target 'ChefAI' from project 'ChefAI')
+
+SwiftDriver\ Compilation\ Requirements ChefAI normal arm64 com.apple.xcode.tools.swift.compiler (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    builtin-Swift-Compilation-Requirements -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name ChefAI -Onone -enforce-exclusivity\=checked @/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.SwiftFileList -DDEBUG -default-isolation\=MainActor -enable-bare-slash-regex -enable-upcoming-feature DisableOutwardActorInference -enable-upcoming-feature InferSendableFromCaptures -enable-upcoming-feature GlobalActorIsolatedTypesUsability -enable-upcoming-feature MemberImportVisibility -enable-upcoming-feature InferIsolatedConformances -enable-upcoming-feature NonisolatedNonsendingByDefault -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.0.sdk -target arm64-apple-ios26.0-simulator -g -module-cache-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -Xfrontend -serialize-debugging-options -enable-testing -index-store-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Index.noindex/DataStore -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator -F /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator -emit-localized-strings -emit-localized-strings-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64 -c -j8 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /Users/matthewpark/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.0-23A339-26257891a6c027eb51374368541b8346.sdkstatcache -output-file-map /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -clang-scanner-module-cache-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -sdk-module-cache-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ModuleCache.noindex -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.swiftmodule -validate-clang-modules-once -clang-build-session-file /Users/matthewpark/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI_const_extract_protocols.json -Xcc -iquote -Xcc /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-generated-files.hmap -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-own-target-headers.hmap -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-all-target-headers.hmap -Xcc -iquote -Xcc /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/ChefAI-project-headers.hmap -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/include -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources-normal/arm64 -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/arm64 -Xcc -I/Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI-Swift.h -working-directory /Users/matthewpark/Downloads/current-projects/ChefAI -experimental-emit-module-separately -disable-cmo
+
+SwiftMergeGeneratedHeaders /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/ChefAI-Swift.h /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI-Swift.h (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    builtin-swiftHeaderTool -arch arm64 /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI-Swift.h -o /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/DerivedSources/ChefAI-Swift.h
+
+Copy /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.swiftmodule/arm64-apple-ios-simulator.swiftmodule /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.swiftmodule (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.swiftmodule /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.swiftmodule/arm64-apple-ios-simulator.swiftmodule
+
+Copy /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.swiftmodule/arm64-apple-ios-simulator.swiftdoc /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.swiftdoc (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.swiftdoc /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.swiftmodule/arm64-apple-ios-simulator.swiftdoc
+
+Copy /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.swiftmodule/arm64-apple-ios-simulator.abi.json /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.abi.json (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.abi.json /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.swiftmodule/arm64-apple-ios-simulator.abi.json
+
+Copy /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.swiftsourceinfo (in target 'ChefAI' from project 'ChefAI')
+    cd /Users/matthewpark/Downloads/current-projects/ChefAI
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks -rename /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Intermediates.noindex/ChefAI.build/Debug-iphonesimulator/ChefAI.build/Objects-normal/arm64/ChefAI.swiftsourceinfo /Users/matthewpark/Library/Developer/Xcode/DerivedData/ChefAI-btunfpcgsarlnaeydtupwsotiprs/Build/Products/Debug-iphonesimulator/ChefAI.swiftmodule/Project/arm64-apple-ios-simulator.swiftsourceinfo
+
+SwiftDriverJobDiscovery normal arm64 Compiling OnboardingQuestionView.swift, SettingsView.swift, ChefAIApp.swift, ContentView.swift, GeneratedAssetSymbols.swift (in target 'ChefAI' from project 'ChefAI')
+
+SwiftDriverJobDiscovery normal arm64 Compiling SavedRecipeImagesView.swift, FloatingPlusButton.swift, MainTabView.swift, OnboardingContainerView.swift, OnboardingProgressIndicator.swift (in target 'ChefAI' from project 'ChefAI')
+
+SwiftDriverJobDiscovery normal arm64 Compiling ImagePicker.swift, CameraViewModel.swift, HomeViewModel.swift, OnboardingViewModel.swift, CameraSheetView.swift (in target 'ChefAI' from project 'ChefAI')
+
+note: Disabling hardened runtime with ad-hoc codesigning. (in target 'ChefAI' from project 'ChefAI')
+** BUILD FAILED **
+
+
+The following build commands failed:
+	SwiftCompile normal arm64 /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/HomeView.swift (in target 'ChefAI' from project 'ChefAI')
+	SwiftCompile normal arm64 Compiling\ ImagePreviewView.swift,\ ManualItemInputView.swift,\ AnalysisCardView.swift,\ HomeView.swift,\ LikedRecipeCardView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/ImagePreviewView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Camera/ManualItemInputView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/AnalysisCardView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/HomeView.swift /Users/matthewpark/Downloads/current-projects/ChefAI/ChefAI/Views/Home/LikedRecipeCardView.swift (in target 'ChefAI' from project 'ChefAI')
+	Building project ChefAI with scheme ChefAI
+(3 failures)
