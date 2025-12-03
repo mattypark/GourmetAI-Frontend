@@ -9,6 +9,8 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
+    @State private var showingSettings = false
+    @Binding var refreshID: UUID
 
     var body: some View {
         NavigationStack {
@@ -97,12 +99,26 @@ struct HomeView: View {
             .navigationTitle("ChefAI")
             .navigationBarTitleDisplayMode(.large)
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                            .foregroundColor(.white)
+                    }
+                }
+            }
             .navigationDestination(for: AnalysisResult.self) { analysis in
                 AnalysisDetailView(analysis: analysis)
             }
             .navigationDestination(for: Recipe.self) { recipe in
                 RecipeDetailView(recipe: recipe)
             }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
+            }
+            .id(refreshID)
             .onAppear {
                 viewModel.loadData()
             }
@@ -111,5 +127,6 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    @Previewable @State var refreshID = UUID()
+    HomeView(refreshID: $refreshID)
 }

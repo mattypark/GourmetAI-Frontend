@@ -56,6 +56,22 @@ struct OnboardingQuestionView: View {
                     selected: $viewModel.selectedSkillLevel
                 )
 
+            case 3:
+                // Question 4: Cooking Style (Single choice)
+                MultipleChoiceSelector(
+                    items: CookingStyle.allCases,
+                    selected: $viewModel.selectedCookingStyle,
+                    iconProvider: { $0.icon }
+                )
+
+            case 4:
+                // Question 5: Cuisine Preferences (Multi-select)
+                TagPicker(
+                    items: CuisineType.allCases,
+                    selectedItems: $viewModel.selectedCuisinePreferences,
+                    iconProvider: { $0.icon }
+                )
+
             default:
                 EmptyView()
             }

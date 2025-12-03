@@ -36,7 +36,8 @@ struct ImagePreviewView: View {
                             action: {
                                 Task {
                                     await viewModel.analyzeImage()
-                                    dismiss()
+                                    // DON'T dismiss here anymore
+                                    // Let the view navigate to results instead
                                 }
                             },
                             isLoading: viewModel.isAnalyzing
@@ -53,6 +54,59 @@ struct ImagePreviewView: View {
                     }
                     .padding()
                 }
+
+                // Full-screen loading overlay with progress
+                if viewModel.isAnalyzing {
+                    ZStack {
+                        Color.black.opacity(0.8)
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 24) {
+                            // Circular progress indicator
+                            ZStack {
+                                Circle()
+                                    .stroke(Color.white.opacity(0.2), lineWidth: 8)
+                                    .frame(width: 120, height: 120)
+
+                                Circle()
+                                    .trim(from: 0, to: viewModel.analysisProgress)
+                                    .stroke(Color.white, lineWidth: 8)
+                                    .frame(width: 120, height: 120)
+                                    .rotationEffect(.degrees(-90))
+                                    .animation(.linear(duration: 0.3), value: viewModel.analysisProgress)
+
+                                Text("\(Int(viewModel.analysisProgress * 100))%")
+                                    .font(.system(size: 32, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+
+                            VStack(spacing: 8) {
+                                Text(progressMessage(for: viewModel.analysisProgress))
+                                    .foregroundColor(.white)
+                                    .font(.headline)
+                                    .multilineTextAlignment(.center)
+
+                                if viewModel.analysisProgress < 0.2 {
+                                    Text("Preparing image...")
+                                        .foregroundColor(.gray)
+                                        .font(.caption)
+                                } else if viewModel.analysisProgress < 0.7 {
+                                    Text("Analyzing ingredients...")
+                                        .foregroundColor(.gray)
+                                        .font(.caption)
+                                } else if viewModel.analysisProgress < 0.95 {
+                                    Text("Generating recipes...")
+                                        .foregroundColor(.gray)
+                                        .font(.caption)
+                                } else {
+                                    Text("Almost done...")
+                                        .foregroundColor(.gray)
+                                        .font(.caption)
+                                }
+                            }
+                        }
+                    }
+                }
             }
             .navigationTitle("Preview")
             .navigationBarTitleDisplayMode(.inline)
@@ -64,8 +118,26 @@ struct ImagePreviewView: View {
                         dismiss()
                     }
                     .foregroundColor(.white)
+                    .disabled(viewModel.isAnalyzing)
                 }
             }
+            .fullScreenCover(isPresented: $viewModel.showingAnalysisResults) {
+                AnalysisResultView(viewModel: viewModel)
+            }
+        }
+    }
+
+    private func progressMessage(for progress: Double) -> String {
+        if progress < 0.2 {
+            return "Starting analysis..."
+        } else if progress < 0.5 {
+            return "Uploading image..."
+        } else if progress < 0.8 {
+            return "Identifying ingredients..."
+        } else if progress < 0.95 {
+            return "Creating recipes..."
+        } else {
+            return "Finishing up..."
         }
     }
 }

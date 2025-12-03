@@ -38,6 +38,10 @@ class StorageService {
         documentsDirectory.appendingPathComponent("likedRecipes.json")
     }
 
+    private var profileImageURL: URL {
+        documentsDirectory.appendingPathComponent("profileImage.jpg")
+    }
+
     // MARK: - User Profile
 
     func saveUserProfile(_ profile: UserProfile) {
@@ -70,6 +74,25 @@ class StorageService {
         load(from: likedRecipesURL) ?? []
     }
 
+    // MARK: - Profile Image
+
+    func saveProfileImage(_ imageData: Data) {
+        do {
+            try imageData.write(to: profileImageURL, options: .atomic)
+        } catch {
+            print("Error saving profile image: \(error)")
+        }
+    }
+
+    func loadProfileImage() -> Data? {
+        guard fileManager.fileExists(atPath: profileImageURL.path) else { return nil }
+        return try? Data(contentsOf: profileImageURL)
+    }
+
+    func deleteProfileImage() {
+        try? fileManager.removeItem(at: profileImageURL)
+    }
+
     // MARK: - Onboarding
 
     @AppStorage(StorageKeys.hasCompletedOnboarding)
@@ -89,6 +112,7 @@ class StorageService {
         try? fileManager.removeItem(at: userProfileURL)
         try? fileManager.removeItem(at: analysesURL)
         try? fileManager.removeItem(at: likedRecipesURL)
+        try? fileManager.removeItem(at: profileImageURL)
         hasCompletedOnboardingStorage = false
     }
 

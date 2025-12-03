@@ -1,0 +1,25 @@
+//
+//  Config.swift.template
+//  ChefAI
+//
+//  INSTRUCTIONS:
+//  1. Copy this file to ChefAI/Utilities/Config.swift
+//  2. Replace YOUR_OPENAI_API_KEY_HERE with your actual API key
+//  3. Get your API key from: https://platform.openai.com/api-keys
+//
+//  IMPORTANT: Never commit the actual Config.swift file with your real API key!
+//
+
+import Foundation
+
+struct Config {
+    // Replace with your actual OpenAI API key
+    static let openAIAPIKey = "YOUR_OPENAI_API_KEY_HERE"
+
+    // API Configuration
+    static let openAIModel = "gpt-4o"  // GPT-4 Omni with vision support
+    static let apiEndpoint = "https://api.openai.com/v1/chat/completions"
+    static let maxTokens = 2000
+    static let temperature: Double = 0.7
+    static let requestTimeout: TimeInterval = 30.0
+}

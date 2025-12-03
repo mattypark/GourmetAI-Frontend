@@ -15,6 +15,8 @@ class OnboardingViewModel: ObservableObject {
     @Published var selectedGoal: CookingGoal?
     @Published var selectedRestrictions: Set<DietaryRestriction> = []
     @Published var selectedSkillLevel: SkillLevel?
+    @Published var selectedCookingStyle: CookingStyle?
+    @Published var selectedCuisinePreferences: Set<CuisineType> = []
 
     private let storageService: StorageService
 
@@ -36,6 +38,18 @@ class OnboardingViewModel: ObservableObject {
             title: "What's your cooking skill level?",
             subtitle: "This helps us match recipe difficulty",
             type: .singleChoice(SkillLevel.allCases.map { $0.rawValue })
+        ),
+        OnboardingQuestion(
+            id: 3,
+            title: "How would you like to cook your food?",
+            subtitle: "Choose your preferred cooking style",
+            type: .singleChoice(CookingStyle.allCases.map { $0.rawValue })
+        ),
+        OnboardingQuestion(
+            id: 4,
+            title: "What type of food do you typically like?",
+            subtitle: "Select all cuisines you enjoy",
+            type: .multipleChoice(CuisineType.allCases.map { $0.rawValue })
         )
     ]
 
@@ -46,13 +60,17 @@ class OnboardingViewModel: ObservableObject {
         self.selectedGoal = profile.mainGoal
         self.selectedRestrictions = Set(profile.dietaryRestrictions)
         self.selectedSkillLevel = profile.cookingSkillLevel
+        self.selectedCookingStyle = profile.cookingStyle
+        self.selectedCuisinePreferences = Set(profile.cuisinePreferences)
     }
 
     var canProceed: Bool {
         switch currentPage {
         case 0: return selectedGoal != nil
-        case 1: return true // Optional
+        case 1: return true // Optional - dietary restrictions
         case 2: return selectedSkillLevel != nil
+        case 3: return true // Optional - cooking style
+        case 4: return true // Optional - cuisine preferences
         default: return false
         }
     }
@@ -79,6 +97,8 @@ class OnboardingViewModel: ObservableObject {
         userProfile.mainGoal = selectedGoal
         userProfile.dietaryRestrictions = Array(selectedRestrictions)
         userProfile.cookingSkillLevel = selectedSkillLevel
+        userProfile.cookingStyle = selectedCookingStyle
+        userProfile.cuisinePreferences = Array(selectedCuisinePreferences)
         userProfile.updatedAt = Date()
 
         storageService.saveUserProfile(userProfile)

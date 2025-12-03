@@ -88,12 +88,6 @@ struct CameraSheetView: View {
             .fullScreenCover(isPresented: $viewModel.isShowingPreview) {
                 ImagePreviewView(viewModel: viewModel)
             }
-            .onChange(of: viewModel.analysisResult) { oldValue, newValue in
-                if newValue != nil {
-                    // Analysis completed, close the entire sheet
-                    dismiss()
-                }
-            }
         }
     }
 }
