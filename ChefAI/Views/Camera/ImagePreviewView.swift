@@ -121,7 +121,9 @@ struct ImagePreviewView: View {
                     .disabled(viewModel.isAnalyzing)
                 }
             }
-            .fullScreenCover(isPresented: $viewModel.showingAnalysisResults) {
+            .fullScreenCover(isPresented: $viewModel.showingAnalysisResults, onDismiss: {
+                viewModel.resetAfterAnalysis()
+            }) {
                 AnalysisResultView(viewModel: viewModel)
             }
         }

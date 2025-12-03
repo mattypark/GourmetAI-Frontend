@@ -133,8 +133,9 @@ class CameraViewModel: ObservableObject {
         analyses.insert(updatedResult, at: 0)
         storageService.saveAnalyses(analyses)
 
-        // Reset state after completion
-        resetAfterAnalysis()
+        // NOTE: Do NOT call resetAfterAnalysis() here.
+        // Let the view call dismiss() first, then reset state via onDismiss callback
+        // to avoid race condition with fullScreenCover binding.
     }
 
     func resetAfterAnalysis() {
