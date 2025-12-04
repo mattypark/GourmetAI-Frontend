@@ -72,7 +72,7 @@ struct AnalysisDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .navigationDestination(for: Recipe.self) { recipe in
-            RecipeDetailView(recipe: recipe)
+            RecipeDetailView(recipe: recipe, onToggleFavorite: {})
         }
     }
 }
