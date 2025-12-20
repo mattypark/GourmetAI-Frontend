@@ -17,7 +17,7 @@ struct ProfileEditView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 24) {
@@ -53,15 +53,15 @@ struct ProfileEditView: View {
                             }
                         }
 
-                        // Cooking Goal Section
+                        // Main Goal Section
                         PreferenceSectionView(
-                            title: "Cooking Goal",
+                            title: "Main Goal",
                             icon: "target",
                             isExpanded: expandedSections.contains("goal"),
                             onToggle: { toggleSection("goal") }
                         ) {
                             CompactMultipleChoiceSelector(
-                                items: CookingGoal.allCases,
+                                items: MainGoal.allCases,
                                 selected: $viewModel.mainGoal,
                                 iconProvider: { $0.icon }
                             )
@@ -75,7 +75,7 @@ struct ProfileEditView: View {
                             onToggle: { toggleSection("dietary") }
                         ) {
                             TagPicker(
-                                items: DietaryRestriction.allCases,
+                                items: ExtendedDietaryRestriction.allCases,
                                 selectedItems: $viewModel.dietaryRestrictions,
                                 iconProvider: { $0.icon }
                             )
@@ -95,24 +95,80 @@ struct ProfileEditView: View {
                             )
                         }
 
-                        // Cooking Style Section
+                        // Meal Preferences Section
                         PreferenceSectionView(
-                            title: "Cooking Style",
-                            icon: "frying.pan.fill",
-                            isExpanded: expandedSections.contains("style"),
-                            onToggle: { toggleSection("style") }
+                            title: "Meal Preferences",
+                            icon: "fork.knife.circle.fill",
+                            isExpanded: expandedSections.contains("meals"),
+                            onToggle: { toggleSection("meals") }
                         ) {
-                            CompactMultipleChoiceSelector(
-                                items: CookingStyle.allCases,
-                                selected: $viewModel.cookingStyle,
+                            TagPicker(
+                                items: MealPreference.allCases,
+                                selectedItems: $viewModel.mealPreferences,
                                 iconProvider: { $0.icon }
                             )
                         }
 
-                        // Cuisine Preferences Section
+                        // Time Availability Section
+                        PreferenceSectionView(
+                            title: "Cooking Time",
+                            icon: "clock.fill",
+                            isExpanded: expandedSections.contains("time"),
+                            onToggle: { toggleSection("time") }
+                        ) {
+                            CompactMultipleChoiceSelector(
+                                items: TimeAvailability.allCases,
+                                selected: $viewModel.timeAvailability,
+                                iconProvider: { $0.icon }
+                            )
+                        }
+
+                        // Cooking Equipment Section
+                        PreferenceSectionView(
+                            title: "Equipment",
+                            icon: "wrench.and.screwdriver.fill",
+                            isExpanded: expandedSections.contains("equipment"),
+                            onToggle: { toggleSection("equipment") }
+                        ) {
+                            TagPicker(
+                                items: CookingEquipment.allCases,
+                                selectedItems: $viewModel.cookingEquipment,
+                                iconProvider: { $0.icon }
+                            )
+                        }
+
+                        // Cooking Struggles Section
+                        PreferenceSectionView(
+                            title: "Cooking Struggles",
+                            icon: "exclamationmark.triangle.fill",
+                            isExpanded: expandedSections.contains("struggles"),
+                            onToggle: { toggleSection("struggles") }
+                        ) {
+                            TagPicker(
+                                items: CookingStruggle.allCases,
+                                selectedItems: $viewModel.cookingStruggles,
+                                iconProvider: { $0.icon }
+                            )
+                        }
+
+                        // Adventure Level Section
+                        PreferenceSectionView(
+                            title: "Adventure Level",
+                            icon: "sparkles",
+                            isExpanded: expandedSections.contains("adventure"),
+                            onToggle: { toggleSection("adventure") }
+                        ) {
+                            CompactMultipleChoiceSelector(
+                                items: AdventureLevel.allCases,
+                                selected: $viewModel.adventureLevel,
+                                iconProvider: { $0.icon }
+                            )
+                        }
+
+                        // Cuisine Preferences Section (Legacy)
                         PreferenceSectionView(
                             title: "Favorite Cuisines",
-                            icon: "fork.knife",
+                            icon: "globe",
                             isExpanded: expandedSections.contains("cuisine"),
                             onToggle: { toggleSection("cuisine") }
                         ) {
@@ -128,13 +184,13 @@ struct ProfileEditView: View {
             }
             .navigationTitle("Edit Profile")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -142,7 +198,7 @@ struct ProfileEditView: View {
                         viewModel.saveSettings()
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                     .fontWeight(.semibold)
                 }
             }
@@ -166,19 +222,23 @@ struct ProfileEditView: View {
                             .scaledToFill()
                             .frame(width: 100, height: 100)
                             .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.black.opacity(0.1), lineWidth: 2)
+                            )
                     } else {
                         Circle()
-                            .fill(Color.white.opacity(0.1))
+                            .fill(Color.black.opacity(0.05))
                             .frame(width: 100, height: 100)
 
                         Image(systemName: "person.fill")
                             .font(.system(size: 40))
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.gray)
                     }
 
                     // Camera overlay
                     Circle()
-                        .fill(Color.black.opacity(0.5))
+                        .fill(Color.black)
                         .frame(width: 32, height: 32)
                         .overlay(
                             Image(systemName: "camera.fill")
@@ -191,7 +251,7 @@ struct ProfileEditView: View {
 
             Text("Tap to change photo")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.gray)
         }
         .padding(.top, 16)
     }
@@ -223,21 +283,21 @@ struct PreferenceSectionView<Content: View>: View {
                 HStack {
                     Image(systemName: icon)
                         .font(.system(size: 16))
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.gray)
                         .frame(width: 24)
 
                     Text(title)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
 
                     Spacer()
 
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(.gray)
                 }
                 .padding()
-                .background(Color.white.opacity(0.05))
+                .background(Color.black.opacity(0.03))
                 .cornerRadius(isExpanded ? 12 : 12)
             }
             .buttonStyle(PlainButtonStyle())
@@ -246,16 +306,16 @@ struct PreferenceSectionView<Content: View>: View {
             if isExpanded {
                 content()
                     .padding()
-                    .background(Color.white.opacity(0.03))
+                    .background(Color.black.opacity(0.02))
                     .cornerRadius(12)
                     .padding(.top, 1)
             }
         }
-        .background(Color.white.opacity(0.02))
+        .background(Color.black.opacity(0.02))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(Color.black.opacity(0.08), lineWidth: 1)
         )
     }
 }
@@ -277,24 +337,24 @@ struct CompactMultipleChoiceSelector<T: RawRepresentable & CaseIterable & Hashab
                         if let iconProvider = iconProvider {
                             Image(systemName: iconProvider(item))
                                 .font(.system(size: 16))
-                                .foregroundColor(selected == item ? .black : .white)
+                                .foregroundColor(selected == item ? .white : .black)
                         }
 
                         Text(item.rawValue)
                             .font(.subheadline)
                             .fontWeight(.medium)
-                            .foregroundColor(selected == item ? .black : .white)
+                            .foregroundColor(selected == item ? .white : .black)
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 8)
-                    .background(selected == item ? Color.white : Color.white.opacity(0.05))
+                    .background(selected == item ? Color.black : Color.black.opacity(0.05))
                     .cornerRadius(10)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .stroke(selected == item ? Color.white : Color.white.opacity(0.2), lineWidth: 1)
+                            .stroke(selected == item ? Color.black : Color.black.opacity(0.1), lineWidth: 1)
                     )
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -316,24 +376,24 @@ struct ProfileTextField: View {
             Label {
                 Text(title)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.gray)
             } icon: {
                 Image(systemName: icon)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.gray)
             }
 
             TextField("", text: $text)
                 .font(.body)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
                 .keyboardType(keyboardType)
                 .autocapitalization(keyboardType == .emailAddress ? .none : .words)
                 .padding()
-                .background(Color.white.opacity(0.05))
+                .background(Color.black.opacity(0.05))
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        .stroke(Color.black.opacity(0.1), lineWidth: 1)
                 )
         }
     }
@@ -351,24 +411,24 @@ struct ProfileTextEditor: View {
             Label {
                 Text(title)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.gray)
             } icon: {
                 Image(systemName: icon)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.gray)
             }
 
             TextEditor(text: $text)
                 .font(.body)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
                 .scrollContentBackground(.hidden)
                 .frame(height: 100)
                 .padding()
-                .background(Color.white.opacity(0.05))
+                .background(Color.black.opacity(0.05))
                 .cornerRadius(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        .stroke(Color.black.opacity(0.1), lineWidth: 1)
                 )
         }
     }

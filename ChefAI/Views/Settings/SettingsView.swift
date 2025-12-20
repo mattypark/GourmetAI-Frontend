@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
-    @State private var showingProfileEdit = false
     @State private var showingAppSettings = false
     @State private var showingPrivacyPolicy = false
     @State private var showingClearDataAlert = false
@@ -18,35 +17,15 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Profile Section
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Profile")
-                                .font(.headline)
-                                .foregroundColor(.white.opacity(0.6))
-                                .padding(.horizontal)
-
-                            VStack(spacing: 0) {
-                                SettingsRowButton(
-                                    icon: "person.fill",
-                                    title: "Edit Profile",
-                                    subtitle: viewModel.userName
-                                ) {
-                                    showingProfileEdit = true
-                                }
-                            }
-                            .cardStyle()
-                            .padding(.horizontal)
-                        }
-
                         // App Settings Section
                         VStack(alignment: .leading, spacing: 16) {
                             Text("App Settings")
                                 .font(.headline)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(.gray)
                                 .padding(.horizontal)
 
                             VStack(spacing: 0) {
@@ -59,7 +38,7 @@ struct SettingsView: View {
                                 }
 
                                 Divider()
-                                    .background(Color.white.opacity(0.1))
+                                    .background(Color.black.opacity(0.1))
                                     .padding(.leading, 56)
 
                                 SettingsRowButton(
@@ -70,7 +49,12 @@ struct SettingsView: View {
                                     showingPrivacyPolicy = true
                                 }
                             }
-                            .cardStyle()
+                            .background(Color.black.opacity(0.03))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                            )
                             .padding(.horizontal)
                         }
 
@@ -78,7 +62,7 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Data")
                                 .font(.headline)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(.gray)
                                 .padding(.horizontal)
 
                             VStack(spacing: 0) {
@@ -91,7 +75,12 @@ struct SettingsView: View {
                                     showingClearDataAlert = true
                                 }
                             }
-                            .cardStyle()
+                            .background(Color.black.opacity(0.03))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                            )
                             .padding(.horizontal)
                         }
 
@@ -99,15 +88,15 @@ struct SettingsView: View {
                         VStack(spacing: 8) {
                             Text("ChefAI")
                                 .font(.headline)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(.gray)
 
                             Text("Version 1.0.0")
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.4))
+                                .foregroundColor(.gray.opacity(0.7))
 
                             Text("Made with AI-powered recipe suggestions")
                                 .font(.caption2)
-                                .foregroundColor(.white.opacity(0.3))
+                                .foregroundColor(.gray.opacity(0.5))
                                 .multilineTextAlignment(.center)
                         }
                         .padding(.top, 24)
@@ -117,24 +106,14 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                 }
-            }
-            .sheet(isPresented: $showingProfileEdit, onDismiss: {
-                // Reload profile data when sheet closes in case it was updated
-                viewModel.loadUserProfile()
-            }) {
-                ProfileEditView(viewModel: viewModel)
-            }
-            .onAppear {
-                // Reload profile data when settings view appears
-                viewModel.loadUserProfile()
             }
             .sheet(isPresented: $showingAppSettings) {
                 AppSettingsView(viewModel: viewModel)
@@ -166,27 +145,26 @@ struct SettingsRowButton: View {
             HStack(spacing: 16) {
                 Image(systemName: icon)
                     .font(.title3)
-                    .foregroundColor(destructive ? .red : .white)
+                    .foregroundColor(destructive ? .red : .black)
                     .frame(width: 24)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
                         .font(.body)
-                        .foregroundColor(destructive ? .red : .white)
+                        .foregroundColor(destructive ? .red : .black)
 
                     Text(subtitle)
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(.gray)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.3))
+                    .foregroundColor(.gray.opacity(0.5))
             }
             .padding()
-            .background(Color.white.opacity(0.05))
         }
     }
 }

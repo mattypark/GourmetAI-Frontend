@@ -12,14 +12,14 @@ extension Color {
 }
 
 struct ColorTheme {
-    let background = Color.black
-    let surface = Color.white.opacity(0.1)
-    let primary = Color.white
+    let background = Color.white
+    let surface = Color.black.opacity(0.05)
+    let primary = Color.black
     let secondary = Color.gray
-    let accent = Color.white
+    let accent = Color.black
     let error = Color.red
 
     // Card backgrounds
-    let cardBackground = Color.white.opacity(0.05)
-    let cardBorder = Color.white.opacity(0.2)
+    let cardBackground = Color.black.opacity(0.03)
+    let cardBorder = Color.black.opacity(0.15)
 }

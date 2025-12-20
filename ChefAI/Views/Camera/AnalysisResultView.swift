@@ -21,7 +21,7 @@ struct AnalysisResultView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
                 if let result = viewModel.analysisResult {
                     ScrollView {
@@ -33,7 +33,7 @@ struct AnalysisResultView: View {
                                     .scaledToFit()
                                     .frame(height: 180)
                                     .cornerRadius(16)
-                                    .shadow(color: .white.opacity(0.1), radius: 8)
+                                    .shadow(color: .black.opacity(0.1), radius: 8)
                             }
 
                             // Summary Stats
@@ -64,14 +64,14 @@ struct AnalysisResultView: View {
             }
             .navigationTitle("Scan Results")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         viewModel.cancel()
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                 }
 
                 ToolbarItem(placement: .primaryAction) {
@@ -110,6 +110,14 @@ struct AnalysisResultView: View {
                 // Select all ingredients by default
                 if let result = viewModel.analysisResult {
                     selectedIngredients = Set(result.extractedIngredients.map { $0.id })
+                }
+            }
+            .onDisappear {
+                // Ensure analysis is saved when leaving results view
+                if viewModel.analysisResult != nil {
+                    Task {
+                        await viewModel.completeAnalysis()
+                    }
                 }
             }
         }
@@ -418,6 +426,11 @@ struct AnalysisResultView: View {
     private func addToInventory(_ result: AnalysisResult) {
         let ingredientsToAdd = selectedIngredientsArray(from: result)
         inventoryService.addIngredients(ingredientsToAdd)
+
+        // Save analysis to storage
+        Task {
+            await viewModel.completeAnalysis()
+        }
     }
 
     private func updateIngredient(_ ingredient: Ingredient) {

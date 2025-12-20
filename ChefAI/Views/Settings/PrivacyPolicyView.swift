@@ -13,7 +13,7 @@ struct PrivacyPolicyView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
@@ -49,7 +49,7 @@ struct PrivacyPolicyView: View {
 
                         Text("Last updated: January 29, 2025")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.4))
+                            .foregroundColor(.gray)
                             .padding(.top, 16)
                     }
                     .padding(24)
@@ -57,13 +57,13 @@ struct PrivacyPolicyView: View {
             }
             .navigationTitle("Privacy Policy")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                 }
             }
         }
@@ -73,11 +73,11 @@ struct PrivacyPolicyView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
 
             Text(content)
                 .font(.body)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(.black.opacity(0.7))
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

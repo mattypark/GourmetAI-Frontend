@@ -14,15 +14,56 @@ struct OnboardingContainerView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.white.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                // Header with back button and progress
+                HStack {
+                    // Back button (hidden on first page)
+                    Button {
+                        withAnimation {
+                            viewModel.previousPage()
+                        }
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.title3)
+                            .foregroundColor(.black)
+                            .frame(width: 44, height: 44)
+                    }
+                    .opacity(viewModel.currentPage > 0 ? 1 : 0)
+                    .disabled(viewModel.currentPage == 0)
+
+                    Spacer()
+
+                    // Page indicator text
+                    Text("\(viewModel.currentPage + 1) of \(viewModel.questions.count)")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+
+                    Spacer()
+
+                    // Skip button (hidden on last page)
+                    Button {
+                        withAnimation {
+                            viewModel.skip()
+                        }
+                    } label: {
+                        Text("Skip")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    .opacity(viewModel.isLastQuestion ? 0 : 1)
+                    .disabled(viewModel.isLastQuestion)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+
                 // Progress indicator
                 OnboardingProgressIndicator(
                     currentPage: viewModel.currentPage,
                     totalPages: viewModel.questions.count
                 )
-                .padding(.top, 60)
+                .padding(.top, 8)
                 .padding(.horizontal, 24)
 
                 // Question content
@@ -36,25 +77,19 @@ struct OnboardingContainerView: View {
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
+                .animation(.easeInOut(duration: 0.3), value: viewModel.currentPage)
 
                 // Bottom buttons
-                HStack {
-                    if !viewModel.isLastQuestion {
-                        SkipButton {
-                            withAnimation {
-                                viewModel.skip()
-                            }
-                        }
-                    }
-
-                    Spacer()
-
+                VStack(spacing: 12) {
+                    // Main action button
                     PrimaryButton(
-                        title: viewModel.isLastQuestion ? "Get Started" : "Next",
+                        title: buttonTitle,
                         action: {
                             if viewModel.isLastQuestion {
                                 viewModel.completeOnboarding()
-                                hasCompletedOnboarding = true
+                                withAnimation {
+                                    hasCompletedOnboarding = true
+                                }
                             } else {
                                 withAnimation {
                                     viewModel.nextPage()
@@ -64,11 +99,32 @@ struct OnboardingContainerView: View {
                     )
                     .disabled(!viewModel.canProceed)
                     .opacity(viewModel.canProceed ? 1.0 : 0.5)
-                    .frame(width: 200)
+
+                    // Optional info text
+                    if !viewModel.isLastQuestion && isOptionalQuestion {
+                        Text("Optional - you can skip this")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
                 }
-                .padding(24)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 24)
             }
         }
+    }
+
+    private var buttonTitle: String {
+        if viewModel.isLastQuestion {
+            return "Finish Setup & Start Cooking"
+        } else if viewModel.currentPage == viewModel.questions.count - 2 {
+            return "Review Summary"
+        } else {
+            return "Continue"
+        }
+    }
+
+    private var isOptionalQuestion: Bool {
+        [1, 3, 5, 6].contains(viewModel.currentPage)
     }
 }
 

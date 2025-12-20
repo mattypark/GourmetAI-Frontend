@@ -328,35 +328,25 @@ struct CapturePreviewView: View {
                     .padding()
                 }
 
-                // Full-screen loading overlay
-                if cameraViewModel.isAnalyzing {
+                // Full-screen loading overlay with dynamic status
+                if cameraViewModel.isAnalyzing || cameraViewModel.analysisStatus.isFinished {
                     ZStack {
-                        Color.black.opacity(0.8)
+                        Color.white
                             .ignoresSafeArea()
 
-                        VStack(spacing: 24) {
-                            ZStack {
-                                Circle()
-                                    .stroke(Color.white.opacity(0.2), lineWidth: 8)
-                                    .frame(width: 120, height: 120)
+                        VStack {
+                            Spacer()
 
-                                Circle()
-                                    .trim(from: 0, to: cameraViewModel.analysisProgress)
-                                    .stroke(Color.white, lineWidth: 8)
-                                    .frame(width: 120, height: 120)
-                                    .rotationEffect(.degrees(-90))
-                                    .animation(.linear(duration: 0.3), value: cameraViewModel.analysisProgress)
+                            AnalysisLoadingView(
+                                image: image,
+                                status: cameraViewModel.analysisStatus
+                            )
 
-                                Text("\(Int(cameraViewModel.analysisProgress * 100))%")
-                                    .font(.system(size: 32, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-
-                            Text("Analyzing...")
-                                .foregroundColor(.white)
-                                .font(.headline)
+                            Spacer()
                         }
                     }
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.3), value: cameraViewModel.isAnalyzing)
                 }
             }
             .navigationTitle("Preview")

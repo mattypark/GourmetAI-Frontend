@@ -17,10 +17,17 @@ class SettingsViewModel: ObservableObject {
     @Published var userBio: String = ""
     @Published var profileImage: UIImage?
 
-    // User Profile - Preferences (from onboarding)
-    @Published var mainGoal: CookingGoal?
-    @Published var dietaryRestrictions: Set<DietaryRestriction> = []
+    // User Profile - Preferences (from onboarding - Phase 10)
+    @Published var mainGoal: MainGoal?
+    @Published var dietaryRestrictions: Set<ExtendedDietaryRestriction> = []
     @Published var cookingSkillLevel: SkillLevel?
+    @Published var mealPreferences: Set<MealPreference> = []
+    @Published var timeAvailability: TimeAvailability?
+    @Published var cookingEquipment: Set<CookingEquipment> = []
+    @Published var cookingStruggles: Set<CookingStruggle> = []
+    @Published var adventureLevel: AdventureLevel?
+
+    // Legacy preferences (kept for compatibility)
     @Published var cookingStyle: CookingStyle?
     @Published var cuisinePreferences: Set<CuisineType> = []
 
@@ -60,9 +67,18 @@ class SettingsViewModel: ObservableObject {
 
     func loadUserProfile() {
         let profile = storageService.loadUserProfile()
+
+        // Phase 10 preferences
         mainGoal = profile.mainGoal
         dietaryRestrictions = Set(profile.dietaryRestrictions)
         cookingSkillLevel = profile.cookingSkillLevel
+        mealPreferences = Set(profile.mealPreferences)
+        timeAvailability = profile.timeAvailability
+        cookingEquipment = Set(profile.cookingEquipment)
+        cookingStruggles = Set(profile.cookingStruggles)
+        adventureLevel = profile.adventureLevel
+
+        // Legacy preferences
         cookingStyle = profile.cookingStyle
         cuisinePreferences = Set(profile.cuisinePreferences)
 
@@ -87,11 +103,21 @@ class SettingsViewModel: ObservableObject {
 
     func saveUserProfile() {
         var profile = storageService.loadUserProfile()
+
+        // Phase 10 preferences
         profile.mainGoal = mainGoal
         profile.dietaryRestrictions = Array(dietaryRestrictions)
         profile.cookingSkillLevel = cookingSkillLevel
+        profile.mealPreferences = Array(mealPreferences)
+        profile.timeAvailability = timeAvailability
+        profile.cookingEquipment = Array(cookingEquipment)
+        profile.cookingStruggles = Array(cookingStruggles)
+        profile.adventureLevel = adventureLevel
+
+        // Legacy preferences
         profile.cookingStyle = cookingStyle
         profile.cuisinePreferences = Array(cuisinePreferences)
+
         profile.updatedAt = Date()
         storageService.saveUserProfile(profile)
 

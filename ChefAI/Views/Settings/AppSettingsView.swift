@@ -14,7 +14,7 @@ struct AppSettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 24) {
@@ -22,7 +22,7 @@ struct AppSettingsView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Notifications")
                                 .font(.headline)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(.gray)
                                 .padding(.horizontal)
 
                             VStack(spacing: 0) {
@@ -33,7 +33,12 @@ struct AppSettingsView: View {
                                     isOn: $viewModel.notificationsEnabled
                                 )
                             }
-                            .cardStyle()
+                            .background(Color.black.opacity(0.03))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                            )
                             .padding(.horizontal)
                         }
 
@@ -41,7 +46,7 @@ struct AppSettingsView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Storage")
                                 .font(.headline)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(.gray)
                                 .padding(.horizontal)
 
                             VStack(spacing: 0) {
@@ -52,7 +57,12 @@ struct AppSettingsView: View {
                                     isOn: $viewModel.saveRecipeImages
                                 )
                             }
-                            .cardStyle()
+                            .background(Color.black.opacity(0.03))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                            )
                             .padding(.horizontal)
                         }
 
@@ -60,7 +70,7 @@ struct AppSettingsView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Accessibility")
                                 .font(.headline)
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(.gray)
                                 .padding(.horizontal)
 
                             VStack(spacing: 0) {
@@ -72,7 +82,7 @@ struct AppSettingsView: View {
                                 )
 
                                 Divider()
-                                    .background(Color.white.opacity(0.1))
+                                    .background(Color.black.opacity(0.1))
                                     .padding(.leading, 56)
 
                                 SettingsToggleRow(
@@ -82,7 +92,12 @@ struct AppSettingsView: View {
                                     isOn: $viewModel.darkModeEnabled
                                 )
                             }
-                            .cardStyle()
+                            .background(Color.black.opacity(0.03))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                            )
                             .padding(.horizontal)
                         }
                     }
@@ -91,14 +106,14 @@ struct AppSettingsView: View {
             }
             .navigationTitle("Preferences")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") {
                         viewModel.saveSettings()
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                     .fontWeight(.semibold)
                 }
             }
@@ -116,27 +131,26 @@ struct SettingsToggleRow: View {
         HStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.body)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.gray)
             }
 
             Spacer()
 
             Toggle("", isOn: $isOn)
                 .labelsHidden()
-                .tint(.white)
+                .tint(.black)
         }
         .padding()
-        .background(Color.white.opacity(0.05))
     }
 }
 

@@ -16,128 +16,81 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
-                if viewModel.analyses.isEmpty && viewModel.likedRecipes.isEmpty && !viewModel.hasPantryItems {
-                    // Empty state
-                    EmptyStateView(
-                        icon: "camera.fill",
-                        title: "No analyses yet",
-                        message: "Tap the + button to analyze your fridge"
-                    )
-                } else {
-                    // Content
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 32) {
-                            // Recent Analyses
-                            if !viewModel.analyses.isEmpty {
-                                VStack(alignment: .leading, spacing: 16) {
-                                    Text("Recent Analyses")
-                                        .font(.title2)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal)
+                VStack(spacing: 0) {
+                    // Custom Header
+                    customHeader
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                        .padding(.bottom, 16)
 
-                                    ScrollView(.horizontal, showsIndicators: false) {
-                                        HStack(spacing: 16) {
-                                            ForEach(viewModel.analyses) { analysis in
-                                                NavigationLink(value: analysis) {
-                                                    AnalysisCardView(analysis: analysis)
-                                                }
-                                                .buttonStyle(PlainButtonStyle())
-                                            }
-                                        }
-                                        .padding(.horizontal)
-                                    }
-                                }
-                            }
-
-                            // My Pantry Section
-                            if viewModel.hasPantryItems {
-                                VStack(alignment: .leading, spacing: 16) {
-                                    HStack {
-                                        Text("My Pantry")
+                    if viewModel.analyses.isEmpty && !viewModel.hasPantryItems {
+                        // Empty state - centered
+                        Spacer()
+                        emptyStateView
+                        Spacer()
+                    } else {
+                        // Content
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 32) {
+                                // Recent Analyses
+                                if !viewModel.analyses.isEmpty {
+                                    VStack(alignment: .leading, spacing: 16) {
+                                        Text("Recent Analyses")
                                             .font(.title2)
                                             .fontWeight(.semibold)
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.black)
+                                            .padding(.horizontal)
 
-                                        Spacer()
-
-                                        Text("\(viewModel.pantryCount) items")
-                                            .font(.subheadline)
-                                            .foregroundColor(.white.opacity(0.5))
-                                    }
-                                    .padding(.horizontal)
-
-                                    // Pantry Card
-                                    Button {
-                                        showingRecipeList = true
-                                    } label: {
-                                        PantryCardView(ingredients: viewModel.pantryIngredients)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                    .padding(.horizontal)
-                                }
-                            }
-
-                            // Liked Recipes
-                            if !viewModel.likedRecipes.isEmpty {
-                                VStack(alignment: .leading, spacing: 16) {
-                                    Text("Liked Recipes")
-                                        .font(.title2)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal)
-
-                                    LazyVGrid(
-                                        columns: [GridItem(.flexible()), GridItem(.flexible())],
-                                        spacing: 16
-                                    ) {
-                                        ForEach(viewModel.likedRecipes) { recipe in
-                                            NavigationLink(value: recipe) {
-                                                LikedRecipeCardView(
-                                                    recipe: recipe,
-                                                    onLike: { viewModel.toggleRecipeLike(recipe) }
-                                                )
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 16) {
+                                                ForEach(viewModel.analyses) { analysis in
+                                                    NavigationLink(value: analysis) {
+                                                        AnalysisCardView(analysis: analysis)
+                                                    }
+                                                    .buttonStyle(PlainButtonStyle())
+                                                }
                                             }
-                                            .buttonStyle(PlainButtonStyle())
+                                            .padding(.horizontal)
                                         }
                                     }
-                                    .padding(.horizontal)
                                 }
-                            }
 
-                            // Saved Recipe Images
-                            if !viewModel.savedRecipeImages.isEmpty {
-                                VStack(alignment: .leading, spacing: 16) {
-                                    Text("Saved Images")
-                                        .font(.title2)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.white)
+                                // My Pantry Section
+                                if viewModel.hasPantryItems {
+                                    VStack(alignment: .leading, spacing: 16) {
+                                        HStack {
+                                            Text("My Pantry")
+                                                .font(.title2)
+                                                .fontWeight(.semibold)
+                                                .foregroundColor(.black)
+
+                                            Spacer()
+
+                                            Text("\(viewModel.pantryCount) items")
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
                                         .padding(.horizontal)
 
-                                    SavedRecipeImagesView(recipes: viewModel.savedRecipeImages)
+                                        // Pantry Card
+                                        Button {
+                                            showingRecipeList = true
+                                        } label: {
+                                            PantryCardView(ingredients: viewModel.pantryIngredients)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
                                         .padding(.horizontal)
+                                    }
                                 }
                             }
+                            .padding(.vertical)
                         }
-                        .padding(.vertical)
                     }
                 }
             }
-            .navigationTitle("ChefAI")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingSettings = true
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                            .foregroundColor(.white)
-                    }
-                }
-            }
+            .navigationBarHidden(true)
             .navigationDestination(for: AnalysisResult.self) { analysis in
                 AnalysisDetailView(analysis: analysis)
             }
@@ -159,6 +112,65 @@ struct HomeView: View {
             .onAppear {
                 viewModel.loadData()
             }
+        }
+    }
+
+    // MARK: - Custom Header
+
+    private var customHeader: some View {
+        HStack {
+            // App Logo (left)
+            Image("ChefAILogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 36, height: 36)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            Spacer()
+
+            // Right side: Flame counter + Settings
+            HStack(spacing: 12) {
+                // Flame/Streak counter
+                HStack(spacing: 4) {
+                    Text("🔥")
+                        .font(.subheadline)
+                    Text("0")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.black)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.black.opacity(0.05))
+                .cornerRadius(20)
+
+                // Settings gear
+                Button {
+                    showingSettings = true
+                } label: {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.black)
+                }
+            }
+        }
+    }
+
+    // MARK: - Empty State View
+
+    private var emptyStateView: some View {
+        VStack(spacing: 16) {
+            Text("You haven't uploaded any food")
+                .font(.title3)
+                .fontWeight(.bold)
+                .foregroundColor(.black)
+                .multilineTextAlignment(.center)
+
+            Text("Start creating delicious meals by a click of a button.")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
         }
     }
 }
@@ -188,10 +200,10 @@ struct PantryCardView: View {
                     Text("+\(remainingCount) more")
                         .font(.caption)
                         .fontWeight(.medium)
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(.black.opacity(0.6))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.white.opacity(0.1))
+                        .background(Color.black.opacity(0.05))
                         .cornerRadius(16)
                 }
             }
@@ -206,16 +218,16 @@ struct PantryCardView: View {
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.black.opacity(0.4))
             }
-            .foregroundColor(.white)
+            .foregroundColor(.black)
         }
         .padding()
-        .background(Color.white.opacity(0.05))
+        .background(Color.black.opacity(0.03))
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(Color.black.opacity(0.1), lineWidth: 1)
         )
     }
 }
@@ -233,10 +245,10 @@ struct IngredientPill: View {
                 .font(.caption)
                 .fontWeight(.medium)
         }
-        .foregroundColor(.white)
+        .foregroundColor(.black)
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(Color.white.opacity(0.1))
+        .background(Color.black.opacity(0.05))
         .cornerRadius(16)
     }
 }

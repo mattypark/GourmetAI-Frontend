@@ -9,42 +9,100 @@ import Foundation
 
 struct UserProfile: Codable {
     var id: UUID
-    var mainGoal: CookingGoal?
-    var dietaryRestrictions: [DietaryRestriction]
-    var cookingSkillLevel: SkillLevel?
-    var cookingStyle: CookingStyle?
-    var cuisinePreferences: [CuisineType]
     var createdAt: Date
     var updatedAt: Date
+
+    // Primary onboarding fields (new enums)
+    var mainGoal: MainGoal?
+    var dietaryRestrictions: [ExtendedDietaryRestriction]
+    var cookingSkillLevel: SkillLevel?
+    var mealPreferences: [MealPreference]
+    var timeAvailability: TimeAvailability?
+    var cookingEquipment: [CookingEquipment]
+    var cookingStruggles: [CookingStruggle]
+    var adventureLevel: AdventureLevel?
+
+    // Legacy/additional fields (kept for backward compatibility)
+    var cookingStyle: CookingStyle?
+    var cuisinePreferences: [CuisineType]
 
     init() {
         self.id = UUID()
         self.dietaryRestrictions = []
+        self.mealPreferences = []
+        self.cookingEquipment = []
+        self.cookingStruggles = []
         self.cuisinePreferences = []
         self.createdAt = Date()
         self.updatedAt = Date()
     }
 
     var isOnboardingComplete: Bool {
-        mainGoal != nil && cookingSkillLevel != nil
+        mainGoal != nil &&
+        cookingSkillLevel != nil &&
+        timeAvailability != nil &&
+        adventureLevel != nil
     }
 
-    // Custom decoder to handle migration from old profiles without new fields
+    // Custom decoder to handle migration from old profiles
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        let legacyContainer = try? decoder.container(keyedBy: LegacyCodingKeys.self)
+
         id = try container.decode(UUID.self, forKey: .id)
-        mainGoal = try container.decodeIfPresent(CookingGoal.self, forKey: .mainGoal)
-        dietaryRestrictions = try container.decodeIfPresent([DietaryRestriction].self, forKey: .dietaryRestrictions) ?? []
-        cookingSkillLevel = try container.decodeIfPresent(SkillLevel.self, forKey: .cookingSkillLevel)
-        // New fields - default to nil/empty if not present in old data
-        cookingStyle = try container.decodeIfPresent(CookingStyle.self, forKey: .cookingStyle)
-        cuisinePreferences = try container.decodeIfPresent([CuisineType].self, forKey: .cuisinePreferences) ?? []
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
+
+        // New main goal - try to decode, or migrate from old CookingGoal
+        if let newGoal = try? container.decodeIfPresent(MainGoal.self, forKey: .mainGoal) {
+            mainGoal = newGoal
+        } else if let legacyContainer = legacyContainer,
+                  let oldGoal = try? legacyContainer.decodeIfPresent(CookingGoal.self, forKey: .mainGoal) {
+            // Migrate old CookingGoal to new MainGoal
+            mainGoal = MainGoal.migrateFrom(oldGoal)
+        } else {
+            mainGoal = nil
+        }
+
+        // New dietary restrictions - try to decode, or migrate from old
+        if let newRestrictions = try? container.decodeIfPresent([ExtendedDietaryRestriction].self, forKey: .dietaryRestrictions) {
+            dietaryRestrictions = newRestrictions
+        } else if let legacyContainer = legacyContainer,
+                  let oldRestrictions = try? legacyContainer.decodeIfPresent([DietaryRestriction].self, forKey: .dietaryRestrictions) {
+            // Migrate old restrictions to new format
+            dietaryRestrictions = oldRestrictions.map { ExtendedDietaryRestriction.migrateFrom($0) }
+        } else {
+            dietaryRestrictions = []
+        }
+
+        cookingSkillLevel = try container.decodeIfPresent(SkillLevel.self, forKey: .cookingSkillLevel)
+        mealPreferences = try container.decodeIfPresent([MealPreference].self, forKey: .mealPreferences) ?? []
+        timeAvailability = try container.decodeIfPresent(TimeAvailability.self, forKey: .timeAvailability)
+        cookingEquipment = try container.decodeIfPresent([CookingEquipment].self, forKey: .cookingEquipment) ?? []
+        cookingStruggles = try container.decodeIfPresent([CookingStruggle].self, forKey: .cookingStruggles) ?? []
+        adventureLevel = try container.decodeIfPresent(AdventureLevel.self, forKey: .adventureLevel)
+
+        // Legacy fields
+        cookingStyle = try container.decodeIfPresent(CookingStyle.self, forKey: .cookingStyle)
+        cuisinePreferences = try container.decodeIfPresent([CuisineType].self, forKey: .cuisinePreferences) ?? []
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, createdAt, updatedAt
+        case mainGoal, dietaryRestrictions, cookingSkillLevel
+        case mealPreferences, timeAvailability, cookingEquipment
+        case cookingStruggles, adventureLevel
+        case cookingStyle, cuisinePreferences
+    }
+
+    // Legacy keys used only for migration decoding
+    private enum LegacyCodingKeys: String, CodingKey {
+        case mainGoal = "oldMainGoal"
+        case dietaryRestrictions = "oldDietaryRestrictions"
     }
 }
 
-// MARK: - Cooking Goal
+// MARK: - Legacy Cooking Goal (for migration)
 
 enum CookingGoal: String, Codable, CaseIterable {
     case healthy = "Healthy"
@@ -66,7 +124,7 @@ enum CookingGoal: String, Codable, CaseIterable {
     }
 }
 
-// MARK: - Dietary Restriction
+// MARK: - Legacy Dietary Restriction (for migration)
 
 enum DietaryRestriction: String, Codable, CaseIterable {
     case vegetarian = "Vegetarian"
@@ -96,14 +154,20 @@ enum SkillLevel: String, Codable, CaseIterable {
     case beginner = "Beginner"
     case intermediate = "Intermediate"
     case advanced = "Advanced"
-    case professional = "Professional"
 
     var description: String {
         switch self {
         case .beginner: return "Just starting out"
         case .intermediate: return "Comfortable with basics"
         case .advanced: return "Confident in the kitchen"
-        case .professional: return "Expert level"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .beginner: return "1.circle.fill"
+        case .intermediate: return "2.circle.fill"
+        case .advanced: return "3.circle.fill"
         }
     }
 }
@@ -156,6 +220,34 @@ enum CuisineType: String, Codable, CaseIterable {
         case .thai: return "leaf.fill"
         case .american: return "star.fill"
         case .mediterranean: return "drop.fill"
+        }
+    }
+}
+
+// MARK: - Migration Helpers
+
+extension MainGoal {
+    static func migrateFrom(_ oldGoal: CookingGoal) -> MainGoal {
+        switch oldGoal {
+        case .healthy: return .eatHealthier
+        case .highProtein: return .eatMoreProtein
+        case .budgetFriendly: return .saveMoney
+        case .quickMeals: return .saveTime
+        case .gourmet: return .eatHealthier
+        case .familyFriendly: return .maintainWeight
+        }
+    }
+}
+
+extension ExtendedDietaryRestriction {
+    static func migrateFrom(_ oldRestriction: DietaryRestriction) -> ExtendedDietaryRestriction {
+        switch oldRestriction {
+        case .vegetarian: return .vegetarian
+        case .vegan: return .vegan
+        case .glutenFree: return .glutenFree
+        case .dairyFree: return .dairyFree
+        case .nutFree: return .nutAllergy
+        case .kosher, .halal, .lowCarb: return .none
         }
     }
 }

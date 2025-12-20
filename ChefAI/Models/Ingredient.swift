@@ -62,6 +62,30 @@ struct Ingredient: Identifiable, Codable, Hashable {
         }
         return qty
     }
+
+    // MARK: - Custom Decoder for backward compatibility
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        brandName = try container.decodeIfPresent(String.self, forKey: .brandName)
+        quantity = try container.decodeIfPresent(String.self, forKey: .quantity)
+        unit = try container.decodeIfPresent(String.self, forKey: .unit)
+        category = try container.decodeIfPresent(IngredientCategory.self, forKey: .category)
+        confidence = try container.decodeIfPresent(Double.self, forKey: .confidence)
+        nutritionInfo = try container.decodeIfPresent(NutritionInfo.self, forKey: .nutritionInfo)
+        barcode = try container.decodeIfPresent(String.self, forKey: .barcode)
+        expirationDate = try container.decodeIfPresent(Date.self, forKey: .expirationDate)
+        // Safe decode with default to Date() if missing (backward compatibility)
+        dateAdded = try container.decodeIfPresent(Date.self, forKey: .dateAdded) ?? Date()
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, name, brandName, quantity, unit, category, confidence
+        case nutritionInfo, barcode, expirationDate, dateAdded
+    }
 }
 
 // MARK: - Nutrition Info

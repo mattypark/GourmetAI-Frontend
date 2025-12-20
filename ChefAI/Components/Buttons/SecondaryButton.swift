@@ -15,13 +15,13 @@ struct SecondaryButton: View {
         Button(action: action) {
             Text(title)
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(Color.clear)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white, lineWidth: 2)
+                        .stroke(Color.black, lineWidth: 2)
                 )
                 .cornerRadius(16)
         }
@@ -30,7 +30,7 @@ struct SecondaryButton: View {
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.white.ignoresSafeArea()
         SecondaryButton(title: "Cancel") {}
             .padding()
     }

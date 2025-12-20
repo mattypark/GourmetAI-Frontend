@@ -18,16 +18,16 @@ struct PrimaryButton: View {
                 if isLoading {
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle())
-                        .tint(.black)
+                        .tint(.white)
                 } else {
                     Text(title)
                         .font(.headline)
-                        .foregroundColor(.black)
+                        .foregroundColor(.white)
                 }
             }
             .frame(maxWidth: .infinity)
             .frame(height: 56)
-            .background(Color.white)
+            .background(Color.black) 
             .cornerRadius(16)
         }
     }
@@ -35,7 +35,7 @@ struct PrimaryButton: View {
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.white.ignoresSafeArea()
         VStack(spacing: 16) {
             PrimaryButton(title: "Continue", action: {})
             PrimaryButton(title: "Loading", action: {}, isLoading: true)

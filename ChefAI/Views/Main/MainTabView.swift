@@ -13,31 +13,43 @@ struct MainTabView: View {
     @State private var refreshID = UUID()
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            HomeView(refreshID: $refreshID)
-                .tag(0)
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
+        ZStack {
+            TabView(selection: $selectedTab) {
+                HomeView(refreshID: $refreshID)
+                    .tag(0)
+                    .tabItem {
+                        Label("Home", systemImage: "house.fill")
+                    }
 
-            Color.clear
-                .tag(1)
-                .tabItem {
-                    Label("Add", systemImage: "plus.circle.fill")
+                StarredView(refreshID: $refreshID)
+                    .tag(1)
+                    .tabItem {
+                        Label("Starred", systemImage: "star.fill")
+                    }
+
+                ProfileView()
+                    .tag(2)
+                    .tabItem {
+                        Label("Profile", systemImage: "person.fill")
+                    }
+            }
+            .tint(.black)
+
+            // Floating Action Button Overlay
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    FloatingPlusButton {
+                        showingCaptureScreen = true
+                    }
+                    .padding(.trailing, 24)
+                    .padding(.bottom, 90) // Position above tab bar
                 }
-        }
-        .tint(.white)
-        .toolbarBackground(.ultraThinMaterial, for: .tabBar)
-        .toolbarBackground(.visible, for: .tabBar)
-        .onChange(of: selectedTab) { oldValue, newValue in
-            if newValue == 1 {
-                showingCaptureScreen = true
-                // Reset to home tab
-                selectedTab = 0
             }
         }
         .fullScreenCover(isPresented: $showingCaptureScreen, onDismiss: {
-            // Refresh HomeView when capture screen closes
+            // Refresh views when capture screen closes
             refreshID = UUID()
         }) {
             CaptureScreenView()

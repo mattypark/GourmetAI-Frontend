@@ -32,20 +32,20 @@ struct RecipeDetailView: View {
                         statsSection
 
                         Divider()
-                            .background(Color.white.opacity(0.2))
+                            .background(Color.black.opacity(0.1))
 
                         // Nutrition Info
                         if let nutrition = recipe.nutritionPerServing, nutrition.hasMacros {
                             nutritionSection(nutrition)
                             Divider()
-                                .background(Color.white.opacity(0.2))
+                                .background(Color.black.opacity(0.1))
                         }
 
                         // Ingredients
                         ingredientsSection
 
                         Divider()
-                            .background(Color.white.opacity(0.2))
+                            .background(Color.black.opacity(0.1))
 
                         // Instructions
                         instructionsSection
@@ -53,7 +53,7 @@ struct RecipeDetailView: View {
                         // Tips
                         if !recipe.tips.isEmpty {
                             Divider()
-                                .background(Color.white.opacity(0.2))
+                                .background(Color.black.opacity(0.1))
                             tipsSection
                         }
 
@@ -65,16 +65,16 @@ struct RecipeDetailView: View {
                     .padding()
                 }
             }
-            .background(Color.black)
+            .background(Color.white)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                     }
                 }
 
@@ -82,14 +82,14 @@ struct RecipeDetailView: View {
                     HStack(spacing: 16) {
                         Button(action: onToggleFavorite) {
                             Image(systemName: recipe.isLiked ? "heart.fill" : "heart")
-                                .foregroundColor(recipe.isLiked ? .red : .white)
+                                .foregroundColor(recipe.isLiked ? .red : .black)
                         }
 
                         Button {
                             showingShareSheet = true
                         } label: {
                             Image(systemName: "square.and.arrow.up")
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
                         }
                     }
                 }
@@ -129,7 +129,7 @@ struct RecipeDetailView: View {
 
             // Gradient Overlay
             LinearGradient(
-                colors: [.clear, .black.opacity(0.8)],
+                colors: [.clear, .white.opacity(0.9)],
                 startPoint: .center,
                 endPoint: .bottom
             )
@@ -141,7 +141,7 @@ struct RecipeDetailView: View {
     private var heroPlaceholder: some View {
         ZStack {
             LinearGradient(
-                colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                colors: [Color.black.opacity(0.05), Color.black.opacity(0.1)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -149,12 +149,12 @@ struct RecipeDetailView: View {
             VStack(spacing: 12) {
                 Image(systemName: "fork.knife")
                     .font(.system(size: 50))
-                    .foregroundColor(.white.opacity(0.3))
+                    .foregroundColor(.black.opacity(0.2))
 
                 if let cuisine = recipe.cuisineType {
                     Text(cuisine)
                         .font(.headline)
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(.black.opacity(0.3))
                 }
             }
         }
@@ -167,12 +167,12 @@ struct RecipeDetailView: View {
             Text(recipe.name)
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
 
             if let description = recipe.description {
                 Text(description)
                     .font(.body)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.black.opacity(0.7))
             }
 
             // Tags
@@ -182,10 +182,10 @@ struct RecipeDetailView: View {
                         ForEach(recipe.tags, id: \.self) { tag in
                             Text(tag)
                                 .font(.caption)
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
-                                .background(Color.white.opacity(0.15))
+                                .background(Color.black.opacity(0.08))
                                 .cornerRadius(16)
                         }
                     }
@@ -206,7 +206,7 @@ struct RecipeDetailView: View {
 
             Divider()
                 .frame(height: 40)
-                .background(Color.white.opacity(0.2))
+                .background(Color.black.opacity(0.1))
 
             if let servings = recipe.servings {
                 statItem(
@@ -217,7 +217,7 @@ struct RecipeDetailView: View {
 
                 Divider()
                     .frame(height: 40)
-                    .background(Color.white.opacity(0.2))
+                    .background(Color.black.opacity(0.1))
             }
 
             if let difficulty = recipe.difficulty {
@@ -229,7 +229,7 @@ struct RecipeDetailView: View {
             }
         }
         .padding(.vertical, 12)
-        .background(Color.white.opacity(0.05))
+        .background(Color.black.opacity(0.03))
         .cornerRadius(12)
     }
 
@@ -241,11 +241,11 @@ struct RecipeDetailView: View {
                 Text(value)
                     .font(.headline)
             }
-            .foregroundColor(.white)
+            .foregroundColor(.black)
 
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.gray)
         }
         .frame(maxWidth: .infinity)
     }
@@ -256,7 +256,7 @@ struct RecipeDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Nutrition per Serving")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
 
             HStack(spacing: 0) {
                 if let calories = nutrition.calories {
@@ -273,7 +273,7 @@ struct RecipeDetailView: View {
                 }
             }
             .padding(.vertical, 12)
-            .background(Color.white.opacity(0.05))
+            .background(Color.black.opacity(0.03))
             .cornerRadius(12)
         }
     }
@@ -283,11 +283,11 @@ struct RecipeDetailView: View {
             Text(value + unit)
                 .font(.title3)
                 .fontWeight(.semibold)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
 
             Text(label)
                 .font(.caption2)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.gray)
         }
         .frame(maxWidth: .infinity)
     }
@@ -299,38 +299,67 @@ struct RecipeDetailView: View {
             HStack {
                 Text("Ingredients")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
 
                 Spacer()
 
                 Text("\(checkedIngredients.count)/\(recipe.ingredients.count)")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .fontWeight(.medium)
+                    .foregroundColor(.gray)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color.black.opacity(0.05))
+                    .cornerRadius(12)
             }
 
-            VStack(spacing: 8) {
+            VStack(spacing: 4) {
                 ForEach(recipe.ingredients) { ingredient in
                     ingredientRow(ingredient)
                 }
             }
+            .padding()
+            .background(Color.black.opacity(0.02))
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+            )
         }
     }
 
     private func ingredientRow(_ ingredient: RecipeIngredient) -> some View {
-        Button {
-            toggleIngredient(ingredient)
+        let isChecked = checkedIngredients.contains(ingredient.id)
+
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                toggleIngredient(ingredient)
+            }
         } label: {
             HStack(spacing: 12) {
-                // Checkbox
-                Image(systemName: checkedIngredients.contains(ingredient.id) ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(checkedIngredients.contains(ingredient.id) ? .green : .white.opacity(0.4))
-                    .font(.title3)
+                // Checkbox with animation
+                ZStack {
+                    Circle()
+                        .stroke(isChecked ? Color.green : Color.gray.opacity(0.3), lineWidth: 2)
+                        .frame(width: 24, height: 24)
+
+                    if isChecked {
+                        Circle()
+                            .fill(Color.green)
+                            .frame(width: 24, height: 24)
+
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .scaleEffect(isChecked ? 1.0 : 1.0)
 
                 // Ingredient text
                 Text(ingredient.displayText)
                     .font(.body)
-                    .foregroundColor(checkedIngredients.contains(ingredient.id) ? .white.opacity(0.5) : .white)
-                    .strikethrough(checkedIngredients.contains(ingredient.id))
+                    .foregroundColor(isChecked ? .gray : .black)
+                    .strikethrough(isChecked, color: .gray)
 
                 Spacer()
 
@@ -338,14 +367,16 @@ struct RecipeDetailView: View {
                 if ingredient.isOptional {
                     Text("Optional")
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.5))
+                        .fontWeight(.medium)
+                        .foregroundColor(.gray)
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(4)
+                        .padding(.vertical, 4)
+                        .background(Color.black.opacity(0.05))
+                        .cornerRadius(6)
                 }
             }
-            .padding(.vertical, 8)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
@@ -364,7 +395,7 @@ struct RecipeDetailView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Instructions")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.black)
 
             if recipe.hasDetailedSteps {
                 // Detailed steps with techniques
@@ -373,7 +404,9 @@ struct RecipeDetailView: View {
                         step: step,
                         isCompleted: completedSteps.contains(step.stepNumber),
                         onToggle: {
-                            toggleStep(step.stepNumber)
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                                toggleStep(step.stepNumber)
+                            }
                         }
                     )
                 }
@@ -387,17 +420,21 @@ struct RecipeDetailView: View {
     }
 
     private func simpleStepRow(index: Int, instruction: String) -> some View {
-        Button {
-            toggleStep(index)
+        let isCompleted = completedSteps.contains(index)
+
+        return Button {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                toggleStep(index)
+            }
         } label: {
             HStack(alignment: .top, spacing: 12) {
                 // Step number
                 ZStack {
                     Circle()
-                        .fill(completedSteps.contains(index) ? Color.green : Color.white.opacity(0.15))
+                        .fill(isCompleted ? Color.green : Color.black.opacity(0.08))
                         .frame(width: 32, height: 32)
 
-                    if completedSteps.contains(index) {
+                    if isCompleted {
                         Image(systemName: "checkmark")
                             .font(.caption)
                             .fontWeight(.bold)
@@ -406,14 +443,14 @@ struct RecipeDetailView: View {
                         Text("\(index)")
                             .font(.subheadline)
                             .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                     }
                 }
 
                 // Instruction text
                 Text(instruction)
                     .font(.body)
-                    .foregroundColor(completedSteps.contains(index) ? .white.opacity(0.5) : .white)
+                    .foregroundColor(isCompleted ? .gray : .black)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -436,25 +473,25 @@ struct RecipeDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "lightbulb.fill")
-                    .foregroundColor(.yellow)
+                    .foregroundColor(.orange)
                 Text("Chef's Tips")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
             }
 
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(recipe.tips, id: \.self) { tip in
                     HStack(alignment: .top, spacing: 8) {
                         Text("•")
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.orange)
                         Text(tip)
                             .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(.black.opacity(0.7))
                     }
                 }
             }
             .padding()
-            .background(Color.yellow.opacity(0.1))
+            .background(Color.orange.opacity(0.08))
             .cornerRadius(12)
         }
     }
@@ -465,11 +502,11 @@ struct RecipeDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Source")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.gray)
 
             Text(source.attribution)
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(.black.opacity(0.7))
 
             if let url = source.url, let link = URL(string: url) {
                 Link(destination: link) {

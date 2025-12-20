@@ -94,6 +94,20 @@ struct AIAnalysisResult: Codable {
     let suggestedRecipes: [SuggestedRecipe]
     let message: String?
 
+    enum CodingKeys: String, CodingKey {
+        case hasFood, ingredients, suggestedRecipes, message
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        // hasFood defaults to true if ingredients exist
+        hasFood = try container.decodeIfPresent(Bool.self, forKey: .hasFood) ?? true
+        ingredients = try container.decodeIfPresent([DetectedIngredient].self, forKey: .ingredients) ?? []
+        suggestedRecipes = try container.decodeIfPresent([SuggestedRecipe].self, forKey: .suggestedRecipes) ?? []
+        message = try container.decodeIfPresent(String.self, forKey: .message)
+    }
+
     struct DetectedIngredient: Codable {
         let name: String
         let brandName: String?
