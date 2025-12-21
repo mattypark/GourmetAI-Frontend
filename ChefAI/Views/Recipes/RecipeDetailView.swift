@@ -9,7 +9,6 @@ import SwiftUI
 
 struct RecipeDetailView: View {
     let recipe: Recipe
-    let onToggleFavorite: () -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var checkedIngredients: Set<UUID> = []
@@ -79,18 +78,11 @@ struct RecipeDetailView: View {
                 }
 
                 ToolbarItem(placement: .primaryAction) {
-                    HStack(spacing: 16) {
-                        Button(action: onToggleFavorite) {
-                            Image(systemName: recipe.isLiked ? "heart.fill" : "heart")
-                                .foregroundColor(recipe.isLiked ? .red : .black)
-                        }
-
-                        Button {
-                            showingShareSheet = true
-                        } label: {
-                            Image(systemName: "square.and.arrow.up")
-                                .foregroundColor(.black)
-                        }
+                    Button {
+                        showingShareSheet = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundColor(.black)
                     }
                 }
             }
@@ -580,7 +572,6 @@ struct ShareSheet: UIViewControllerRepresentable {
                 "Use room temperature chicken for more even cooking"
             ],
             source: RecipeSource(name: "ChefAI Generated", author: "ChefAI")
-        ),
-        onToggleFavorite: {}
+        )
     )
 }

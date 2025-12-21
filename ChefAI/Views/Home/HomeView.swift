@@ -9,7 +9,8 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
-    @State private var showingSettings = false
+    @StateObject private var settingsViewModel = SettingsViewModel()
+    @State private var showingProfile = false
     @State private var showingRecipeList = false
     @Binding var refreshID: UUID
 
@@ -95,10 +96,10 @@ struct HomeView: View {
                 AnalysisDetailView(analysis: analysis)
             }
             .navigationDestination(for: Recipe.self) { recipe in
-                RecipeDetailView(recipe: recipe, onToggleFavorite: {})
+                RecipeDetailView(recipe: recipe)
             }
-            .sheet(isPresented: $showingSettings) {
-                SettingsView()
+            .sheet(isPresented: $showingProfile) {
+                ProfileMenuView()
             }
             .fullScreenCover(isPresented: $showingRecipeList) {
                 RecipeListView(
@@ -128,28 +129,19 @@ struct HomeView: View {
 
             Spacer()
 
-            // Right side: Flame counter + Settings
-            HStack(spacing: 12) {
-                // Flame/Streak counter
-                HStack(spacing: 4) {
-                    Text("🔥")
-                        .font(.subheadline)
-                    Text("0")
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.black)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(Color.black.opacity(0.05))
-                .cornerRadius(20)
-
-                // Settings gear
-                Button {
-                    showingSettings = true
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 20))
+            // Profile picture button (right)
+            Button {
+                showingProfile = true
+            } label: {
+                if let profileImage = settingsViewModel.profileImage {
+                    Image(uiImage: profileImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 36, height: 36)
+                        .clipShape(Circle())
+                } else {
+                    Image(systemName: "person.circle.fill")
+                        .font(.system(size: 32))
                         .foregroundColor(.black)
                 }
             }

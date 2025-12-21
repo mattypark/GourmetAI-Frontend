@@ -18,7 +18,6 @@ struct Recipe: Identifiable, Codable, Hashable {
     var ingredients: [RecipeIngredient]
     var imageURL: String?
     var savedImageData: Data?
-    var isLiked: Bool
     var tags: [String]
     var prepTime: Int?
     var cookTime: Int?
@@ -39,7 +38,6 @@ struct Recipe: Identifiable, Codable, Hashable {
         ingredients: [RecipeIngredient] = [],
         imageURL: String? = nil,
         savedImageData: Data? = nil,
-        isLiked: Bool = false,
         tags: [String] = [],
         prepTime: Int? = nil,
         cookTime: Int? = nil,
@@ -59,7 +57,6 @@ struct Recipe: Identifiable, Codable, Hashable {
         self.ingredients = ingredients
         self.imageURL = imageURL
         self.savedImageData = savedImageData
-        self.isLiked = isLiked
         self.tags = tags
         self.prepTime = prepTime
         self.cookTime = cookTime

@@ -100,9 +100,10 @@ class CaptureViewModel: NSObject, ObservableObject {
         captureSession.commitConfiguration()
 
         // Start session on background thread
-        Task.detached { [weak self] in
-            self?.captureSession.startRunning()
-            await MainActor.run {
+        let session = captureSession
+        Task.detached {
+            session.startRunning()
+            await MainActor.run { [weak self] in
                 self?.isCameraReady = true
             }
         }
@@ -112,15 +113,17 @@ class CaptureViewModel: NSObject, ObservableObject {
 
     func startSession() {
         guard !captureSession.isRunning else { return }
-        Task.detached { [weak self] in
-            self?.captureSession.startRunning()
+        let session = captureSession
+        Task.detached {
+            session.startRunning()
         }
     }
 
     func stopSession() {
         guard captureSession.isRunning else { return }
-        Task.detached { [weak self] in
-            self?.captureSession.stopRunning()
+        let session = captureSession
+        Task.detached {
+            session.stopRunning()
         }
     }
 

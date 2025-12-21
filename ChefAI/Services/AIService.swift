@@ -12,12 +12,10 @@ import UIKit
 
 enum AIServiceError: LocalizedError {
     case noAPIKey
-    case noAnthropicAPIKey
     case imageEncodingFailed
     case networkError(Error)
     case invalidResponse
     case apiError(String)
-    case claudeAPIError(String)
     case noFoodDetected
     case jsonParsingError
     case insufficientRecipes
@@ -27,8 +25,6 @@ enum AIServiceError: LocalizedError {
         switch self {
         case .noAPIKey:
             return "OpenAI API key not configured. Please add your API key to Config.swift"
-        case .noAnthropicAPIKey:
-            return "Anthropic API key not configured. Please add your API key to Config.swift"
         case .imageEncodingFailed:
             return "Failed to encode image for analysis"
         case .networkError(let error):
@@ -37,8 +33,6 @@ enum AIServiceError: LocalizedError {
             return "Invalid response from AI service"
         case .apiError(let message):
             return "API error: \(message)"
-        case .claudeAPIError(let message):
-            return "Recipe generation error: \(message)"
         case .noFoodDetected:
             return "No food detected in image"
         case .jsonParsingError:
@@ -87,7 +81,7 @@ struct DetectedIngredientItem: Codable {
 
 // MARK: - AI Service
 
-actor AIService {
+final class AIService: @unchecked Sendable {
     static let shared = AIService()
 
     private init() {}
@@ -99,15 +93,30 @@ actor AIService {
         manualItems: [String],
         userProfile: UserProfile? = nil
     ) async throws -> AnalysisResult {
-        print("🤖 Starting fridge analysis...")
+        print("🤖 Starting fridge analysis (two-step flow)...")
 
-        var aiResult: AIAnalysisResult?
+        // Step 1: Detect ingredients from image (OpenAI Vision)
+        var ingredients: [Ingredient] = []
         if let image = image {
-            aiResult = try await callOpenAI(image: image, userProfile: userProfile)
+            ingredients = try await analyzeImageForIngredients(image)
         }
 
-        let ingredients = convertIngredients(from: aiResult)
-        let recipes = convertRecipes(from: aiResult, manualItems: manualItems)
+        // Add manual items as ingredients
+        for item in manualItems {
+            ingredients.append(Ingredient(name: item, confidence: 1.0))
+        }
+
+        // Check if we have any ingredients to work with
+        if ingredients.isEmpty {
+            throw AIServiceError.noFoodDetected
+        }
+
+        // Step 2: Generate recipes from ingredients (OpenAI)
+        let recipes = try await generateRecipesFromIngredients(
+            from: ingredients,
+            userProfile: userProfile,
+            count: 5
+        )
 
         let imageData = image?.jpegData(compressionQuality: 0.7)
 
@@ -177,12 +186,39 @@ actor AIService {
             throw AIServiceError.invalidResponse
         }
 
-        let generationResult = try parseRecipeGenerationResponse(content)
+        // Strip markdown fences before parsing
+        let jsonString = try extractAndValidateJSON(content)
+        print("🔍 Full JSON to parse (\(jsonString.count) chars): \(jsonString.prefix(2000))...")
 
-        let recipes = generationResult.recipes.map { convertSuggestedRecipe($0) }
+        guard let jsonData = jsonString.data(using: .utf8) else {
+            throw AIServiceError.jsonParsingError
+        }
 
-        print("✅ Generated \(recipes.count) recipes")
-        return recipes
+        do {
+            let generationResult = try JSONDecoder().decode(RecipeGenerationResult.self, from: jsonData)
+
+            let recipes = generationResult.recipes.map { convertSuggestedRecipe($0) }
+
+            print("✅ Generated \(recipes.count) recipes")
+            return recipes
+
+        } catch let decodingError as DecodingError {
+            print("❌ JSON Decode Error:")
+            switch decodingError {
+            case .keyNotFound(let key, let context):
+                print("   Missing key '\(key.stringValue)' at: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+            case .typeMismatch(let type, let context):
+                print("   Type mismatch for \(type) at: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                print("   Debug: \(context.debugDescription)")
+            case .valueNotFound(let type, let context):
+                print("   Value not found for \(type) at: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+            case .dataCorrupted(let context):
+                print("   Data corrupted: \(context.debugDescription)")
+            @unknown default:
+                print("   Unknown: \(decodingError)")
+            }
+            throw AIServiceError.jsonParsingError
+        }
     }
 
     // MARK: - Step 1: Ingredient Detection Only (OpenAI Vision)
@@ -283,46 +319,47 @@ actor AIService {
         return ingredients
     }
 
-    // MARK: - Step 2: Recipe Generation (Claude)
+    // MARK: - Step 2: Recipe Generation (OpenAI)
 
-    func generateRecipesWithClaude(
+    func generateRecipesFromIngredients(
         from ingredients: [Ingredient],
         userProfile: UserProfile?,
         count: Int = 5
     ) async throws -> [Recipe] {
-        print("🍳 Step 2: Generating \(count) recipes with Claude...")
+        print("🍳 Step 2: Generating \(count) recipes with OpenAI...")
 
-        guard !Config.anthropicAPIKey.isEmpty else {
-            throw AIServiceError.noAnthropicAPIKey
+        guard !Config.openAIAPIKey.isEmpty && Config.openAIAPIKey != "YOUR_OPENAI_API_KEY_HERE" else {
+            throw AIServiceError.noAPIKey
         }
 
-        let prompt = buildClaudeRecipePrompt(
+        let prompt = buildRecipePrompt(
             ingredients: ingredients,
             userProfile: userProfile,
             count: count
         )
 
-        let request = ClaudeRequest(
-            model: Config.anthropicModel,
-            maxTokens: Config.anthropicMaxTokens,
+        let request = OpenAITextRequest(
+            model: Config.recipeModel,
             messages: [
-                ClaudeMessage(role: "user", content: prompt)
-            ]
+                OpenAITextRequest.Message(role: "system", content: "You are ChefAI, a professional culinary AI that creates detailed, personalized recipes."),
+                OpenAITextRequest.Message(role: "user", content: prompt)
+            ],
+            maxTokens: Config.recipeMaxTokens,
+            temperature: Config.temperature
         )
 
-        guard let url = URL(string: Config.anthropicEndpoint) else {
+        guard let url = URL(string: Config.chatEndpoint) else {
             throw AIServiceError.invalidResponse
         }
 
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
-        urlRequest.setValue(Config.anthropicAPIKey, forHTTPHeaderField: "x-api-key")
-        urlRequest.setValue(Config.anthropicVersion, forHTTPHeaderField: "anthropic-version")
+        urlRequest.setValue("Bearer \(Config.openAIAPIKey)", forHTTPHeaderField: "Authorization")
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.timeoutInterval = Config.requestTimeout
         urlRequest.httpBody = try JSONEncoder().encode(request)
 
-        print("📡 Calling Claude API for recipe generation...")
+        print("📡 Calling OpenAI API for recipe generation...")
 
         let (data, response) = try await performRequestWithRetry(urlRequest: urlRequest)
 
@@ -330,46 +367,65 @@ actor AIService {
             throw AIServiceError.invalidResponse
         }
 
-        // Try to decode response first to get better error messages
-        let claudeResponse = try JSONDecoder().decode(ClaudeResponse.self, from: data)
-
-        // Check for API errors
-        if let error = claudeResponse.error {
-            throw AIServiceError.claudeAPIError(error.message)
-        }
-
         guard httpResponse.statusCode == 200 else {
-            throw AIServiceError.claudeAPIError("HTTP \(httpResponse.statusCode)")
+            if let errorResponse = try? JSONDecoder().decode(OpenAIResponse.self, from: data),
+               let error = errorResponse.error {
+                throw AIServiceError.apiError(error.message)
+            }
+            throw AIServiceError.apiError("HTTP \(httpResponse.statusCode)")
         }
 
-        guard let content = claudeResponse.content?.first?.text else {
+        let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
+
+        guard let content = openAIResponse.choices.first?.message.content else {
             throw AIServiceError.invalidResponse
         }
 
-        print("📊 Claude tokens - input: \(claudeResponse.usage?.inputTokens ?? 0), output: \(claudeResponse.usage?.outputTokens ?? 0)")
+        print("📊 OpenAI tokens used: \(openAIResponse.usage?.totalTokens ?? 0)")
         print("🔍 Response preview: \(content.prefix(300))...")
 
         // Parse recipe response
         let jsonString = try extractAndValidateJSON(content)
+        print("🔍 Full JSON to parse (\(jsonString.count) chars): \(jsonString.prefix(2000))...")
+
         guard let jsonData = jsonString.data(using: .utf8) else {
             throw AIServiceError.jsonParsingError
         }
 
-        let recipeResult = try JSONDecoder().decode(ClaudeRecipeResult.self, from: jsonData)
+        do {
+            let recipeResult = try JSONDecoder().decode(RecipeGenerationResult.self, from: jsonData)
 
-        if recipeResult.recipes.isEmpty {
-            throw AIServiceError.recipeGenerationFailed
+            if recipeResult.recipes.isEmpty {
+                throw AIServiceError.recipeGenerationFailed
+            }
+
+            let recipes = recipeResult.recipes.map { convertSuggestedRecipe($0) }
+
+            print("✅ Generated \(recipes.count) recipes with OpenAI")
+            return recipes
+
+        } catch let decodingError as DecodingError {
+            print("❌ JSON Decode Error:")
+            switch decodingError {
+            case .keyNotFound(let key, let context):
+                print("   Missing key '\(key.stringValue)' at: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+            case .typeMismatch(let type, let context):
+                print("   Type mismatch for \(type) at: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                print("   Debug: \(context.debugDescription)")
+            case .valueNotFound(let type, let context):
+                print("   Value not found for \(type) at: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+            case .dataCorrupted(let context):
+                print("   Data corrupted: \(context.debugDescription)")
+            @unknown default:
+                print("   Unknown: \(decodingError)")
+            }
+            throw AIServiceError.jsonParsingError
         }
-
-        let recipes = recipeResult.recipes.map { convertClaudeRecipe($0) }
-
-        print("✅ Generated \(recipes.count) recipes with Claude")
-        return recipes
     }
 
     // MARK: - OpenAI API Call
 
-    private nonisolated func callOpenAI(
+    private func callOpenAI(
         image: UIImage,
         userProfile: UserProfile? = nil,
         aggressiveMode: Bool = false,
@@ -443,7 +499,7 @@ actor AIService {
 
     // MARK: - API Request with Retry and Exponential Backoff
 
-    private nonisolated func performAPIRequest(urlRequest: URLRequest, retryCount: Int = 0) async throws -> (Data, URLResponse) {
+    private func performAPIRequest(urlRequest: URLRequest, retryCount: Int = 0) async throws -> (Data, URLResponse) {
         do {
             return try await URLSession.shared.data(for: urlRequest)
         } catch let error as URLError where error.code == .timedOut && retryCount < Config.maxRetries {
@@ -454,7 +510,7 @@ actor AIService {
         }
     }
 
-    private nonisolated func performRequestWithRetry(urlRequest: URLRequest) async throws -> (Data, URLResponse) {
+    private func performRequestWithRetry(urlRequest: URLRequest) async throws -> (Data, URLResponse) {
         var lastError: Error?
 
         for attempt in 0..<Config.maxRetries {
@@ -485,7 +541,7 @@ actor AIService {
 
     // MARK: - JSON Extraction and Validation
 
-    private nonisolated func extractAndValidateJSON(_ content: String) throws -> String {
+    private func extractAndValidateJSON(_ content: String) throws -> String {
         var jsonString = content.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Strip markdown code fences
@@ -523,7 +579,7 @@ actor AIService {
 
     // MARK: - Image Processing
 
-    private nonisolated func convertToBase64(image: UIImage) -> String? {
+    private func convertToBase64(image: UIImage) -> String? {
         let maxDimension: CGFloat = 1024
         let size = image.size
         let scale: CGFloat = size.width > size.height
@@ -547,7 +603,7 @@ actor AIService {
 
     // MARK: - Request Building
 
-    private nonisolated func buildRequest(base64Image: String, userProfile: UserProfile?, aggressiveMode: Bool = false) -> OpenAIRequest {
+    private func buildRequest(base64Image: String, userProfile: UserProfile?, aggressiveMode: Bool = false) -> OpenAIRequest {
         let prompt = buildAnalysisPrompt(userProfile: userProfile, aggressiveMode: aggressiveMode)
 
         return OpenAIRequest(
@@ -572,22 +628,46 @@ actor AIService {
 
     // MARK: - Prompt Building
 
-    private nonisolated func buildIngredientDetectionPrompt() -> String {
+    private func buildIngredientDetectionPrompt() -> String {
         return """
-        You are analyzing a photo of food/ingredients. Your task is to identify ALL visible food items with precision.
+        You are analyzing an image that may contain food items, grocery receipts, shopping lists, or product packaging.
+
+        DETECT INGREDIENTS FROM ANY OF THESE SOURCES:
+        - Actual food items (fresh produce, meats, dairy, etc.)
+        - Grocery/shopping receipts (extract purchased item names from line items)
+        - Product packaging and labels (read product names from boxes, cans, bottles)
+        - Shopping lists (handwritten or typed)
+        - Pantry/fridge/shelf photos (packaged or fresh items)
+        - Barcodes with visible product labels
+
+        FOR RECEIPTS:
+        - Extract each food item name from the receipt line items
+        - IGNORE non-food items (cleaning supplies, toiletries, household goods)
+        - Use the quantity from the receipt if visible (e.g., "2x" or "QTY: 3")
+        - Parse brand names if shown on the receipt
+
+        FOR BARCODES/PACKAGING:
+        - Read the product name from the label
+        - Include brand name if prominently displayed
+        - Note package size/quantity if visible (e.g., "16 oz", "500g")
+
+        FOR SHOPPING LISTS:
+        - Extract each food item from the list
+        - Handle handwritten text with best-effort recognition
+        - Parse quantities if written (e.g., "2 lbs chicken", "1 dozen eggs")
 
         For each ingredient, extract:
         - name: Exact product name (e.g., "Kirkland Organic Extra Virgin Olive Oil" not just "olive oil")
-        - brand: Brand name if visible on packaging, null otherwise
-        - quantity: Estimated amount (e.g., "2", "half", "500g", "1 bunch")
-        - unit: Unit of measurement (e.g., "pieces", "cups", "grams", "lbs")
-        - category: One of: protein, vegetable, grain, dairy, condiment, fruit, beverage, spice, other
+        - brand: Brand name if visible on packaging/receipt, null otherwise
+        - quantity: Amount from source (e.g., "2", "500g", "1 bunch", "1 box")
+        - unit: Unit of measurement (e.g., "pieces", "cups", "grams", "lbs", "oz")
+        - category: One of: protein, vegetable, grain, dairy, condiment, fruit, beverage, spice, frozen, canned, snack, other
         - confidence: Your confidence score from 0.0 to 1.0
 
         Handle edge cases:
         - Blurry items: Include with lower confidence (0.3-0.5)
         - Partial visibility: Note in quantity (e.g., "partially visible")
-        - Packaged foods: Try to read the label for exact product name
+        - Unclear handwriting: Best-effort with lower confidence
         - No food detected: Return empty ingredients array
 
         Return ONLY valid JSON matching this exact structure:
@@ -608,7 +688,7 @@ actor AIService {
         """
     }
 
-    private nonisolated func buildClaudeRecipePrompt(
+    private func buildRecipePrompt(
         ingredients: [Ingredient],
         userProfile: UserProfile?,
         count: Int
@@ -669,42 +749,49 @@ actor AIService {
         }
 
         return """
-        You are a professional chef creating personalized recipes.
+        You are a recipe expert with extensive knowledge of recipes from trusted cooking sources.
 
         AVAILABLE INGREDIENTS:
         \(ingredientList)
         \(profileContext)
 
-        Generate exactly \(count) recipes that:
+        Find \(count) REAL recipes from your knowledge of trusted cooking sources like:
+        - NYT Cooking, Serious Eats, Bon Appétit
+        - AllRecipes, Epicurious, Food Network
+        - America's Test Kitchen, Simply Recipes
+
+        Requirements:
         1. Use PRIMARILY the available ingredients listed above
-        2. You may suggest common pantry staples if needed (salt, pepper, oil, basic spices, water)
-        3. Match the user's skill level and time constraints if specified
-        4. Respect all dietary restrictions strictly
-        5. Include detailed step-by-step instructions with techniques
+        2. You may suggest common pantry staples if needed (salt, pepper, oil, basic spices)
+        3. Include SOURCE NAME for each recipe (e.g., "Adapted from Serious Eats")
+        4. Match the user's skill level and dietary restrictions if specified
+        5. Provide accurate prep/cook times and techniques
 
-        For each recipe provide:
-        - name: Creative recipe title
-        - description: 1-2 sentence appetizing description
-        - ingredients: Array with name, amount, unit, isOptional (true for pantry staples), substitutes
-        - instructions: Array of step strings (simple version)
-        - detailedSteps: Array with stepNumber, instruction, duration (in seconds), technique, tips
-        - prepTime: Prep time in minutes
-        - cookTime: Cook time in minutes
-        - servings: Number of servings
-        - difficulty: "easy", "medium", "hard", or "expert"
-        - cuisineType: Cuisine category (e.g., "Italian", "Mexican", "Asian Fusion")
-        - nutritionPerServing: Estimated calories, protein, carbs, fat
-        - tips: Array of helpful chef tips
-        - tags: Array of relevant tags (e.g., "quick", "healthy", "comfort food")
-
-        Return ONLY valid JSON with no markdown formatting:
+        Return this exact JSON structure (no markdown):
         {
-          "recipes": [...]
+          "recipes": [
+            {
+              "name": "Recipe Title",
+              "description": "Brief appetizing description",
+              "ingredients": [{"name": "item", "amount": "2", "unit": "cups", "isOptional": false, "substitutes": []}],
+              "instructions": ["Step 1", "Step 2"],
+              "detailedSteps": [{"stepNumber": 1, "instruction": "Do this", "duration": 300, "technique": "sauté", "tips": ["tip"]}],
+              "prepTime": 15,
+              "cookTime": 30,
+              "servings": 4,
+              "difficulty": "easy",
+              "cuisineType": "Italian",
+              "nutritionPerServing": {"calories": 350, "protein": 25.0, "carbs": 30.0, "fat": 12.0},
+              "tips": ["Chef tip"],
+              "tags": ["quick", "healthy"],
+              "source": {"name": "Serious Eats", "author": "J. Kenji López-Alt", "url": null}
+            }
+          ]
         }
         """
     }
 
-    private nonisolated func buildUserContext(from profile: UserProfile) -> String {
+    private func buildUserContext(from profile: UserProfile) -> String {
         var preferences: [String] = []
 
         // Main goal
@@ -760,7 +847,7 @@ actor AIService {
         return preferences.isEmpty ? "" : "\n\nUser preferences:\n" + preferences.joined(separator: "\n")
     }
 
-    private nonisolated func buildAnalysisPrompt(userProfile: UserProfile?, aggressiveMode: Bool = false) -> String {
+    private func buildAnalysisPrompt(userProfile: UserProfile?, aggressiveMode: Bool = false) -> String {
         var userContext = ""
         if let profile = userProfile {
             userContext = buildUserContext(from: profile)
@@ -849,7 +936,7 @@ actor AIService {
         """
     }
 
-    private nonisolated func buildRecipeGenerationPrompt(
+    private func buildRecipeGenerationPrompt(
         ingredients: [String],
         count: Int,
         userProfile: UserProfile?,
@@ -912,7 +999,7 @@ actor AIService {
         """
     }
 
-    private nonisolated func buildPersonalizationRules(from profile: UserProfile) -> String {
+    private func buildPersonalizationRules(from profile: UserProfile) -> String {
         var rules: [String] = []
 
         // Goal-based nutrition filtering
@@ -1007,7 +1094,7 @@ actor AIService {
 
     // MARK: - Response Parsing
 
-    private nonisolated func parseAIResponse(_ content: String) throws -> AIAnalysisResult {
+    private func parseAIResponse(_ content: String) throws -> AIAnalysisResult {
         var jsonString = content.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Robust JSON extraction - find first { and last }
@@ -1059,7 +1146,7 @@ actor AIService {
         }
     }
 
-    private nonisolated func parseRecipeGenerationResponse(_ content: String) throws -> RecipeGenerationResult {
+    private func parseRecipeGenerationResponse(_ content: String) throws -> RecipeGenerationResult {
         var jsonString = content.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Robust JSON extraction - find first { and last }
@@ -1095,7 +1182,7 @@ actor AIService {
 
     // MARK: - Model Conversion
 
-    private nonisolated func convertIngredients(from aiResult: AIAnalysisResult?) -> [Ingredient] {
+    private func convertIngredients(from aiResult: AIAnalysisResult?) -> [Ingredient] {
         guard let aiResult = aiResult, aiResult.hasFood else { return [] }
 
         return aiResult.ingredients.map { detected in
@@ -1122,7 +1209,7 @@ actor AIService {
         }
     }
 
-    private nonisolated func convertRecipes(from aiResult: AIAnalysisResult?, manualItems: [String]) -> [Recipe] {
+    private func convertRecipes(from aiResult: AIAnalysisResult?, manualItems: [String]) -> [Recipe] {
         guard let aiResult = aiResult, aiResult.hasFood else {
             if !manualItems.isEmpty {
                 return generateFallbackRecipes(ingredients: manualItems)
@@ -1133,7 +1220,7 @@ actor AIService {
         return aiResult.suggestedRecipes.map { convertSuggestedRecipe($0) }
     }
 
-    private nonisolated func convertSuggestedRecipe(_ suggested: AIAnalysisResult.SuggestedRecipe) -> Recipe {
+    private func convertSuggestedRecipe(_ suggested: AIAnalysisResult.SuggestedRecipe) -> Recipe {
         let ingredients = suggested.ingredients.map { ingredient in
             RecipeIngredient(
                 name: ingredient.name,
@@ -1194,61 +1281,7 @@ actor AIService {
         )
     }
 
-    private nonisolated func convertClaudeRecipe(_ claudeRecipe: ClaudeRecipe) -> Recipe {
-        let ingredients = claudeRecipe.ingredients.map { ingredient in
-            RecipeIngredient(
-                name: ingredient.name,
-                amount: ingredient.amount,
-                unit: ingredient.unit,
-                isOptional: ingredient.isOptional ?? false,
-                substitutes: ingredient.substitutes ?? []
-            )
-        }
-
-        var detailedSteps: [RecipeStep] = []
-        if let steps = claudeRecipe.detailedSteps {
-            detailedSteps = steps.map { step in
-                RecipeStep(
-                    stepNumber: step.stepNumber,
-                    instruction: step.instruction,
-                    duration: step.duration,
-                    technique: step.technique,
-                    tips: step.tips ?? []
-                )
-            }
-        }
-
-        var nutritionInfo: NutritionInfo?
-        if let nutrition = claudeRecipe.nutritionPerServing {
-            nutritionInfo = NutritionInfo(
-                calories: nutrition.calories,
-                protein: nutrition.protein,
-                carbs: nutrition.carbs,
-                fat: nutrition.fat,
-                fiber: nutrition.fiber,
-                sodium: nutrition.sodium
-            )
-        }
-
-        return Recipe(
-            name: claudeRecipe.name,
-            description: claudeRecipe.description,
-            instructions: claudeRecipe.instructions,
-            detailedSteps: detailedSteps,
-            ingredients: ingredients,
-            tags: claudeRecipe.tags ?? [],
-            prepTime: claudeRecipe.prepTime,
-            cookTime: claudeRecipe.cookTime,
-            servings: claudeRecipe.servings,
-            difficulty: mapDifficulty(claudeRecipe.difficulty),
-            cuisineType: claudeRecipe.cuisineType,
-            nutritionPerServing: nutritionInfo,
-            tips: claudeRecipe.tips ?? [],
-            source: RecipeSource(name: "ChefAI (Claude)", author: "ChefAI")
-        )
-    }
-
-    private nonisolated func mapCategory(_ categoryString: String?) -> IngredientCategory? {
+    private func mapCategory(_ categoryString: String?) -> IngredientCategory? {
         guard let category = categoryString?.lowercased() else { return nil }
 
         switch category {
@@ -1268,7 +1301,7 @@ actor AIService {
         }
     }
 
-    private nonisolated func mapDifficulty(_ difficultyString: String?) -> DifficultyLevel? {
+    private func mapDifficulty(_ difficultyString: String?) -> DifficultyLevel? {
         guard let difficulty = difficultyString?.lowercased() else { return .easy }
 
         switch difficulty {
@@ -1280,7 +1313,7 @@ actor AIService {
         }
     }
 
-    private nonisolated func generateFallbackRecipes(ingredients: [String]) -> [Recipe] {
+    private func generateFallbackRecipes(ingredients: [String]) -> [Recipe] {
         guard !ingredients.isEmpty else { return [] }
 
         let ingredientList = ingredients.prefix(5).joined(separator: ", ")

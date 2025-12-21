@@ -82,9 +82,9 @@ class OnboardingViewModel: ObservableObject {
         )
     ]
 
-    init(storageService: StorageService = .shared) {
-        self.storageService = storageService
-        let profile = storageService.loadUserProfile()
+    init(storageService: StorageService? = nil) {
+        self.storageService = storageService ?? StorageService.shared
+        let profile = self.storageService.loadUserProfile()
         self.userProfile = profile
 
         // Load existing selections if any

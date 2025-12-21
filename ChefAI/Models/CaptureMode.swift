@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum CaptureMode: String, CaseIterable, Identifiable {
+enum CaptureMode: String, CaseIterable, Identifiable, Sendable {
     case scanIngredients = "Scan Ingredients"
     case barcode = "Barcode"
     case foodLabel = "Food Label"

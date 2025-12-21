@@ -139,6 +139,59 @@ struct AIAnalysisResult: Codable {
         let carbs: Double?
         let fat: Double?
         let servingSize: String?
+
+        enum CodingKeys: String, CodingKey {
+            case calories, protein, carbs, fat, servingSize
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            servingSize = try container.decodeIfPresent(String.self, forKey: .servingSize)
+
+            // Handle calories as Int, Double, or String
+            if let intCal = try? container.decode(Int.self, forKey: .calories) {
+                calories = intCal
+            } else if let doubleCal = try? container.decode(Double.self, forKey: .calories) {
+                calories = Int(doubleCal)
+            } else if let stringCal = try? container.decode(String.self, forKey: .calories) {
+                calories = Int(stringCal)
+            } else {
+                calories = nil
+            }
+
+            // Handle protein as Double, Int, or String
+            if let doubleVal = try? container.decode(Double.self, forKey: .protein) {
+                protein = doubleVal
+            } else if let intVal = try? container.decode(Int.self, forKey: .protein) {
+                protein = Double(intVal)
+            } else if let stringVal = try? container.decode(String.self, forKey: .protein) {
+                protein = Double(stringVal)
+            } else {
+                protein = nil
+            }
+
+            // Handle carbs as Double, Int, or String
+            if let doubleVal = try? container.decode(Double.self, forKey: .carbs) {
+                carbs = doubleVal
+            } else if let intVal = try? container.decode(Int.self, forKey: .carbs) {
+                carbs = Double(intVal)
+            } else if let stringVal = try? container.decode(String.self, forKey: .carbs) {
+                carbs = Double(stringVal)
+            } else {
+                carbs = nil
+            }
+
+            // Handle fat as Double, Int, or String
+            if let doubleVal = try? container.decode(Double.self, forKey: .fat) {
+                fat = doubleVal
+            } else if let intVal = try? container.decode(Int.self, forKey: .fat) {
+                fat = Double(intVal)
+            } else if let stringVal = try? container.decode(String.self, forKey: .fat) {
+                fat = Double(stringVal)
+            } else {
+                fat = nil
+            }
+        }
     }
 
     struct SuggestedRecipe: Codable {
@@ -210,7 +263,18 @@ struct AIAnalysisResult: Codable {
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             name = try container.decode(String.self, forKey: .name)
-            amount = try container.decodeIfPresent(String.self, forKey: .amount) ?? "as needed"
+
+            // Handle amount as either String or Number
+            if let stringAmount = try? container.decode(String.self, forKey: .amount) {
+                amount = stringAmount
+            } else if let intAmount = try? container.decode(Int.self, forKey: .amount) {
+                amount = String(intAmount)
+            } else if let doubleAmount = try? container.decode(Double.self, forKey: .amount) {
+                amount = String(doubleAmount)
+            } else {
+                amount = "as needed"
+            }
+
             unit = try container.decodeIfPresent(String.self, forKey: .unit)
             isOptional = try container.decodeIfPresent(Bool.self, forKey: .isOptional)
             substitutes = try container.decodeIfPresent([String].self, forKey: .substitutes)
@@ -232,9 +296,21 @@ struct AIAnalysisResult: Codable {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             stepNumber = try container.decodeIfPresent(Int.self, forKey: .stepNumber) ?? 1
             instruction = try container.decode(String.self, forKey: .instruction)
-            duration = try container.decodeIfPresent(Int.self, forKey: .duration)
             technique = try container.decodeIfPresent(String.self, forKey: .technique)
             tips = try container.decodeIfPresent([String].self, forKey: .tips)
+
+            // Handle duration as Int, String, or Double
+            if let intDuration = try? container.decode(Int.self, forKey: .duration) {
+                duration = intDuration
+            } else if let stringDuration = try? container.decode(String.self, forKey: .duration) {
+                // Parse "300" or "300 seconds" -> 300
+                let digits = stringDuration.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+                duration = Int(digits)
+            } else if let doubleDuration = try? container.decode(Double.self, forKey: .duration) {
+                duration = Int(doubleDuration)
+            } else {
+                duration = nil
+            }
         }
     }
 

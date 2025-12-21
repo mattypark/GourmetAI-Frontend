@@ -15,49 +15,13 @@ class RecipeDetailViewModel: ObservableObject {
 
     private let storageService: StorageService
 
-    init(recipe: Recipe, storageService: StorageService = .shared) {
+    init(recipe: Recipe, storageService: StorageService? = nil) {
         self.recipe = recipe
-        self.storageService = storageService
-    }
-
-    func toggleLike() {
-        recipe.isLiked.toggle()
-
-        // Update in liked recipes
-        var likedRecipes = storageService.loadLikedRecipes()
-
-        if recipe.isLiked {
-            // Add to liked recipes if not already there
-            if !likedRecipes.contains(where: { $0.id == recipe.id }) {
-                likedRecipes.append(recipe)
-            } else {
-                // Update existing
-                if let index = likedRecipes.firstIndex(where: { $0.id == recipe.id }) {
-                    likedRecipes[index] = recipe
-                }
-            }
-        } else {
-            // Remove from liked recipes
-            likedRecipes.removeAll { $0.id == recipe.id }
-        }
-
-        storageService.saveLikedRecipes(likedRecipes)
-
-        // Also update in analyses
-        updateInAnalyses()
+        self.storageService = storageService ?? StorageService.shared
     }
 
     func saveRecipeImage(_ imageData: Data) {
         recipe.savedImageData = imageData
-
-        // Update in liked recipes
-        var likedRecipes = storageService.loadLikedRecipes()
-        if let index = likedRecipes.firstIndex(where: { $0.id == recipe.id }) {
-            likedRecipes[index].savedImageData = imageData
-            storageService.saveLikedRecipes(likedRecipes)
-        }
-
-        // Update in analyses
         updateInAnalyses()
     }
 

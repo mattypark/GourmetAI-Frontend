@@ -70,9 +70,7 @@ struct RecipeListView: View {
             }
             .fullScreenCover(isPresented: $viewModel.showingRecipeDetail) {
                 if let recipe = viewModel.selectedRecipe {
-                    RecipeDetailView(recipe: recipe, onToggleFavorite: {
-                        viewModel.toggleFavorite(recipe)
-                    })
+                    RecipeDetailView(recipe: recipe)
                 }
             }
         }
@@ -138,8 +136,6 @@ struct RecipeListView: View {
                         ForEach(viewModel.recipes) { recipe in
                             RecipeCardView(recipe: recipe) {
                                 viewModel.selectRecipe(recipe)
-                            } onToggleFavorite: {
-                                viewModel.toggleFavorite(recipe)
                             }
                         }
                     }
@@ -157,8 +153,6 @@ struct RecipeListView: View {
                     ForEach(viewModel.recipes) { recipe in
                         RecipeRowView(recipe: recipe) {
                             viewModel.selectRecipe(recipe)
-                        } onToggleFavorite: {
-                            viewModel.toggleFavorite(recipe)
                         }
                     }
                 }
@@ -217,7 +211,6 @@ struct RecipeListView: View {
 struct RecipeRowView: View {
     let recipe: Recipe
     let onTap: () -> Void
-    let onToggleFavorite: () -> Void
 
     var body: some View {
         Button(action: onTap) {
@@ -258,13 +251,9 @@ struct RecipeRowView: View {
 
                 Spacer()
 
-                // Favorite Button
-                Button(action: onToggleFavorite) {
-                    Image(systemName: recipe.isLiked ? "heart.fill" : "heart")
-                        .foregroundColor(recipe.isLiked ? .red : .white.opacity(0.5))
-                        .font(.title3)
-                }
-                .buttonStyle(.plain)
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.white.opacity(0.3))
+                    .font(.caption)
             }
             .padding()
             .background(Color.white.opacity(0.05))

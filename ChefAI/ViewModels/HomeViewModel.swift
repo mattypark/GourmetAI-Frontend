@@ -11,7 +11,6 @@ import Combine
 @MainActor
 class HomeViewModel: ObservableObject {
     @Published var analyses: [AnalysisResult] = []
-    @Published var likedRecipes: [Recipe] = []
     @Published var pantryIngredients: [Ingredient] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -19,8 +18,8 @@ class HomeViewModel: ObservableObject {
     private let storageService: StorageService
     private let inventoryService = InventoryService.shared
 
-    init(storageService: StorageService = .shared) {
-        self.storageService = storageService
+    init(storageService: StorageService? = nil) {
+        self.storageService = storageService ?? StorageService.shared
     }
 
     func loadData() {
@@ -28,35 +27,9 @@ class HomeViewModel: ObservableObject {
 
         // Load from storage
         analyses = storageService.loadAnalyses()
-        likedRecipes = storageService.loadLikedRecipes()
         pantryIngredients = inventoryService.getAllIngredients()
 
         isLoading = false
-    }
-
-    func toggleRecipeLike(_ recipe: Recipe) {
-        var updatedRecipe = recipe
-        updatedRecipe.isLiked.toggle()
-
-        if updatedRecipe.isLiked {
-            // Add to liked recipes if not already there
-            if !likedRecipes.contains(where: { $0.id == recipe.id }) {
-                likedRecipes.append(updatedRecipe)
-            }
-        } else {
-            // Remove from liked recipes
-            likedRecipes.removeAll { $0.id == recipe.id }
-        }
-
-        // Update in all analyses
-        for i in analyses.indices {
-            if let recipeIndex = analyses[i].suggestedRecipes.firstIndex(where: { $0.id == recipe.id }) {
-                analyses[i].suggestedRecipes[recipeIndex] = updatedRecipe
-            }
-        }
-
-        storageService.saveLikedRecipes(likedRecipes)
-        storageService.saveAnalyses(analyses)
     }
 
     func deleteAnalysis(_ analysis: AnalysisResult) {
@@ -66,12 +39,7 @@ class HomeViewModel: ObservableObject {
 
     func clearAllData() {
         analyses.removeAll()
-        likedRecipes.removeAll()
         storageService.clearAllData()
-    }
-
-    var savedRecipeImages: [Recipe] {
-        likedRecipes.filter { $0.savedImageData != nil }
     }
 
     var pantryCount: Int {

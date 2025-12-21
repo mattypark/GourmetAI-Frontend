@@ -10,7 +10,6 @@ import SwiftUI
 struct RecipeCardView: View {
     let recipe: Recipe
     let onTap: () -> Void
-    let onToggleFavorite: () -> Void
 
     var body: some View {
         Button(action: onTap) {
@@ -38,18 +37,6 @@ struct RecipeCardView: View {
                     } else {
                         imagePlaceholder
                     }
-
-                    // Favorite Button
-                    Button(action: onToggleFavorite) {
-                        Image(systemName: recipe.isLiked ? "heart.fill" : "heart")
-                            .font(.title3)
-                            .foregroundColor(recipe.isLiked ? .red : .white)
-                            .padding(10)
-                            .background(Color.black.opacity(0.4))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .padding(12)
                 }
                 .frame(height: 180)
                 .clipped()
@@ -154,7 +141,6 @@ struct RecipeCardView: View {
 struct LargeRecipeCardView: View {
     let recipe: Recipe
     let onTap: () -> Void
-    let onToggleFavorite: () -> Void
 
     var body: some View {
         Button(action: onTap) {
@@ -184,22 +170,6 @@ struct LargeRecipeCardView: View {
 
                 // Content Overlay
                 VStack(alignment: .leading, spacing: 12) {
-                    Spacer()
-
-                    // Favorite Button
-                    HStack {
-                        Spacer()
-                        Button(action: onToggleFavorite) {
-                            Image(systemName: recipe.isLiked ? "heart.fill" : "heart")
-                                .font(.title2)
-                                .foregroundColor(recipe.isLiked ? .red : .white)
-                                .padding(12)
-                                .background(Color.black.opacity(0.3))
-                                .clipShape(Circle())
-                        }
-                        .buttonStyle(.plain)
-                    }
-
                     Spacer()
 
                     // Recipe Info
@@ -264,8 +234,7 @@ struct LargeRecipeCardView: View {
                     difficulty: .easy,
                     cuisineType: "American"
                 ),
-                onTap: {},
-                onToggleFavorite: {}
+                onTap: {}
             )
 
             LargeRecipeCardView(
@@ -279,8 +248,7 @@ struct LargeRecipeCardView: View {
                     difficulty: .medium,
                     cuisineType: "Mediterranean"
                 ),
-                onTap: {},
-                onToggleFavorite: {}
+                onTap: {}
             )
             .padding(.horizontal)
         }
