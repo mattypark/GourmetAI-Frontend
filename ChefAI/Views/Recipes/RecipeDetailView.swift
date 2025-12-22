@@ -16,79 +16,77 @@ struct RecipeDetailView: View {
     @State private var showingShareSheet: Bool = false
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    // Hero Image
-                    heroImageSection
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                // Hero Image
+                heroImageSection
 
-                    // Content
-                    VStack(alignment: .leading, spacing: 24) {
-                        // Title & Meta
-                        titleSection
+                // Content
+                VStack(alignment: .leading, spacing: 24) {
+                    // Title & Meta
+                    titleSection
 
-                        // Quick Stats
-                        statsSection
+                    // Quick Stats
+                    statsSection
 
+                    Divider()
+                        .background(Color.black.opacity(0.1))
+
+                    // Nutrition Info
+                    if let nutrition = recipe.nutritionPerServing, nutrition.hasMacros {
+                        nutritionSection(nutrition)
                         Divider()
                             .background(Color.black.opacity(0.1))
+                    }
 
-                        // Nutrition Info
-                        if let nutrition = recipe.nutritionPerServing, nutrition.hasMacros {
-                            nutritionSection(nutrition)
-                            Divider()
-                                .background(Color.black.opacity(0.1))
-                        }
+                    // Ingredients
+                    ingredientsSection
 
-                        // Ingredients
-                        ingredientsSection
+                    Divider()
+                        .background(Color.black.opacity(0.1))
 
+                    // Instructions
+                    instructionsSection
+
+                    // Tips
+                    if !recipe.tips.isEmpty {
                         Divider()
                             .background(Color.black.opacity(0.1))
-
-                        // Instructions
-                        instructionsSection
-
-                        // Tips
-                        if !recipe.tips.isEmpty {
-                            Divider()
-                                .background(Color.black.opacity(0.1))
-                            tipsSection
-                        }
-
-                        // Source
-                        if let source = recipe.source {
-                            sourceSection(source)
-                        }
+                        tipsSection
                     }
-                    .padding()
-                }
-            }
-            .background(Color.white)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.light, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.black)
+
+                    // Source
+                    if let source = recipe.source {
+                        sourceSection(source)
                     }
                 }
-
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingShareSheet = true
-                    } label: {
-                        Image(systemName: "square.and.arrow.up")
-                            .foregroundColor(.black)
-                    }
+                .padding()
+            }
+        }
+        .background(Color.white)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarColorScheme(.light, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .foregroundColor(.black)
                 }
             }
-            .sheet(isPresented: $showingShareSheet) {
-                ShareSheet(items: [shareText])
+
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingShareSheet = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .foregroundColor(.black)
+                }
             }
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            ShareSheet(items: [shareText])
         }
         .gesture(
             DragGesture()

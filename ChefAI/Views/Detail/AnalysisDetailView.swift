@@ -21,14 +21,14 @@ struct AnalysisDetailView: View {
                         .resizable()
                         .scaledToFit()
                         .cornerRadius(16)
-                        .shadow(color: .white.opacity(0.1), radius: 8)
+                        .shadow(color: .black.opacity(0.1), radius: 8)
                 }
 
                 // Analysis Info
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Analysis Date")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
 
                     Text(analysis.date.formatted())
                         .font(.subheadline)
@@ -53,7 +53,7 @@ struct AnalysisDetailView: View {
                         Text("Suggested Recipes")
                             .font(.title2)
                             .fontWeight(.semibold)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding(.horizontal)
 
                         ForEach(analysis.suggestedRecipes) { recipe in
@@ -67,13 +67,10 @@ struct AnalysisDetailView: View {
             }
             .padding()
         }
-        .background(Color.black.ignoresSafeArea())
+        .background(Color.white.ignoresSafeArea())
         .navigationTitle("Fridge Analysis")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-        .navigationDestination(for: Recipe.self) { recipe in
-            RecipeDetailView(recipe: recipe)
-        }
+        .toolbarColorScheme(.light, for: .navigationBar)
     }
 }
 
@@ -88,7 +85,7 @@ struct RecipeCardPreview: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(recipe.name)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
 
                     HStack(spacing: 16) {
                         if let prepTime = recipe.prepTime, let cookTime = recipe.cookTime {
@@ -126,8 +123,8 @@ struct RecipeCardPreview: View {
                                 .font(.caption)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
-                                .background(Color.white.opacity(0.1))
-                                .foregroundColor(.white)
+                                .background(Color.black.opacity(0.05))
+                                .foregroundColor(.black)
                                 .cornerRadius(12)
                         }
                     }

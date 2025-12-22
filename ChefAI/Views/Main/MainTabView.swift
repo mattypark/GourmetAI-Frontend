@@ -14,13 +14,12 @@ struct MainTabView: View {
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var selectedImage: UIImage?
     @State private var showingImagePreview = false
-    @State private var refreshID = UUID()
     @StateObject private var cameraViewModel = CameraViewModel()
 
     var body: some View {
         ZStack {
             // Single Home view - no tab bar needed
-            HomeView(refreshID: $refreshID)
+            HomeView()
 
             // Floating Action Button Overlay
             VStack {
@@ -41,9 +40,7 @@ struct MainTabView: View {
             }
         }
         // Camera flow - opens simplified CaptureScreenView
-        .fullScreenCover(isPresented: $showingCamera, onDismiss: {
-            refreshID = UUID()
-        }) {
+        .fullScreenCover(isPresented: $showingCamera) {
             CaptureScreenView()
         }
         // Gallery flow - direct PhotosPicker
@@ -63,7 +60,6 @@ struct MainTabView: View {
         .fullScreenCover(isPresented: $showingImagePreview, onDismiss: {
             selectedImage = nil
             selectedPhotoItem = nil
-            refreshID = UUID()
         }) {
             if let image = selectedImage {
                 GalleryPreviewView(

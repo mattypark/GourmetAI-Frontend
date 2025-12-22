@@ -11,12 +11,10 @@ import Combine
 @MainActor
 class HomeViewModel: ObservableObject {
     @Published var analyses: [AnalysisResult] = []
-    @Published var pantryIngredients: [Ingredient] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
 
     private let storageService: StorageService
-    private let inventoryService = InventoryService.shared
 
     init(storageService: StorageService? = nil) {
         self.storageService = storageService ?? StorageService.shared
@@ -24,11 +22,8 @@ class HomeViewModel: ObservableObject {
 
     func loadData() {
         isLoading = true
-
-        // Load from storage
+        storageService.removeDuplicateAnalyses()  // Clean up any duplicate analyses
         analyses = storageService.loadAnalyses()
-        pantryIngredients = inventoryService.getAllIngredients()
-
         isLoading = false
     }
 
@@ -40,23 +35,5 @@ class HomeViewModel: ObservableObject {
     func clearAllData() {
         analyses.removeAll()
         storageService.clearAllData()
-    }
-
-    var pantryCount: Int {
-        pantryIngredients.count
-    }
-
-    var hasPantryItems: Bool {
-        !pantryIngredients.isEmpty
-    }
-
-    func removeFromPantry(_ ingredient: Ingredient) {
-        inventoryService.removeIngredient(ingredient.id)
-        pantryIngredients = inventoryService.getAllIngredients()
-    }
-
-    func clearPantry() {
-        inventoryService.clearAll()
-        pantryIngredients = []
     }
 }

@@ -22,7 +22,7 @@ struct RecipeListView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
                 if viewModel.isLoading {
                     loadingView
@@ -34,14 +34,14 @@ struct RecipeListView: View {
             }
             .navigationTitle("Recipes")
             .navigationBarTitleDisplayMode(.large)
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") {
                         onComplete()
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                 }
 
                 if viewModel.hasRecipes {
@@ -53,10 +53,10 @@ struct RecipeListView: View {
                         } label: {
                             if viewModel.isRefreshing {
                                 ProgressView()
-                                    .tint(.white)
+                                    .tint(.black)
                             } else {
                                 Image(systemName: "arrow.clockwise")
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.black)
                             }
                         }
                         .disabled(viewModel.isRefreshing)
@@ -82,29 +82,29 @@ struct RecipeListView: View {
         VStack(spacing: 24) {
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.2), lineWidth: 8)
+                    .stroke(Color.black.opacity(0.1), lineWidth: 8)
                     .frame(width: 120, height: 120)
 
                 Circle()
                     .trim(from: 0, to: viewModel.progress)
-                    .stroke(Color.white, lineWidth: 8)
+                    .stroke(Color.black, lineWidth: 8)
                     .frame(width: 120, height: 120)
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 0.3), value: viewModel.progress)
 
                 Text("\(Int(viewModel.progress * 100))%")
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
             }
 
             VStack(spacing: 8) {
                 Text("Generating Recipes")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
 
-                Text("Creating 5 unique recipes from your ingredients...")
+                Text("This may take up to 60 seconds...")
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
             }
         }
@@ -121,11 +121,11 @@ struct RecipeListView: View {
                     Text("\(viewModel.recipeCount) Recipes Found")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
 
                     Text("Based on \(ingredients.count) ingredients")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(.gray)
                 }
                 .padding(.horizontal)
                 .padding(.top)
@@ -147,7 +147,7 @@ struct RecipeListView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("All Recipes")
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                         .padding(.horizontal)
 
                     ForEach(viewModel.recipes) { recipe in
@@ -168,23 +168,23 @@ struct RecipeListView: View {
         VStack(spacing: 24) {
             Image(systemName: "fork.knife.circle")
                 .font(.system(size: 64))
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(.gray)
 
             VStack(spacing: 8) {
                 Text("No Recipes Yet")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
 
                 if let error = viewModel.errorMessage {
                     Text(error)
                         .font(.subheadline)
-                        .foregroundColor(.red.opacity(0.8))
+                        .foregroundColor(.red)
                         .multilineTextAlignment(.center)
                 } else {
                     Text("Add more ingredients to generate recipes")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(.gray)
                 }
             }
 
@@ -195,10 +195,10 @@ struct RecipeListView: View {
             } label: {
                 Text("Try Again")
                     .font(.headline)
-                    .foregroundColor(.black)
+                    .foregroundColor(.white)
                     .padding(.horizontal, 32)
                     .padding(.vertical, 12)
-                    .background(Color.white)
+                    .background(Color.black)
                     .cornerRadius(25)
             }
         }
@@ -218,11 +218,11 @@ struct RecipeRowView: View {
                 // Recipe Image Placeholder
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.1))
+                        .fill(Color.black.opacity(0.05))
 
                     Image(systemName: "photo")
                         .font(.title2)
-                        .foregroundColor(.white.opacity(0.3))
+                        .foregroundColor(.gray)
                 }
                 .frame(width: 80, height: 80)
 
@@ -230,7 +230,7 @@ struct RecipeRowView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(recipe.name)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                         .lineLimit(2)
 
                     HStack(spacing: 12) {
@@ -240,24 +240,28 @@ struct RecipeRowView: View {
                         }
                     }
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(.gray)
 
                     if !recipe.tags.isEmpty {
                         Text(recipe.tags.prefix(3).joined(separator: " • "))
                             .font(.caption2)
-                            .foregroundColor(.white.opacity(0.4))
+                            .foregroundColor(.gray.opacity(0.7))
                     }
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.white.opacity(0.3))
+                    .foregroundColor(.gray)
                     .font(.caption)
             }
             .padding()
-            .background(Color.white.opacity(0.05))
+            .background(Color.black.opacity(0.02))
             .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
         .padding(.horizontal)

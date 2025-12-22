@@ -16,7 +16,7 @@ struct IngredientListView: View {
             if !ingredients.isEmpty {
                 Text("Detected Ingredients")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
 
                 ForEach(ingredients) { ingredient in
                     HStack {
@@ -25,7 +25,7 @@ struct IngredientListView: View {
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text(ingredient.name)
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
 
                             if let category = ingredient.category {
                                 Text(category.rawValue)
@@ -49,13 +49,13 @@ struct IngredientListView: View {
             if !manualItems.isEmpty {
                 if !ingredients.isEmpty {
                     Divider()
-                        .background(Color.white.opacity(0.2))
+                        .background(Color.black.opacity(0.1))
                         .padding(.vertical, 8)
                 }
 
                 Text("Manually Added")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
 
                 ForEach(manualItems, id: \.self) { item in
                     HStack {
@@ -63,7 +63,7 @@ struct IngredientListView: View {
                             .foregroundColor(.blue)
 
                         Text(item)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
 
                         Spacer()
                     }
@@ -78,7 +78,7 @@ struct IngredientListView: View {
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.white.ignoresSafeArea()
         IngredientListView(
             ingredients: [
                 Ingredient(name: "Eggs", category: .dairy, confidence: 0.95),

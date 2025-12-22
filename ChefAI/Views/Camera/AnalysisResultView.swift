@@ -10,7 +10,6 @@ import SwiftUI
 struct AnalysisResultView: View {
     @ObservedObject var viewModel: CameraViewModel
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var inventoryService = InventoryService.shared
 
     @State private var isCompleting = false
     @State private var showingRecipeList = false
@@ -82,7 +81,7 @@ struct AnalysisResultView: View {
                             Text(allSelected(result.extractedIngredients) ? "Deselect All" : "Select All")
                                 .font(.caption)
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(.accentColor)
                     }
                 }
             }
@@ -112,14 +111,6 @@ struct AnalysisResultView: View {
                     selectedIngredients = Set(result.extractedIngredients.map { $0.id })
                 }
             }
-            .onDisappear {
-                // Ensure analysis is saved when leaving results view
-                if viewModel.analysisResult != nil {
-                    Task {
-                        await viewModel.completeAnalysis()
-                    }
-                }
-            }
         }
     }
 
@@ -146,7 +137,7 @@ struct AnalysisResultView: View {
             )
         }
         .padding()
-        .background(Color.white.opacity(0.05))
+        .background(Color.gray.opacity(0.1))
         .cornerRadius(16)
     }
 
@@ -159,11 +150,11 @@ struct AnalysisResultView: View {
                     .font(.title2)
                     .fontWeight(.bold)
             }
-            .foregroundColor(.white)
+            .foregroundColor(.primary)
 
             Text(label)
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -176,13 +167,13 @@ struct AnalysisResultView: View {
                 Text("Detected Ingredients")
                     .font(.title3)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
 
                 Spacer()
 
                 Text("\(selectedIngredients.count) selected")
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(.secondary)
             }
 
             VStack(spacing: 10) {
@@ -201,7 +192,7 @@ struct AnalysisResultView: View {
             } label: {
                 Image(systemName: selectedIngredients.contains(ingredient.id) ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
-                    .foregroundColor(selectedIngredients.contains(ingredient.id) ? .green : .white.opacity(0.3))
+                    .foregroundColor(selectedIngredients.contains(ingredient.id) ? .green : .gray.opacity(0.5))
             }
 
             // Ingredient Info
@@ -210,12 +201,12 @@ struct AnalysisResultView: View {
                 HStack {
                     Text(ingredient.displayName)
                         .font(.headline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
 
                     if let brand = ingredient.brandName, !brand.isEmpty {
                         Text("(\(brand))")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.secondary)
                     }
                 }
 
@@ -228,13 +219,13 @@ struct AnalysisResultView: View {
                             Text(category.rawValue)
                                 .font(.caption)
                         }
-                        .foregroundColor(.white.opacity(0.6))
+                        .foregroundColor(.secondary)
                     }
 
                     if let qty = ingredient.quantityDisplay {
                         Text(qty)
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.secondary)
                     }
                 }
 
@@ -242,7 +233,7 @@ struct AnalysisResultView: View {
                 if let nutrition = ingredient.nutritionInfo, nutrition.hasMacros {
                     Text(nutrition.macrosSummary)
                         .font(.caption2)
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(.secondary)
                 }
             }
 
@@ -265,14 +256,14 @@ struct AnalysisResultView: View {
             } label: {
                 Image(systemName: "pencil.circle")
                     .font(.title3)
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(.gray)
             }
         }
         .padding()
         .background(
             selectedIngredients.contains(ingredient.id)
                 ? Color.green.opacity(0.1)
-                : Color.white.opacity(0.05)
+                : Color.gray.opacity(0.08)
         )
         .cornerRadius(12)
         .overlay(
@@ -280,7 +271,7 @@ struct AnalysisResultView: View {
                 .stroke(
                     selectedIngredients.contains(ingredient.id)
                         ? Color.green.opacity(0.3)
-                        : Color.white.opacity(0.1),
+                        : Color.gray.opacity(0.2),
                     lineWidth: 1
                 )
         )
@@ -298,14 +289,14 @@ struct AnalysisResultView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Manually Added")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
 
             ForEach(items, id: \.self) { item in
                 HStack {
                     Image(systemName: "plus.circle.fill")
                         .foregroundColor(.blue)
                     Text(item)
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                     Spacer()
                 }
                 .padding()
@@ -321,11 +312,11 @@ struct AnalysisResultView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Missing Anything?")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
 
             Text("Add ingredients we may have missed")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.5))
+                .foregroundColor(.secondary)
 
             ManualItemInputView(viewModel: viewModel)
         }
@@ -335,27 +326,14 @@ struct AnalysisResultView: View {
 
     private func actionButtons(_ result: AnalysisResult) -> some View {
         VStack(spacing: 16) {
-            // Add to Inventory Button
-            Button {
-                addToInventory(result)
-            } label: {
-                HStack {
-                    Image(systemName: "cabinet.fill")
-                    Text("Add to My Pantry")
-                }
-                .font(.headline)
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.white)
-                .cornerRadius(14)
-            }
-
             // Generate Recipes Button
             PrimaryButton(
                 title: "Generate \(selectedIngredients.count > 0 ? "\(selectedIngredients.count) " : "")Recipes",
                 action: {
-                    addToInventory(result)
+                    // Save analysis first
+                    Task {
+                        await viewModel.completeAnalysis()
+                    }
                     showingRecipeList = true
                 },
                 isLoading: isCompleting
@@ -366,7 +344,7 @@ struct AnalysisResultView: View {
             // Skip hint
             Text("Recipes will use only selected ingredients")
                 .font(.caption)
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(.secondary)
         }
         .padding(.top, 16)
     }
@@ -381,11 +359,11 @@ struct AnalysisResultView: View {
 
             Text("No Results")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
 
             Text("Unable to analyze the image. Please try again.")
                 .font(.subheadline)
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
         }
         .padding()
@@ -421,16 +399,6 @@ struct AnalysisResultView: View {
         ingredients.append(contentsOf: manualIngredients)
 
         return ingredients
-    }
-
-    private func addToInventory(_ result: AnalysisResult) {
-        let ingredientsToAdd = selectedIngredientsArray(from: result)
-        inventoryService.addIngredients(ingredientsToAdd)
-
-        // Save analysis to storage
-        Task {
-            await viewModel.completeAnalysis()
-        }
     }
 
     private func updateIngredient(_ ingredient: Ingredient) {

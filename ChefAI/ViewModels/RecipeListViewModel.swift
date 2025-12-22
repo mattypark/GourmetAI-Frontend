@@ -24,6 +24,7 @@ class RecipeListViewModel: ObservableObject {
     // MARK: - Private Properties
 
     private var currentIngredients: [String] = []
+    private var hasAttemptedGeneration: Bool = false
     private var userProfile: UserProfile?
 
     // MARK: - Initialization
@@ -44,11 +45,18 @@ class RecipeListViewModel: ObservableObject {
     }
 
     func generateRecipes(from ingredientNames: [String]) async {
+        // Prevent duplicate generation calls
+        guard !hasAttemptedGeneration else {
+            print("⚠️ Recipe generation already attempted, skipping duplicate call")
+            return
+        }
+
         guard !ingredientNames.isEmpty else {
             errorMessage = "No ingredients available to generate recipes"
             return
         }
 
+        hasAttemptedGeneration = true
         currentIngredients = ingredientNames
         isLoading = true
         errorMessage = nil

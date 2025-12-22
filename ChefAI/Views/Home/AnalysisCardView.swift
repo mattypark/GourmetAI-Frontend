@@ -40,7 +40,7 @@ struct AnalysisCardView: View {
                 Text(analysis.ingredientSummary)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
 
                 if !analysis.suggestedRecipes.isEmpty {
                     Text("\(analysis.suggestedRecipes.count) recipes")
@@ -56,7 +56,7 @@ struct AnalysisCardView: View {
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.white.ignoresSafeArea()
         AnalysisCardView(
             analysis: AnalysisResult(
                 extractedIngredients: MockData.mockIngredients,

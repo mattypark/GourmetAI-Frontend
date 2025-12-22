@@ -72,6 +72,23 @@ final class StorageService: @unchecked Sendable {
         load(from: analysesURL) ?? []
     }
 
+    func removeDuplicateAnalyses() {
+        var analyses = loadAnalyses()
+        var seen = Set<UUID>()
+        let originalCount = analyses.count
+        analyses = analyses.filter { analysis in
+            if seen.contains(analysis.id) {
+                return false
+            }
+            seen.insert(analysis.id)
+            return true
+        }
+        if analyses.count < originalCount {
+            print("🧹 Removed \(originalCount - analyses.count) duplicate analyses")
+            saveAnalyses(analyses)
+        }
+    }
+
     // MARK: - Profile Image
 
     func saveProfileImage(_ imageData: Data) {

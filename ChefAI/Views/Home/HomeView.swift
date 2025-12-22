@@ -11,8 +11,7 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var settingsViewModel = SettingsViewModel()
     @State private var showingProfile = false
-    @State private var showingRecipeList = false
-    @Binding var refreshID: UUID
+    @State private var hasLoadedInitially = false
 
     var body: some View {
         NavigationStack {
@@ -26,7 +25,7 @@ struct HomeView: View {
                         .padding(.top, 8)
                         .padding(.bottom, 16)
 
-                    if viewModel.analyses.isEmpty && !viewModel.hasPantryItems {
+                    if viewModel.analyses.isEmpty {
                         // Empty state - centered
                         Spacer()
                         emptyStateView
@@ -36,52 +35,22 @@ struct HomeView: View {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 32) {
                                 // Recent Analyses
-                                if !viewModel.analyses.isEmpty {
-                                    VStack(alignment: .leading, spacing: 16) {
-                                        Text("Recent Analyses")
-                                            .font(.title2)
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.black)
-                                            .padding(.horizontal)
-
-                                        ScrollView(.horizontal, showsIndicators: false) {
-                                            HStack(spacing: 16) {
-                                                ForEach(viewModel.analyses) { analysis in
-                                                    NavigationLink(value: analysis) {
-                                                        AnalysisCardView(analysis: analysis)
-                                                    }
-                                                    .buttonStyle(PlainButtonStyle())
-                                                }
-                                            }
-                                            .padding(.horizontal)
-                                        }
-                                    }
-                                }
-
-                                // My Pantry Section
-                                if viewModel.hasPantryItems {
-                                    VStack(alignment: .leading, spacing: 16) {
-                                        HStack {
-                                            Text("My Pantry")
-                                                .font(.title2)
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(.black)
-
-                                            Spacer()
-
-                                            Text("\(viewModel.pantryCount) items")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
+                                VStack(alignment: .leading, spacing: 16) {
+                                    Text("Recent Analyses")
+                                        .font(.title2)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.black)
                                         .padding(.horizontal)
 
-                                        // Pantry Card
-                                        Button {
-                                            showingRecipeList = true
-                                        } label: {
-                                            PantryCardView(ingredients: viewModel.pantryIngredients)
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 16) {
+                                            ForEach(viewModel.analyses) { analysis in
+                                                NavigationLink(value: analysis) {
+                                                    AnalysisCardView(analysis: analysis)
+                                                }
+                                                .buttonStyle(PlainButtonStyle())
+                                            }
                                         }
-                                        .buttonStyle(PlainButtonStyle())
                                         .padding(.horizontal)
                                     }
                                 }
@@ -101,17 +70,11 @@ struct HomeView: View {
             .sheet(isPresented: $showingProfile) {
                 ProfileMenuView()
             }
-            .fullScreenCover(isPresented: $showingRecipeList) {
-                RecipeListView(
-                    ingredients: viewModel.pantryIngredients,
-                    onComplete: {
-                        viewModel.loadData()
-                    }
-                )
-            }
-            .id(refreshID)
             .onAppear {
-                viewModel.loadData()
+                if !hasLoadedInitially {
+                    hasLoadedInitially = true
+                    viewModel.loadData()
+                }
             }
         }
     }
@@ -167,140 +130,6 @@ struct HomeView: View {
     }
 }
 
-// MARK: - Pantry Card View
-
-struct PantryCardView: View {
-    let ingredients: [Ingredient]
-
-    private var displayIngredients: [Ingredient] {
-        Array(ingredients.prefix(6))
-    }
-
-    private var remainingCount: Int {
-        max(0, ingredients.count - 6)
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Ingredient Pills
-            FlowLayout(spacing: 8) {
-                ForEach(displayIngredients) { ingredient in
-                    IngredientPill(ingredient: ingredient)
-                }
-
-                if remainingCount > 0 {
-                    Text("+\(remainingCount) more")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.black.opacity(0.6))
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.black.opacity(0.05))
-                        .cornerRadius(16)
-                }
-            }
-
-            // Generate Recipes CTA
-            HStack {
-                Image(systemName: "sparkles")
-                    .foregroundColor(.green)
-                Text("Generate Recipes from Pantry")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(.black.opacity(0.4))
-            }
-            .foregroundColor(.black)
-        }
-        .padding()
-        .background(Color.black.opacity(0.03))
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.black.opacity(0.1), lineWidth: 1)
-        )
-    }
-}
-
-struct IngredientPill: View {
-    let ingredient: Ingredient
-
-    var body: some View {
-        HStack(spacing: 4) {
-            if let category = ingredient.category {
-                Image(systemName: category.icon)
-                    .font(.caption2)
-            }
-            Text(ingredient.displayName)
-                .font(.caption)
-                .fontWeight(.medium)
-        }
-        .foregroundColor(.black)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Color.black.opacity(0.05))
-        .cornerRadius(16)
-    }
-}
-
-// MARK: - Flow Layout
-
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = FlowResult(
-            in: proposal.replacingUnspecifiedDimensions().width,
-            subviews: subviews,
-            spacing: spacing
-        )
-        return result.size
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = FlowResult(
-            in: bounds.width,
-            subviews: subviews,
-            spacing: spacing
-        )
-        for (index, subview) in subviews.enumerated() {
-            subview.place(at: CGPoint(x: bounds.minX + result.positions[index].x,
-                                      y: bounds.minY + result.positions[index].y),
-                         proposal: .unspecified)
-        }
-    }
-
-    struct FlowResult {
-        var size: CGSize = .zero
-        var positions: [CGPoint] = []
-
-        init(in maxWidth: CGFloat, subviews: Subviews, spacing: CGFloat) {
-            var x: CGFloat = 0
-            var y: CGFloat = 0
-            var rowHeight: CGFloat = 0
-
-            for subview in subviews {
-                let size = subview.sizeThatFits(.unspecified)
-
-                if x + size.width > maxWidth && x > 0 {
-                    x = 0
-                    y += rowHeight + spacing
-                    rowHeight = 0
-                }
-
-                positions.append(CGPoint(x: x, y: y))
-                rowHeight = max(rowHeight, size.height)
-                x += size.width + spacing
-            }
-
-            self.size = CGSize(width: maxWidth, height: y + rowHeight)
-        }
-    }
-}
-
 #Preview {
-    @Previewable @State var refreshID = UUID()
-    HomeView(refreshID: $refreshID)
+    HomeView()
 }
