@@ -42,17 +42,15 @@ struct HomeView: View {
                                         .foregroundColor(.black)
                                         .padding(.horizontal)
 
-                                    ScrollView(.horizontal, showsIndicators: false) {
-                                        HStack(spacing: 16) {
-                                            ForEach(viewModel.analyses) { analysis in
-                                                NavigationLink(value: analysis) {
-                                                    AnalysisCardView(analysis: analysis)
-                                                }
-                                                .buttonStyle(PlainButtonStyle())
+                                    VStack(spacing: 16) {
+                                        ForEach(viewModel.analyses) { analysis in
+                                            NavigationLink(value: analysis) {
+                                                AnalysisCardView(analysis: analysis)
                                             }
+                                            .buttonStyle(PlainButtonStyle())
                                         }
-                                        .padding(.horizontal)
                                     }
+                                    .padding(.horizontal)
                                 }
                             }
                             .padding(.vertical)

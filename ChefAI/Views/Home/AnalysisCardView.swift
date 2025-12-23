@@ -17,13 +17,15 @@ struct AnalysisCardView: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 200, height: 150)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 180)
                     .clipped()
                     .cornerRadius(12)
             } else {
                 Rectangle()
                     .fill(Color.theme.surface)
-                    .frame(width: 200, height: 150)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 180)
                     .overlay(
                         Image(systemName: "photo")
                             .font(.largeTitle)
@@ -49,7 +51,6 @@ struct AnalysisCardView: View {
                 }
             }
         }
-        .frame(width: 200)
         .cardStyle()
     }
 }

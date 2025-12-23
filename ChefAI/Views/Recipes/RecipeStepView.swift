@@ -25,7 +25,7 @@ struct RecipeStepView: View {
                     // Step Number
                     ZStack {
                         Circle()
-                            .fill(isCompleted ? Color.green : Color.white.opacity(0.15))
+                            .fill(isCompleted ? Color.green : Color.black.opacity(0.08))
                             .frame(width: 36, height: 36)
 
                         if isCompleted {
@@ -36,7 +36,7 @@ struct RecipeStepView: View {
                         } else {
                             Text("\(step.stepNumber)")
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
                         }
                     }
 
@@ -44,7 +44,7 @@ struct RecipeStepView: View {
                         // Instruction
                         Text(step.instruction)
                             .font(.body)
-                            .foregroundColor(isCompleted ? .white.opacity(0.5) : .white)
+                            .foregroundColor(isCompleted ? .gray : .black)
                             .multilineTextAlignment(.leading)
                             .strikethrough(isCompleted)
 
@@ -58,7 +58,7 @@ struct RecipeStepView: View {
                                     Text(durationDisplay)
                                         .font(.caption)
                                 }
-                                .foregroundColor(.white.opacity(0.6))
+                                .foregroundColor(.gray)
                             }
 
                             // Technique badge
@@ -87,7 +87,7 @@ struct RecipeStepView: View {
             }
         }
         .padding()
-        .background(Color.white.opacity(0.05))
+        .background(Color.black.opacity(0.03))
         .cornerRadius(16)
     }
 
@@ -167,7 +167,7 @@ struct RecipeStepView: View {
                     // Timer Display
                     Text(formatTime(timeRemaining))
                         .font(.system(size: 32, weight: .bold, design: .monospaced))
-                        .foregroundColor(timeRemaining <= 10 && timerActive ? .red : .white)
+                        .foregroundColor(timeRemaining <= 10 && timerActive ? .red : .black)
 
                     Spacer()
 
@@ -206,15 +206,15 @@ struct RecipeStepView: View {
                         } label: {
                             Image(systemName: "arrow.counterclockwise")
                                 .font(.title3)
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(.gray)
                                 .frame(width: 36, height: 36)
-                                .background(Color.white.opacity(0.1))
+                                .background(Color.black.opacity(0.08))
                                 .clipShape(Circle())
                         }
                     }
                 }
                 .padding()
-                .background(Color.white.opacity(0.08))
+                .background(Color.black.opacity(0.05))
                 .cornerRadius(12)
             } else {
                 Button {
@@ -228,9 +228,9 @@ struct RecipeStepView: View {
                         Image(systemName: "chevron.right")
                     }
                     .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.gray)
                     .padding()
-                    .background(Color.white.opacity(0.05))
+                    .background(Color.black.opacity(0.03))
                     .cornerRadius(8)
                 }
                 .buttonStyle(.plain)
@@ -270,7 +270,7 @@ struct RecipeStepView: View {
             ForEach(step.tips, id: \.self) { tip in
                 Text(tip)
                     .font(.caption)
-                    .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.gray)
             }
         }
         .padding(10)
@@ -286,16 +286,16 @@ struct RecipeStepView: View {
                 // GIF placeholder - would use AsyncImage or SDWebImage in production
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.white.opacity(0.1))
+                        .fill(Color.black.opacity(0.05))
                         .frame(height: 120)
 
                     VStack(spacing: 8) {
                         Image(systemName: "play.circle.fill")
                             .font(.largeTitle)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.gray)
                         Text("Tap to view technique")
                             .font(.caption)
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(.gray)
                     }
                 }
             }
@@ -327,7 +327,7 @@ struct RecipeStepView: View {
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.white.ignoresSafeArea()
 
         ScrollView {
             VStack(spacing: 16) {
