@@ -79,10 +79,52 @@ struct DetectedIngredientItem: Codable {
     }
 }
 
+// MARK: - Gemini Response Models
+
+struct GeminiResponse: Codable {
+    let candidates: [GeminiCandidate]?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        candidates = try container.decodeIfPresent([GeminiCandidate].self, forKey: .candidates)
+    }
+}
+
+struct GeminiCandidate: Codable {
+    let content: GeminiContent
+}
+
+struct GeminiContent: Codable {
+    let parts: [GeminiPart]
+}
+
+struct GeminiPart: Codable {
+    let text: String?
+}
+
+// MARK: - Tavily Response Models
+
+struct TavilyResponse: Codable {
+    let results: [TavilyResult]
+}
+
+struct TavilyResult: Codable {
+    let title: String
+    let url: String
+    let content: String
+    let score: Double?
+}
+
 // MARK: - AI Service
 
 final class AIService: @unchecked Sendable {
     static let shared = AIService()
+
+    private var lastTavilyResults: [TavilyResult] = []
+
+    func getLastTavilyResults() -> [TavilyResult] {
+        return lastTavilyResults
+    }
 
     private init() {}
 
@@ -95,10 +137,10 @@ final class AIService: @unchecked Sendable {
     ) async throws -> AnalysisResult {
         print("🤖 Starting fridge analysis (two-step flow)...")
 
-        // Step 1: Detect ingredients from image (OpenAI Vision)
+        // Step 1: Detect ingredients from image (Gemini Flash 2.0)
         var ingredients: [Ingredient] = []
         if let image = image {
-            ingredients = try await analyzeImageForIngredients(image)
+            ingredients = try await analyzeImageWithGemini(image)
         }
 
         // Add manual items as ingredients
@@ -111,12 +153,8 @@ final class AIService: @unchecked Sendable {
             throw AIServiceError.noFoodDetected
         }
 
-        // Step 2: Generate recipes from ingredients (OpenAI)
-        let recipes = try await generateRecipesFromIngredients(
-            from: ingredients,
-            userProfile: userProfile,
-            count: 5
-        )
+        // Step 2 removed - recipes generated when user taps "Generate Recipes" button
+        let recipes: [Recipe] = []
 
         let imageData = image?.jpegData(compressionQuality: 0.7)
 
@@ -319,6 +357,111 @@ final class AIService: @unchecked Sendable {
         return ingredients
     }
 
+    // MARK: - Step 1: Ingredient Detection (Gemini 2.5 Flash)
+
+    func analyzeImageWithGemini(_ image: UIImage) async throws -> [Ingredient] {
+        print("🔍 Step 1: Detecting ingredients with Gemini 2.5 Flash...")
+
+        guard !Config.geminiAPIKey.isEmpty && Config.geminiAPIKey != "YOUR_GEMINI_API_KEY_HERE" else {
+            throw AIServiceError.noAPIKey
+        }
+
+        // Convert image to base64
+        guard let base64Image = convertToBase64(image: image) else {
+            throw AIServiceError.imageEncodingFailed
+        }
+
+        // Build Gemini API request
+        guard let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=\(Config.geminiAPIKey)") else {
+            throw AIServiceError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = Config.requestTimeout
+
+        let prompt = buildIngredientDetectionPrompt()
+
+        let requestBody: [String: Any] = [
+            "contents": [
+                [
+                    "parts": [
+                        ["text": prompt],
+                        [
+                            "inline_data": [
+                                "mime_type": "image/jpeg",
+                                "data": base64Image
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+
+        print("📡 Calling Gemini 2.5 Flash API...")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AIServiceError.invalidResponse
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("❌ Gemini API error: \(responseString)")
+            }
+            throw AIServiceError.apiError("Gemini HTTP \(httpResponse.statusCode)")
+        }
+
+        // Parse Gemini response
+        let geminiResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
+
+        guard let content = geminiResponse.candidates?.first?.content.parts.first?.text else {
+            throw AIServiceError.invalidResponse
+        }
+
+        print("🔍 Response preview: \(content.prefix(300))...")
+
+        // Parse ingredients JSON
+        let jsonString = try extractAndValidateJSON(content)
+
+        // Check if response is an array instead of object with "ingredients" key
+        var finalJsonString = jsonString
+        if jsonString.trimmingCharacters(in: .whitespaces).hasPrefix("[") {
+            // Gemini returned array directly, wrap it in ingredients object
+            finalJsonString = "{\"ingredients\": \(jsonString)}"
+            print("⚠️ Gemini returned array, wrapping in ingredients object")
+        }
+
+        guard let jsonData = finalJsonString.data(using: .utf8) else {
+            throw AIServiceError.jsonParsingError
+        }
+
+        let ingredientResult = try JSONDecoder().decode(IngredientDetectionResult.self, from: jsonData)
+
+        if ingredientResult.ingredients.isEmpty {
+            print("⚠️ No ingredients detected in image")
+            throw AIServiceError.noFoodDetected
+        }
+
+        let ingredients = ingredientResult.ingredients.map { detected -> Ingredient in
+            Ingredient(
+                name: detected.name,
+                brandName: detected.brand,
+                quantity: detected.quantity,
+                unit: detected.unit,
+                category: mapCategory(detected.category),
+                confidence: detected.confidence
+            )
+        }
+
+        print("✅ Detected \(ingredients.count) ingredients with Gemini 2.5 Flash")
+        return ingredients
+    }
+
     // MARK: - Step 2: Recipe Generation (OpenAI)
 
     func generateRecipesFromIngredients(
@@ -423,6 +566,376 @@ final class AIService: @unchecked Sendable {
         }
     }
 
+    // MARK: - Step 2: Recipe Generation (Tavily Search + Gemini)
+
+    func generateRecipesWithTavily(
+        from ingredients: [Ingredient],
+        userProfile: UserProfile?,
+        count: Int = 5
+    ) async throws -> [Recipe] {
+        print("🍳 Step 2: Generating \(count) recipes with Tavily Search...")
+
+        guard !Config.tavilyAPIKey.isEmpty && Config.tavilyAPIKey != "YOUR_TAVILY_API_KEY_HERE" else {
+            throw AIServiceError.noAPIKey
+        }
+
+        let ingredientNames = ingredients.map { $0.name }.joined(separator: ", ")
+        let query = "recipes using \(ingredientNames)"
+
+        // Tavily API request
+        guard let url = URL(string: "https://api.tavily.com/search") else {
+            throw AIServiceError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = Config.requestTimeout
+
+        let requestBody: [String: Any] = [
+            "api_key": Config.tavilyAPIKey,
+            "query": query,
+            "search_depth": "advanced",
+            "include_domains": [
+                "allrecipes.com",
+                "foodnetwork.com",
+                "bonappetit.com",
+                "seriouseats.com",
+                "epicurious.com",
+                "delish.com",
+                "tasty.co",
+                "simplyrecipes.com"
+            ],
+            "max_results": 10
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+
+        print("📡 Calling Tavily Search API...")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AIServiceError.invalidResponse
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("❌ Tavily API error: \(responseString)")
+            }
+            throw AIServiceError.apiError("Tavily HTTP \(httpResponse.statusCode)")
+        }
+
+        let tavilyResponse = try JSONDecoder().decode(TavilyResponse.self, from: data)
+
+        // Store results for later display
+        self.lastTavilyResults = tavilyResponse.results
+
+        print("✅ Tavily returned \(tavilyResponse.results.count) search results")
+
+        // Use GPT-5o Mini to extract structured recipes from search results
+        let recipes = try await extractRecipesWithGPT5oMini(
+            from: tavilyResponse.results,
+            ingredients: ingredients,
+            userProfile: userProfile,
+            count: count
+        )
+
+        print("✅ Generated \(recipes.count) recipes with Tavily + GPT-5o Mini")
+        return recipes
+    }
+
+    // MARK: - Extract Recipes from Tavily Results using Gemini
+
+    private func extractRecipesWithGemini(
+        from results: [TavilyResult],
+        ingredients: [Ingredient],
+        userProfile: UserProfile?,
+        count: Int
+    ) async throws -> [Recipe] {
+        guard !Config.geminiAPIKey.isEmpty && Config.geminiAPIKey != "YOUR_GEMINI_API_KEY_HERE" else {
+            throw AIServiceError.noAPIKey
+        }
+
+        // Build context from search results
+        var searchContext = ""
+        for result in results.prefix(5) {
+            searchContext += "Recipe: \(result.title)\nURL: \(result.url)\nContent: \(result.content)\n\n"
+        }
+
+        let prompt = buildRecipeExtractionPrompt(
+            searchContext: searchContext,
+            ingredients: ingredients,
+            userProfile: userProfile,
+            count: count
+        )
+
+        // Call Gemini API
+        guard let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=\(Config.geminiAPIKey)") else {
+            throw AIServiceError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = Config.requestTimeout
+
+        let requestBody: [String: Any] = [
+            "contents": [
+                [
+                    "parts": [
+                        ["text": prompt]
+                    ]
+                ]
+            ],
+            "generationConfig": [
+                "temperature": Config.temperature,
+                "maxOutputTokens": Config.recipeMaxTokens
+            ]
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+
+        print("📡 Calling Gemini 2.5 Flash to extract recipes from search results...")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AIServiceError.invalidResponse
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("❌ Gemini API error: \(responseString)")
+            }
+            throw AIServiceError.apiError("Gemini HTTP \(httpResponse.statusCode)")
+        }
+
+        let geminiResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
+
+        guard let content = geminiResponse.candidates?.first?.content.parts.first?.text else {
+            throw AIServiceError.invalidResponse
+        }
+
+        print("🔍 Response preview: \(content.prefix(300))...")
+
+        // Parse recipe response
+        let jsonString = try extractAndValidateJSON(content)
+        print("🔍 Full JSON to parse (\(jsonString.count) chars): \(jsonString.prefix(2000))...")
+
+        guard let jsonData = jsonString.data(using: .utf8) else {
+            throw AIServiceError.jsonParsingError
+        }
+
+        do {
+            let recipeResult = try JSONDecoder().decode(RecipeGenerationResult.self, from: jsonData)
+
+            if recipeResult.recipes.isEmpty {
+                throw AIServiceError.recipeGenerationFailed
+            }
+
+            let recipes = recipeResult.recipes.map { convertSuggestedRecipe($0) }
+            return recipes
+
+        } catch let decodingError as DecodingError {
+            print("❌ JSON Decode Error:")
+            switch decodingError {
+            case .keyNotFound(let key, let context):
+                print("   Missing key '\(key.stringValue)' at: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+            case .typeMismatch(let type, let context):
+                print("   Type mismatch for \(type) at: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+                print("   Debug: \(context.debugDescription)")
+            case .valueNotFound(let type, let context):
+                print("   Value not found for \(type) at: \(context.codingPath.map { $0.stringValue }.joined(separator: "."))")
+            case .dataCorrupted(let context):
+                print("   Data corrupted: \(context.debugDescription)")
+            @unknown default:
+                print("   Unknown: \(decodingError)")
+            }
+            throw AIServiceError.jsonParsingError
+        }
+    }
+
+    // MARK: - Extract Recipes from Tavily Results using GPT-5o Mini
+
+    private func extractRecipesWithGPT5oMini(
+        from results: [TavilyResult],
+        ingredients: [Ingredient],
+        userProfile: UserProfile?,
+        count: Int
+    ) async throws -> [Recipe] {
+        guard !Config.openAIAPIKey.isEmpty && Config.openAIAPIKey != "YOUR_OPENAI_API_KEY_HERE" else {
+            throw AIServiceError.noAPIKey
+        }
+
+        // Build context from search results
+        var searchContext = ""
+        for result in results.prefix(10) {
+            searchContext += "Recipe: \(result.title)\nURL: \(result.url)\nContent: \(result.content)\n\n"
+        }
+
+        let prompt = buildRecipeExtractionPrompt(
+            searchContext: searchContext,
+            ingredients: ingredients,
+            userProfile: userProfile,
+            count: count
+        )
+
+        // Call GPT-5o Mini API
+        // Note: GPT-5o Mini only supports default temperature (1.0), so we omit the parameter
+        let requestBody: [String: Any] = [
+            "model": Config.gpt5oMiniModel,
+            "messages": [
+                [
+                    "role": "system",
+                    "content": "You are a recipe extraction assistant. You format web search results into structured recipe JSON. Always return valid, complete JSON with all requested recipes."
+                ],
+                [
+                    "role": "user",
+                    "content": prompt
+                ]
+            ],
+            "max_completion_tokens": 10000,
+            "response_format": ["type": "json_object"]
+        ]
+
+        guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
+            throw AIServiceError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(Config.openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.timeoutInterval = 90
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+
+        print("📡 Calling GPT-5o Mini to extract recipes from search results...")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw AIServiceError.invalidResponse
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("❌ GPT-5o Mini API error: \(responseString)")
+            }
+            throw AIServiceError.apiError("GPT-5o Mini HTTP \(httpResponse.statusCode)")
+        }
+
+        // Parse OpenAI response
+        let openAIResponse = try JSONDecoder().decode(OpenAIResponse.self, from: data)
+
+        guard let content = openAIResponse.choices.first?.message.content else {
+            throw AIServiceError.invalidResponse
+        }
+
+        print("🔍 GPT-5o Mini response preview: \(content.prefix(300))...")
+        print("📄 Response length: \(content.count) chars")
+
+        // Parse recipe response (GPT-5o Mini with json_object mode returns clean JSON)
+        let jsonString = try extractAndValidateJSON(content)
+
+        guard let jsonData = jsonString.data(using: .utf8) else {
+            throw AIServiceError.jsonParsingError
+        }
+
+        let recipeResult = try JSONDecoder().decode(RecipeGenerationResult.self, from: jsonData)
+
+        if recipeResult.recipes.isEmpty {
+            throw AIServiceError.recipeGenerationFailed
+        }
+
+        let recipes = recipeResult.recipes.map { convertSuggestedRecipe($0) }
+
+        print("✅ Generated \(recipes.count) recipes with GPT-5o Mini")
+        return recipes
+    }
+
+    // MARK: - Build Recipe Extraction Prompt
+
+    private func buildRecipeExtractionPrompt(
+        searchContext: String,
+        ingredients: [Ingredient],
+        userProfile: UserProfile?,
+        count: Int
+    ) -> String {
+        let ingredientNames = ingredients.map { $0.name }
+
+        // Build user profile context
+        var profileContext = ""
+        if let profile = userProfile {
+            var details: [String] = []
+
+            if let skill = profile.cookingSkillLevel {
+                details.append("Cooking Skill: \(skill.rawValue)")
+            }
+
+            if !profile.dietaryRestrictions.isEmpty {
+                let restrictions = profile.dietaryRestrictions
+                    .filter { $0 != .none }
+                    .map { $0.rawValue }
+                if !restrictions.isEmpty {
+                    details.append("Dietary Restrictions: \(restrictions.joined(separator: ", "))")
+                }
+            }
+
+            if let time = profile.timeAvailability {
+                details.append("Available Time: \(time.maxMinutes) minutes max")
+            }
+
+            if !details.isEmpty {
+                profileContext = "\n\nUSER PROFILE:\n\(details.joined(separator: "\n"))"
+            }
+        }
+
+        return """
+        Based on these recipe search results from trusted cooking websites, create \(count) detailed recipes that use these available ingredients: \(ingredientNames.joined(separator: ", "))
+        \(profileContext)
+
+        Search Results:
+        \(searchContext)
+
+        Requirements:
+        1. Use PRIMARILY the available ingredients listed above
+        2. You may suggest common pantry staples if needed (salt, pepper, oil, basic spices)
+        3. Include the SOURCE URL from the search results for each recipe
+        4. Match the user's skill level and dietary restrictions if specified
+        5. Provide accurate prep/cook times and techniques
+
+        Return this exact JSON structure (no markdown):
+        {
+          "recipes": [
+            {
+              "name": "Recipe Title",
+              "description": "Brief appetizing description",
+              "ingredients": [{"name": "item", "amount": "2", "unit": "cups", "isOptional": false, "substitutes": []}],
+              "instructions": ["Step 1", "Step 2"],
+              "detailedSteps": [{"stepNumber": 1, "instruction": "Do this", "duration": 300, "technique": "sauté", "tips": ["tip"]}],
+              "prepTime": 15,
+              "cookTime": 30,
+              "servings": 4,
+              "difficulty": "easy",
+              "cuisineType": "Italian",
+              "nutritionPerServing": {"calories": 350, "protein": 25.0, "carbs": 30.0, "fat": 12.0},
+              "tips": ["Chef tip"],
+              "tags": ["quick", "healthy"],
+              "source": {"name": "Source Website", "author": null, "url": "URL from search results"}
+            }
+          ]
+        }
+
+        CRITICAL OUTPUT FORMAT:
+        - Return ONLY the JSON object
+        - DO NOT wrap in ```json or ``` markdown fences
+        - DO NOT include any text before or after the JSON
+        - Start your response with { and end with }
+        """
+    }
+
     // MARK: - OpenAI API Call
 
     private func callOpenAI(
@@ -462,7 +975,7 @@ final class AIService: @unchecked Sendable {
             throw AIServiceError.invalidResponse
         }
 
-        guard httpResponse.statusCode == 200 else {
+        guard httpResponse.statusCode == 200 else { 
             if let errorResponse = try? JSONDecoder().decode(OpenAIResponse.self, from: data),
                let error = errorResponse.error {
                 throw AIServiceError.apiError(error.message)
@@ -544,33 +1057,44 @@ final class AIService: @unchecked Sendable {
     private func extractAndValidateJSON(_ content: String) throws -> String {
         var jsonString = content.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // Strip markdown code fences
-        if jsonString.hasPrefix("```json") {
-            jsonString = String(jsonString.dropFirst(7))
-        } else if jsonString.hasPrefix("```") {
-            jsonString = String(jsonString.dropFirst(3))
+        print("📄 Raw response length: \(jsonString.count) chars")
+        print("📄 First 100 chars: \(jsonString.prefix(100))")
+
+        // Remove ALL markdown code fences - multiple strategies
+
+        // Strategy 1: Remove ```json or ``` at start
+        while jsonString.hasPrefix("```") {
+            if jsonString.hasPrefix("```json") {
+                jsonString = String(jsonString.dropFirst(7))
+            } else {
+                jsonString = String(jsonString.dropFirst(3))
+            }
+            jsonString = jsonString.trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        if jsonString.hasSuffix("```") {
+
+        // Strategy 2: Remove ``` at end
+        while jsonString.hasSuffix("```") {
             jsonString = String(jsonString.dropLast(3))
+            jsonString = jsonString.trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
-        jsonString = jsonString.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Find JSON object boundaries
-        guard let start = jsonString.firstIndex(of: "{"),
-              let end = jsonString.lastIndex(of: "}") else {
-            print("❌ No JSON object found in response")
+        // Strategy 3: Find first { and last }
+        guard let firstBrace = jsonString.firstIndex(of: "{"),
+              let lastBrace = jsonString.lastIndex(of: "}") else {
+            print("❌ No JSON braces found in response")
             print("📄 Content preview: \(content.prefix(500))")
             throw AIServiceError.jsonParsingError
         }
 
-        jsonString = String(jsonString[start...end])
+        jsonString = String(jsonString[firstBrace...lastBrace])
+
+        print("📄 Extracted JSON length: \(jsonString.count) chars")
 
         // Validate it's parseable JSON before returning
         guard let data = jsonString.data(using: .utf8),
               (try? JSONSerialization.jsonObject(with: data)) != nil else {
-            print("❌ Invalid JSON structure")
-            print("📄 JSON preview: \(jsonString.prefix(500))")
+            print("❌ Invalid JSON after extraction")
+            print("📄 Attempted JSON: \(jsonString.prefix(500))")
             throw AIServiceError.jsonParsingError
         }
 
@@ -664,27 +1188,39 @@ final class AIService: @unchecked Sendable {
         - category: One of: protein, vegetable, grain, dairy, condiment, fruit, beverage, spice, frozen, canned, snack, other
         - confidence: Your confidence score from 0.0 to 1.0
 
+        QUANTITY GUIDELINES (IMPORTANT):
+        - For whole items: COUNT them exactly (e.g., "3" peppers, "1" cabbage, "6" eggs)
+        - For partial items: estimate fraction (e.g., "0.5" for half an onion)
+        - For packaged items: read the label quantity if visible (e.g., "16 oz", "500g")
+        - For bunches/groups: estimate count (e.g., "1" bunch of bananas = approximately "6")
+        - NEVER use vague terms like "partially visible", "some", or "several"
+        - If quantity is truly unclear, use "1" as default with confidence < 0.5
+
         Handle edge cases:
-        - Blurry items: Include with lower confidence (0.3-0.5)
-        - Partial visibility: Note in quantity (e.g., "partially visible")
+        - Blurry items: Include with lower confidence (0.3-0.5), still estimate quantity
         - Unclear handwriting: Best-effort with lower confidence
         - No food detected: Return empty ingredients array
 
-        Return ONLY valid JSON matching this exact structure:
+        CRITICAL: You MUST return a JSON object with an "ingredients" key containing an array.
+
+        Your response must be EXACTLY this structure with NO other text:
         {
           "ingredients": [
             {
-              "name": "string",
-              "brand": "string or null",
-              "quantity": "string",
-              "unit": "string or null",
-              "category": "string",
-              "confidence": 0.0-1.0
+              "name": "ingredient name here",
+              "brand": null,
+              "quantity": "1",
+              "unit": "piece",
+              "category": "protein",
+              "confidence": 0.9
             }
           ]
         }
 
-        NO explanations. NO markdown code fences. ONLY the JSON object.
+        DO NOT return just an array like [{...}].
+        DO NOT include markdown fences like ```json.
+        DO NOT add any explanation before or after.
+        ONLY return the JSON object starting with { and ending with }.
         """
     }
 

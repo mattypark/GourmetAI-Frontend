@@ -40,24 +40,19 @@ class RecipeListViewModel: ObservableObject {
     // MARK: - Recipe Generation
 
     func generateRecipes(from ingredients: [Ingredient]) async {
-        let ingredientNames = ingredients.map { $0.displayName }
-        await generateRecipes(from: ingredientNames)
-    }
-
-    func generateRecipes(from ingredientNames: [String]) async {
         // Prevent duplicate generation calls
         guard !hasAttemptedGeneration else {
             print("⚠️ Recipe generation already attempted, skipping duplicate call")
             return
         }
 
-        guard !ingredientNames.isEmpty else {
+        guard !ingredients.isEmpty else {
             errorMessage = "No ingredients available to generate recipes"
             return
         }
 
         hasAttemptedGeneration = true
-        currentIngredients = ingredientNames
+        currentIngredients = ingredients.map { $0.displayName }
         isLoading = true
         errorMessage = nil
         progress = 0.0
@@ -73,10 +68,11 @@ class RecipeListViewModel: ObservableObject {
         }
 
         do {
-            let generatedRecipes = try await AIService.shared.generateRecipes(
-                from: ingredientNames,
-                count: 5,
-                userProfile: userProfile
+            // Use Tavily + Gemini for recipe generation
+            let generatedRecipes = try await AIService.shared.generateRecipesWithTavily(
+                from: ingredients,
+                userProfile: userProfile,
+                count: 5
             )
 
             progressTask.cancel()
@@ -93,6 +89,12 @@ class RecipeListViewModel: ObservableObject {
         }
     }
 
+    func generateRecipes(from ingredientNames: [String]) async {
+        // Convert string names to Ingredient objects
+        let ingredients = ingredientNames.map { Ingredient(name: $0, confidence: 1.0) }
+        await generateRecipes(from: ingredients)
+    }
+
     func refreshRecipes() async {
         guard !currentIngredients.isEmpty else { return }
 
@@ -100,11 +102,13 @@ class RecipeListViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            let newRecipes = try await AIService.shared.generateRecipes(
-                from: currentIngredients,
-                count: 5,
+            // Convert current ingredient names to Ingredient objects
+            let ingredients = currentIngredients.map { Ingredient(name: $0, confidence: 1.0) }
+
+            let newRecipes = try await AIService.shared.generateRecipesWithTavily(
+                from: ingredients,
                 userProfile: userProfile,
-                excludingRecipes: recipes
+                count: 5
             )
 
             recipes = newRecipes

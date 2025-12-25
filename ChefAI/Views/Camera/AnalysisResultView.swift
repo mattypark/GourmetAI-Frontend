@@ -330,16 +330,33 @@ struct AnalysisResultView: View {
             PrimaryButton(
                 title: "Generate \(selectedIngredients.count > 0 ? "\(selectedIngredients.count) " : "")Recipes",
                 action: {
-                    // Save analysis first
                     Task {
-                        await viewModel.completeAnalysis()
+                        // Generate recipes first with selected ingredients
+                        await viewModel.generateRecipesWithSelectedIngredients(
+                            selectedIngredientsArray(from: result)
+                        )
+
+                        // Only proceed if recipes were generated successfully
+                        if viewModel.analysisResult?.suggestedRecipes.isEmpty == false {
+                            // Save analysis with recipes
+                            await viewModel.completeAnalysis()
+                            // Then navigate to recipe list
+                            showingRecipeList = true
+                        }
                     }
-                    showingRecipeList = true
                 },
-                isLoading: isCompleting
+                isLoading: viewModel.isGeneratingRecipes
             )
-            .disabled(selectedIngredients.isEmpty)
+            .disabled(selectedIngredients.isEmpty || viewModel.isGeneratingRecipes)
             .opacity(selectedIngredients.isEmpty ? 0.5 : 1)
+
+            // Error message
+            if let error = viewModel.errorMessage {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .multilineTextAlignment(.center)
+            }
 
             // Skip hint
             Text("Recipes will use only selected ingredients")

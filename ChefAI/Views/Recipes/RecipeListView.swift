@@ -11,6 +11,7 @@ struct RecipeListView: View {
     @StateObject private var viewModel = RecipeListViewModel()
     @Environment(\.dismiss) private var dismiss
 
+    private let aiService = AIService.shared
     let ingredients: [Ingredient]
     let onComplete: () -> Void
 
@@ -157,6 +158,43 @@ struct RecipeListView: View {
                     }
                 }
                 .padding(.top, 8)
+
+                // Recipe Sources Section
+                if !aiService.getLastTavilyResults().isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Divider()
+                            .padding(.vertical, 8)
+
+                        Text("Recipe Sources")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+                            .padding(.horizontal)
+
+                        ForEach(Array(Set(aiService.getLastTavilyResults().map { $0.url })).sorted().prefix(5), id: \.self) { urlString in
+                            if let url = URL(string: urlString), let host = url.host {
+                                Link(destination: url) {
+                                    HStack {
+                                        Image(systemName: "link.circle.fill")
+                                            .foregroundColor(.blue)
+                                        Text(host.replacingOccurrences(of: "www.", with: ""))
+                                            .font(.caption)
+                                            .foregroundColor(.blue)
+                                        Spacer()
+                                        Image(systemName: "arrow.up.forward")
+                                            .font(.caption2)
+                                            .foregroundColor(.gray)
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
+                                    .background(Color.blue.opacity(0.05))
+                                    .cornerRadius(8)
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
+                    .padding(.bottom)
+                }
             }
             .padding(.bottom, 32)
         }

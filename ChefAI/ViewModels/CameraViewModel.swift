@@ -91,7 +91,7 @@ class CameraViewModel: ObservableObject {
         manualItems.remove(at: index)
     }
 
-    // MARK: - Step 1: Detect Ingredients (OpenAI Vision)
+    // MARK: - Step 1: Detect Ingredients (Gemini Flash)
 
     func detectIngredients() async {
         guard let image = selectedImage else {
@@ -106,8 +106,8 @@ class CameraViewModel: ObservableObject {
         analysisStatus = .detectingIngredients
 
         do {
-            // Call OpenAI Vision API to detect ingredients only
-            let ingredients = try await aiService.analyzeImageForIngredients(image)
+            // Call Gemini Flash API to detect ingredients only
+            let ingredients = try await aiService.analyzeImageWithGemini(image)
 
             // Add manual items as ingredients
             var allIngredients = ingredients
@@ -123,7 +123,7 @@ class CameraViewModel: ObservableObject {
             showingIngredientReview = true
 
         } catch AIServiceError.noAPIKey {
-            errorMessage = "Please configure your OpenAI API key in Config.swift"
+            errorMessage = "Please configure your Gemini API key in Config.swift"
         } catch AIServiceError.noFoodDetected {
             // Allow user to continue with manual items only
             if !manualItems.isEmpty {
@@ -149,7 +149,7 @@ class CameraViewModel: ObservableObject {
         isAnalyzing = false
     }
 
-    // MARK: - Step 2: Generate Recipes (OpenAI)
+    // MARK: - Step 2: Generate Recipes (Tavily + Gemini)
 
     func generateRecipesFromIngredients(userProfile: UserProfile? = nil) async {
         guard !detectedIngredients.isEmpty else {
@@ -167,8 +167,8 @@ class CameraViewModel: ObservableObject {
             // Get user profile from storage if not provided
             let profile = userProfile ?? storageService.loadUserProfile()
 
-            // Call OpenAI API to generate recipes
-            let recipes = try await aiService.generateRecipesFromIngredients(
+            // Call Tavily + Gemini to generate recipes
+            let recipes = try await aiService.generateRecipesWithTavily(
                 from: detectedIngredients,
                 userProfile: profile,
                 count: 5
@@ -190,7 +190,7 @@ class CameraViewModel: ObservableObject {
             showingAnalysisResults = true
 
         } catch AIServiceError.noAPIKey {
-            errorMessage = "Please configure your OpenAI API key in Config.swift"
+            errorMessage = "Please configure your API keys in Config.swift"
             analysisStatus = .ingredientsDetected  // Go back to review state
             analysisProgress = 0.5
         } catch AIServiceError.recipeGenerationFailed {
@@ -215,7 +215,7 @@ class CameraViewModel: ObservableObject {
         isAnalyzing = false
     }
 
-    // MARK: - Combined Analysis (Two-Step: OpenAI Vision + OpenAI Recipes)
+    // MARK: - Combined Analysis (Two-Step: Gemini + Tavily)
 
     func analyzeImage() async {
         guard let image = selectedImage else {
@@ -228,9 +228,9 @@ class CameraViewModel: ObservableObject {
         analysisProgress = 0.1
         analysisStatus = .detectingIngredients
 
-        // STEP 1: Detect ingredients (OpenAI Vision)
+        // STEP 1: Detect ingredients (Gemini Flash)
         do {
-            let ingredients = try await aiService.analyzeImageForIngredients(image)
+            let ingredients = try await aiService.analyzeImageWithGemini(image)
 
             // Add manual items as ingredients
             var allIngredients = ingredients
@@ -255,7 +255,7 @@ class CameraViewModel: ObservableObject {
             try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
 
         } catch AIServiceError.noAPIKey {
-            errorMessage = "Please configure your OpenAI API key in Config.swift"
+            errorMessage = "Please configure your API keys in Config.swift"
             analysisProgress = 0.0
             analysisStatus = .idle
             isAnalyzing = false
@@ -285,53 +285,74 @@ class CameraViewModel: ObservableObject {
             return
         }
 
-        // STEP 2: Generate recipes (OpenAI)
-        analysisProgress = 0.6
+        // Step 2 is triggered manually when user taps "Generate Recipes" button
+        // Create analysisResult with just ingredients (no recipes yet)
+        let imageData = selectedImage?.jpegData(compressionQuality: 0.7)
+        analysisResult = AnalysisResult(
+            extractedIngredients: detectedIngredients,
+            suggestedRecipes: [],  // Empty - will be populated when user generates recipes
+            imageData: imageData,
+            manuallyAddedItems: manualItems
+        )
+
+        analysisProgress = 1.0
+        analysisStatus = .ingredientsDetected
+        showingAnalysisResults = true
+        isAnalyzing = false
+    }
+
+    // MARK: - Generate Recipes with Selected Ingredients
+
+    func generateRecipesWithSelectedIngredients(_ ingredients: [Ingredient]) async {
+        isGeneratingRecipes = true
+        isAnalyzing = true
+        errorMessage = nil
         analysisStatus = .generatingRecipes
 
         do {
             let profile = storageService.loadUserProfile()
-            let recipes = try await aiService.generateRecipesFromIngredients(
-                from: detectedIngredients,
+            let recipes = try await aiService.generateRecipesWithTavily(
+                from: ingredients,
                 userProfile: profile,
                 count: 5
             )
 
-            // Create analysis result with ingredients and recipes
+            // Update analysisResult with the selected ingredients and new recipes
             let imageData = selectedImage?.jpegData(compressionQuality: 0.7)
             analysisResult = AnalysisResult(
-                extractedIngredients: detectedIngredients,
+                id: analysisResult?.id ?? UUID(),
+                extractedIngredients: ingredients,
                 suggestedRecipes: recipes,
+                date: analysisResult?.date ?? Date(),
                 imageData: imageData,
                 manuallyAddedItems: manualItems
             )
 
-            analysisProgress = 1.0
             analysisStatus = .finished
-            showingAnalysisResults = true
+
+            // Save the updated analysis with recipes
+            var analyses = storageService.loadAnalyses()
+            // Remove any existing analysis with same ID
+            analyses.removeAll { $0.id == analysisResult?.id }
+            if let result = analysisResult {
+                analyses.insert(result, at: 0)
+                storageService.saveAnalyses(analyses)
+                print("💾 Saved analysis with \(result.extractedIngredients.count) ingredients and \(result.suggestedRecipes.count) recipes")
+            }
 
         } catch AIServiceError.noAPIKey {
-            errorMessage = "Please configure your OpenAI API key in Config.swift"
-            analysisStatus = .ingredientsDetected
-            analysisProgress = 0.5
+            errorMessage = "Please configure your API keys in Config.swift"
         } catch AIServiceError.recipeGenerationFailed {
             errorMessage = "Unable to generate recipes - please try again"
-            analysisStatus = .ingredientsDetected
-            analysisProgress = 0.5
         } catch AIServiceError.apiError(let message) {
-            errorMessage = "Recipe generation error: \(message)"
-            analysisStatus = .ingredientsDetected
-            analysisProgress = 0.5
+            errorMessage = "Recipe search error: \(message)"
         } catch AIServiceError.networkError {
-            errorMessage = "API connection failed - please check your internet"
-            analysisStatus = .ingredientsDetected
-            analysisProgress = 0.5
+            errorMessage = "Connection failed - please check your internet"
         } catch {
             errorMessage = "Failed to generate recipes: \(error.localizedDescription)"
-            analysisStatus = .ingredientsDetected
-            analysisProgress = 0.5
         }
 
+        isGeneratingRecipes = false
         isAnalyzing = false
     }
 

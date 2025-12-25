@@ -14,18 +14,18 @@ struct ManualItemInputView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Add Items Manually")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
 
             HStack {
                 TextField("Enter ingredient name", text: $viewModel.currentManualItem)
                     .font(.body)
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .padding()
-                    .background(Color.theme.cardBackground)
+                    .background(Color.gray.opacity(0.1))
                     .cornerRadius(12)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color.theme.cardBorder, lineWidth: 1)
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 1)
                     )
                     .onSubmit {
                         viewModel.addManualItem()
@@ -36,7 +36,7 @@ struct ManualItemInputView: View {
                 }) {
                     Image(systemName: "plus.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.white)
+                        .foregroundColor(.green)
                 }
                 .disabled(viewModel.currentManualItem.trimmingCharacters(in: .whitespaces).isEmpty)
                 .opacity(viewModel.currentManualItem.trimmingCharacters(in: .whitespaces).isEmpty ? 0.5 : 1.0)
@@ -52,7 +52,7 @@ struct ManualItemInputView: View {
 
                             Text(item)
                                 .font(.subheadline)
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
 
                             Spacer()
 
@@ -78,7 +78,7 @@ struct ManualItemInputView: View {
     @Previewable @StateObject var viewModel = CameraViewModel()
 
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.white.ignoresSafeArea()
         ManualItemInputView(viewModel: viewModel)
             .padding()
     }
