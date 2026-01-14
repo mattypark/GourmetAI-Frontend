@@ -243,3 +243,231 @@ enum AdventureLevel: String, Codable, CaseIterable {
         }
     }
 }
+
+// MARK: - NEW: Physical Stats & Personal Info
+
+enum WeightUnit: String, Codable, CaseIterable {
+    case lbs = "lbs"
+    case kg = "kg"
+}
+
+enum HeightUnit: String, Codable, CaseIterable {
+    case inches = "inches"
+    case cm = "cm"
+}
+
+// MARK: - NEW: Gender
+
+enum Gender: String, Codable, CaseIterable {
+    case male = "Male"
+    case female = "Female"
+    case nonBinary = "Non-binary"
+    case preferNotToSay = "Prefer not to say"
+
+    var icon: String {
+        switch self {
+        case .male: return "figure.stand"
+        case .female: return "figure.stand.dress"
+        case .nonBinary: return "figure.stand"
+        case .preferNotToSay: return "person.fill.questionmark"
+        }
+    }
+}
+
+// MARK: - NEW: Physique Goal (Optional)
+
+enum PhysiqueGoal: String, Codable, CaseIterable {
+    case buildMuscle = "Build muscle"
+    case loseFat = "Lose fat"
+    case maintainCurrent = "Maintain current physique"
+    case toneUp = "Tone up"
+    case preferNotToSay = "Prefer not to say"
+
+    var icon: String {
+        switch self {
+        case .buildMuscle: return "figure.strengthtraining.traditional"
+        case .loseFat: return "figure.walk"
+        case .maintainCurrent: return "figure.stand"
+        case .toneUp: return "figure.arms.open"
+        case .preferNotToSay: return "hand.raised.fill"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .buildMuscle: return "Focus on protein-rich, calorie-dense meals"
+        case .loseFat: return "Emphasize lower-calorie, filling foods"
+        case .maintainCurrent: return "Balanced nutrition for stability"
+        case .toneUp: return "Lean protein with moderate calories"
+        case .preferNotToSay: return "We'll provide general balanced recommendations"
+        }
+    }
+}
+
+// MARK: - NEW: Processed Food Impact
+
+enum ProcessedFoodImpact: String, Codable, CaseIterable {
+    case lowEnergy = "Low energy"
+    case weightGain = "Weight gain"
+    case poorDigestion = "Poor digestion"
+    case guilt = "Feel guilty after eating"
+    case expensiveHabit = "Spending too much"
+    case none = "No negative impact"
+
+    var icon: String {
+        switch self {
+        case .lowEnergy: return "battery.25"
+        case .weightGain: return "arrow.up.circle"
+        case .poorDigestion: return "stomach"
+        case .guilt: return "face.dashed"
+        case .expensiveHabit: return "dollarsign.arrow.circlepath"
+        case .none: return "checkmark.circle.fill"
+        }
+    }
+}
+
+// MARK: - NEW: Organic Cooking Goals
+
+enum OrganicGoal: String, Codable, CaseIterable {
+    case consistency = "Cook organic consistently"
+    case variety = "Try new organic recipes"
+    case budgetOrganic = "Organic on a budget"
+    case familyOrganic = "Get family to eat organic"
+
+    var icon: String {
+        switch self {
+        case .consistency: return "calendar.badge.checkmark"
+        case .variety: return "sparkles"
+        case .budgetOrganic: return "leaf.circle"
+        case .familyOrganic: return "person.3.fill"
+        }
+    }
+}
+
+// MARK: - NEW: Cooking Frequency
+
+enum CookingFrequency: String, Codable, CaseIterable {
+    case rarely = "Rarely (0-1 times/week)"
+    case sometimes = "Sometimes (2-3 times/week)"
+    case often = "Often (4-5 times/week)"
+    case daily = "Daily (6-7 times/week)"
+
+    var icon: String {
+        switch self {
+        case .rarely: return "1.circle"
+        case .sometimes: return "2.circle"
+        case .often: return "4.circle"
+        case .daily: return "7.circle.fill"
+        }
+    }
+}
+
+// MARK: - NEW: Cooking Time of Day
+
+enum CookingTimeOfDay: String, Codable, CaseIterable {
+    case morning = "Morning (6-11am)"
+    case lunch = "Lunch (11am-2pm)"
+    case afternoon = "Afternoon (2-6pm)"
+    case dinner = "Dinner (6-9pm)"
+    case lateNight = "Late night (9pm+)"
+
+    var icon: String {
+        switch self {
+        case .morning: return "sunrise.fill"
+        case .lunch: return "sun.max.fill"
+        case .afternoon: return "sun.haze.fill"
+        case .dinner: return "sunset.fill"
+        case .lateNight: return "moon.stars.fill"
+        }
+    }
+}
+
+// MARK: - NEW: Diet Change Barriers
+
+enum DietBarrier: String, Codable, CaseIterable {
+    case noTime = "No time"
+    case tooExpensive = "Too expensive"
+    case dontKnowHow = "Don't know how to cook healthy"
+    case familyResistance = "Family doesn't like healthy food"
+    case lackMotivation = "Lack of motivation"
+    case confusingInfo = "Too much conflicting info"
+
+    var icon: String {
+        switch self {
+        case .noTime: return "clock.badge.xmark"
+        case .tooExpensive: return "dollarsign.circle"
+        case .dontKnowHow: return "book.closed"
+        case .familyResistance: return "person.2.slash"
+        case .lackMotivation: return "figure.stand"
+        case .confusingInfo: return "questionmark.circle"
+        }
+    }
+}
+
+// MARK: - NEW: Cooking Motivation
+
+enum CookingMotivation: String, Codable, CaseIterable {
+    case healthGoals = "Achieve health goals"
+    case saveMoney = "Save money on food"
+    case familyHealth = "Improve family's health"
+    case newSkill = "Learn a new skill"
+    case stressRelief = "Cooking is relaxing"
+    case socialMedia = "Share on social media"
+
+    var icon: String {
+        switch self {
+        case .healthGoals: return "heart.text.square.fill"
+        case .saveMoney: return "dollarsign.circle.fill"
+        case .familyHealth: return "figure.2.and.child.holdinghands"
+        case .newSkill: return "graduationcap.fill"
+        case .stressRelief: return "leaf.fill"
+        case .socialMedia: return "camera.fill"
+        }
+    }
+}
+
+// MARK: - NEW: Acquisition Source
+
+enum AcquisitionSource: String, Codable, CaseIterable {
+    case instagram = "Instagram"
+    case tiktok = "TikTok"
+    case youtube = "YouTube"
+    case friendFamily = "Friend or family"
+    case googleSearch = "Google search"
+    case appStore = "App Store search"
+    case other = "Other"
+
+    var icon: String {
+        switch self {
+        case .instagram: return "photo.fill"
+        case .tiktok: return "video.fill"
+        case .youtube: return "play.rectangle.fill"
+        case .friendFamily: return "person.2.fill"
+        case .googleSearch: return "magnifyingglass"
+        case .appStore: return "app.badge.fill"
+        case .other: return "ellipsis.circle.fill"
+        }
+    }
+}
+
+// MARK: - NEW: Aspirational Goals
+
+enum AspirationalGoal: String, Codable, CaseIterable {
+    case moreFocused = "More focused & energized"
+    case betterSleep = "Better sleep"
+    case clearerSkin = "Clearer skin"
+    case strongerBody = "Stronger & fitter"
+    case happierMood = "Happier mood"
+    case familyHealth = "Healthier family"
+
+    var icon: String {
+        switch self {
+        case .moreFocused: return "bolt.fill"
+        case .betterSleep: return "bed.double.fill"
+        case .clearerSkin: return "sparkles"
+        case .strongerBody: return "figure.strengthtraining.traditional"
+        case .happierMood: return "face.smiling.fill"
+        case .familyHealth: return "heart.circle.fill"
+        }
+    }
+}

@@ -34,15 +34,15 @@ struct TagPicker<T: RawRepresentable & CaseIterable & Hashable>: View where T.Ra
                             .lineLimit(1)
                             .minimumScaleFactor(0.8)
                     }
-                    .foregroundColor(selectedItems.contains(item) ? .black : .white)
+                    .foregroundColor(.black)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)
-                    .background(selectedItems.contains(item) ? Color.white : Color.theme.cardBackground)
+                    .background(selectedItems.contains(item) ? Color.black.opacity(0.1) : Color.black.opacity(0.05))
                     .cornerRadius(20)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(selectedItems.contains(item) ? Color.white : Color.theme.cardBorder, lineWidth: 1.5)
+                            .stroke(selectedItems.contains(item) ? Color.black.opacity(0.3) : Color.black.opacity(0.1), lineWidth: 1.5)
                     )
                 }
                 .buttonStyle(PlainButtonStyle())

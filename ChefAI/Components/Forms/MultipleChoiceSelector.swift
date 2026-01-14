@@ -38,11 +38,11 @@ struct MultipleChoiceSelector<T: RawRepresentable & CaseIterable & Hashable>: Vi
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: 120)
-                    .background(selected == item ? Color.black : Color.theme.cardBackground)
+                    .background(selected == item ? Color.black : Color.black.opacity(0.05))
                     .cornerRadius(16)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(selected == item ? Color.black : Color.theme.cardBorder, lineWidth: 2)
+                            .stroke(selected == item ? Color.black : Color.black.opacity(0.1), lineWidth: 2)
                     )
                 }
                 .buttonStyle(PlainButtonStyle())

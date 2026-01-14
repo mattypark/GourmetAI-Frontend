@@ -12,7 +12,30 @@ struct UserProfile: Codable {
     var createdAt: Date
     var updatedAt: Date
 
-    // Primary onboarding fields (new enums)
+    // NEW: Personal information
+    var userName: String?
+    var userGender: Gender?
+    var userAge: Int?
+    var userWeight: Double? // in lbs or kg
+    var userHeight: Double? // in inches or cm
+    var weightUnit: WeightUnit?
+    var heightUnit: HeightUnit?
+    var physiqueGoal: PhysiqueGoal? // OPTIONAL
+
+    // NEW: Onboarding questions
+    var eatsOrganic: Bool? // true = organic, false = processed
+    var processedFoodImpact: [ProcessedFoodImpact]?
+    var organicCookingGoals: [OrganicGoal]?
+    var cookingDaysPerWeek: Int? // 0-7
+    var cookingFrequency: CookingFrequency?
+    var cookingTimesOfDay: [CookingTimeOfDay]?
+    var hasTriedDietChange: Bool?
+    var dietChangeBarriers: [DietBarrier]?
+    var motivationToCook: [CookingMotivation]?
+    var acquisitionSource: AcquisitionSource?
+    var aspirationalGoals: [AspirationalGoal]?
+
+    // Primary onboarding fields (existing)
     var mainGoal: MainGoal?
     var dietaryRestrictions: [ExtendedDietaryRestriction]
     var cookingSkillLevel: SkillLevel?
@@ -38,10 +61,131 @@ struct UserProfile: Codable {
     }
 
     var isOnboardingComplete: Bool {
+        // Check if minimum required fields are filled
+        userName != nil &&
+        userGender != nil &&
         mainGoal != nil &&
         cookingSkillLevel != nil &&
         timeAvailability != nil &&
         adventureLevel != nil
+    }
+
+    // MARK: - Calculated Fields
+
+    /// Calculate BMI from weight and height
+    var bmi: Double? {
+        guard let weight = userWeight,
+              let height = userHeight,
+              let weightUnit = weightUnit,
+              let heightUnit = heightUnit else {
+            return nil
+        }
+
+        // Convert to metric (kg and meters)
+        let weightInKg: Double
+        let heightInMeters: Double
+
+        switch weightUnit {
+        case .lbs:
+            weightInKg = weight * 0.453592
+        case .kg:
+            weightInKg = weight
+        }
+
+        switch heightUnit {
+        case .inches:
+            heightInMeters = height * 0.0254
+        case .cm:
+            heightInMeters = height / 100.0
+        }
+
+        return weightInKg / (heightInMeters * heightInMeters)
+    }
+
+    /// Calculate recommended daily calories based on age, weight, height, gender, and goal
+    var recommendedCalories: Int? {
+        guard let weight = userWeight,
+              let height = userHeight,
+              let age = userAge,
+              let weightUnit = weightUnit,
+              let heightUnit = heightUnit else {
+            return nil
+        }
+
+        // Convert to metric
+        let weightInKg: Double
+        let heightInCm: Double
+
+        switch weightUnit {
+        case .lbs:
+            weightInKg = weight * 0.453592
+        case .kg:
+            weightInKg = weight
+        }
+
+        switch heightUnit {
+        case .inches:
+            heightInCm = height * 2.54
+        case .cm:
+            heightInCm = height
+        }
+
+        // Mifflin-St Jeor Equation for BMR
+        var bmr: Double
+
+        if let gender = userGender {
+            switch gender {
+            case .male:
+                bmr = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) + 5
+            case .female:
+                bmr = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) - 161
+            case .nonBinary, .preferNotToSay:
+                // Use average between male and female
+                let maleBMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) + 5
+                let femaleBMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) - 161
+                bmr = (maleBMR + femaleBMR) / 2
+            }
+        } else {
+            // No gender provided, use average
+            let maleBMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) + 5
+            let femaleBMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) - 161
+            bmr = (maleBMR + femaleBMR) / 2
+        }
+
+        // Multiply by activity factor (assuming moderate activity)
+        var tdee = bmr * 1.55
+
+        // Adjust based on goal
+        if let goal = mainGoal {
+            switch goal {
+            case .loseWeight:
+                tdee *= 0.85 // 15% deficit
+            case .gainMuscle:
+                tdee *= 1.1 // 10% surplus
+            case .maintainWeight:
+                break // Keep as is
+            case .eatHealthier, .saveTime, .saveMoney, .eatMoreProtein:
+                break // Keep as is
+            }
+        }
+
+        // Adjust based on physique goal if available
+        if let physiqueGoal = physiqueGoal {
+            switch physiqueGoal {
+            case .loseFat:
+                tdee *= 0.85 // 15% deficit
+            case .buildMuscle:
+                tdee *= 1.1 // 10% surplus
+            case .maintainCurrent:
+                break
+            case .toneUp:
+                tdee *= 0.95 // Slight deficit
+            case .preferNotToSay:
+                break
+            }
+        }
+
+        return Int(tdee)
     }
 
     // Custom decoder to handle migration from old profiles
@@ -53,23 +197,43 @@ struct UserProfile: Codable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
 
-        // New main goal - try to decode, or migrate from old CookingGoal
+        // NEW: Personal information
+        userName = try container.decodeIfPresent(String.self, forKey: .userName)
+        userGender = try container.decodeIfPresent(Gender.self, forKey: .userGender)
+        userAge = try container.decodeIfPresent(Int.self, forKey: .userAge)
+        userWeight = try container.decodeIfPresent(Double.self, forKey: .userWeight)
+        userHeight = try container.decodeIfPresent(Double.self, forKey: .userHeight)
+        weightUnit = try container.decodeIfPresent(WeightUnit.self, forKey: .weightUnit)
+        heightUnit = try container.decodeIfPresent(HeightUnit.self, forKey: .heightUnit)
+        physiqueGoal = try container.decodeIfPresent(PhysiqueGoal.self, forKey: .physiqueGoal)
+
+        // NEW: Onboarding questions
+        eatsOrganic = try container.decodeIfPresent(Bool.self, forKey: .eatsOrganic)
+        processedFoodImpact = try container.decodeIfPresent([ProcessedFoodImpact].self, forKey: .processedFoodImpact)
+        organicCookingGoals = try container.decodeIfPresent([OrganicGoal].self, forKey: .organicCookingGoals)
+        cookingDaysPerWeek = try container.decodeIfPresent(Int.self, forKey: .cookingDaysPerWeek)
+        cookingFrequency = try container.decodeIfPresent(CookingFrequency.self, forKey: .cookingFrequency)
+        cookingTimesOfDay = try container.decodeIfPresent([CookingTimeOfDay].self, forKey: .cookingTimesOfDay)
+        hasTriedDietChange = try container.decodeIfPresent(Bool.self, forKey: .hasTriedDietChange)
+        dietChangeBarriers = try container.decodeIfPresent([DietBarrier].self, forKey: .dietChangeBarriers)
+        motivationToCook = try container.decodeIfPresent([CookingMotivation].self, forKey: .motivationToCook)
+        acquisitionSource = try container.decodeIfPresent(AcquisitionSource.self, forKey: .acquisitionSource)
+        aspirationalGoals = try container.decodeIfPresent([AspirationalGoal].self, forKey: .aspirationalGoals)
+
+        // Existing fields - try to decode, or migrate from old
         if let newGoal = try? container.decodeIfPresent(MainGoal.self, forKey: .mainGoal) {
             mainGoal = newGoal
         } else if let legacyContainer = legacyContainer,
                   let oldGoal = try? legacyContainer.decodeIfPresent(CookingGoal.self, forKey: .mainGoal) {
-            // Migrate old CookingGoal to new MainGoal
             mainGoal = MainGoal.migrateFrom(oldGoal)
         } else {
             mainGoal = nil
         }
 
-        // New dietary restrictions - try to decode, or migrate from old
         if let newRestrictions = try? container.decodeIfPresent([ExtendedDietaryRestriction].self, forKey: .dietaryRestrictions) {
             dietaryRestrictions = newRestrictions
         } else if let legacyContainer = legacyContainer,
                   let oldRestrictions = try? legacyContainer.decodeIfPresent([DietaryRestriction].self, forKey: .dietaryRestrictions) {
-            // Migrate old restrictions to new format
             dietaryRestrictions = oldRestrictions.map { ExtendedDietaryRestriction.migrateFrom($0) }
         } else {
             dietaryRestrictions = []
@@ -89,6 +253,15 @@ struct UserProfile: Codable {
 
     private enum CodingKeys: String, CodingKey {
         case id, createdAt, updatedAt
+        // NEW: Personal information
+        case userName, userGender, userAge, userWeight, userHeight
+        case weightUnit, heightUnit, physiqueGoal
+        // NEW: Onboarding questions
+        case eatsOrganic, processedFoodImpact, organicCookingGoals
+        case cookingDaysPerWeek, cookingFrequency, cookingTimesOfDay
+        case hasTriedDietChange, dietChangeBarriers, motivationToCook
+        case acquisitionSource, aspirationalGoals
+        // Existing fields
         case mainGoal, dietaryRestrictions, cookingSkillLevel
         case mealPreferences, timeAvailability, cookingEquipment
         case cookingStruggles, adventureLevel

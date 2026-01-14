@@ -22,7 +22,7 @@ struct OnboardingSummaryView: View {
                     Text("Your Profile Summary")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
 
                     Text("Tap any item to edit")
                         .font(.subheadline)
@@ -53,12 +53,12 @@ struct OnboardingSummaryView: View {
                     HStack(spacing: 12) {
                         Image(systemName: "sparkles")
                             .font(.title2)
-                            .foregroundColor(.yellow)
+                            .foregroundColor(.orange)
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Ready to cook!")
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
 
                             Text("ChefAI will personalize recipes based on your preferences.")
                                 .font(.subheadline)
@@ -66,7 +66,7 @@ struct OnboardingSummaryView: View {
                         }
                     }
                     .padding()
-                    .background(Color.white.opacity(0.05))
+                    .background(Color.black.opacity(0.05))
                     .cornerRadius(12)
                 }
                 .padding(.top, 16)
@@ -93,7 +93,7 @@ struct SummaryItemRow: View {
 
                     Text(value)
                         .font(.body)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                 }
@@ -101,15 +101,15 @@ struct SummaryItemRow: View {
                 Spacer()
 
                 Image(systemName: "pencil.circle.fill")
-                    .foregroundColor(.white.opacity(0.3))
+                    .foregroundColor(.black.opacity(0.3))
                     .font(.title3)
             }
             .padding()
-            .background(Color.white.opacity(0.05))
+            .background(Color.black.opacity(0.05))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    .stroke(Color.black.opacity(0.1), lineWidth: 1)
             )
         }
         .buttonStyle(PlainButtonStyle())
@@ -155,16 +155,16 @@ struct SummarySection: View {
             if let value = value {
                 Text(value)
                     .font(.body)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
             } else if let values = values, !values.isEmpty {
                 FlowLayout(spacing: 8) {
                     ForEach(values, id: \.self) { item in
                         Text(item)
                             .font(.caption)
-                            .foregroundColor(.white)
+                            .foregroundColor(.black)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.white.opacity(0.1))
+                            .background(Color.black.opacity(0.1))
                             .cornerRadius(16)
                     }
                 }
@@ -177,14 +177,14 @@ struct SummarySection: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color.white.opacity(0.03))
+        .background(Color.black.opacity(0.03))
         .cornerRadius(12)
     }
 }
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.white.ignoresSafeArea()
 
         OnboardingSummaryView(viewModel: {
             let vm = OnboardingViewModel()

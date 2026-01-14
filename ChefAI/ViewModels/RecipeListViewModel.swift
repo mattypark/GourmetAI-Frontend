@@ -26,10 +26,12 @@ class RecipeListViewModel: ObservableObject {
     private var currentIngredients: [String] = []
     private var hasAttemptedGeneration: Bool = false
     private var userProfile: UserProfile?
+    private let apiClient: APIClient
 
     // MARK: - Initialization
 
-    init() {
+    init(apiClient: APIClient? = nil) {
+        self.apiClient = apiClient ?? APIClient.shared
         loadUserProfile()
     }
 
@@ -68,8 +70,8 @@ class RecipeListViewModel: ObservableObject {
         }
 
         do {
-            // Use Tavily + Gemini for recipe generation
-            let generatedRecipes = try await AIService.shared.generateRecipesWithTavily(
+            // Use Backend API for recipe generation
+            let generatedRecipes = try await apiClient.generateRecipes(
                 from: ingredients,
                 userProfile: userProfile,
                 count: 5
@@ -81,6 +83,16 @@ class RecipeListViewModel: ObservableObject {
             recipes = generatedRecipes
             isLoading = false
 
+        } catch APIClientError.networkError {
+            progressTask.cancel()
+            isLoading = false
+            errorMessage = "Connection failed - is the backend server running?"
+            print("❌ Recipe generation error: Network error")
+        } catch APIClientError.unauthorized {
+            progressTask.cancel()
+            isLoading = false
+            errorMessage = "Unauthorized - check API key configuration"
+            print("❌ Recipe generation error: Unauthorized")
         } catch {
             progressTask.cancel()
             isLoading = false
@@ -105,7 +117,7 @@ class RecipeListViewModel: ObservableObject {
             // Convert current ingredient names to Ingredient objects
             let ingredients = currentIngredients.map { Ingredient(name: $0, confidence: 1.0) }
 
-            let newRecipes = try await AIService.shared.generateRecipesWithTavily(
+            let newRecipes = try await apiClient.generateRecipes(
                 from: ingredients,
                 userProfile: userProfile,
                 count: 5

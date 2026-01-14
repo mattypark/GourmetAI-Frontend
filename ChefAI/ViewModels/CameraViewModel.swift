@@ -13,9 +13,9 @@ import UIKit
 
 enum AnalysisStatus: Equatable {
     case idle
-    case detectingIngredients   // Step 1: OpenAI Vision
+    case detectingIngredients   // Step 1: Backend API
     case ingredientsDetected    // User review phase
-    case generatingRecipes      // Step 2: OpenAI
+    case generatingRecipes      // Step 2: Backend API
     case finished
 
     var displayText: String {
@@ -54,15 +54,41 @@ class CameraViewModel: ObservableObject {
     @Published var isGeneratingRecipes = false
     @Published var showingIngredientReview = false
 
-    private let aiService: AIService
+    // Subscription gating
+    @Published var showPaywallPrompt = false
+
+    private let apiClient: APIClient
     private let storageService: StorageService
+    private let subscriptionService: SubscriptionService
 
     init(
-        aiService: AIService? = nil,
-        storageService: StorageService? = nil
+        apiClient: APIClient? = nil,
+        storageService: StorageService? = nil,
+        subscriptionService: SubscriptionService? = nil
     ) {
-        self.aiService = aiService ?? AIService.shared
+        self.apiClient = apiClient ?? APIClient.shared
         self.storageService = storageService ?? StorageService.shared
+        self.subscriptionService = subscriptionService ?? SubscriptionService.shared
+    }
+
+    // MARK: - Subscription Check
+
+    /// Check if user has an active subscription before allowing image analysis
+    func checkSubscriptionAndAnalyze() async {
+        if subscriptionService.hasActiveSubscription() {
+            await analyzeImage()
+        } else {
+            showPaywallPrompt = true
+        }
+    }
+
+    /// Check subscription before detecting ingredients
+    func checkSubscriptionAndDetectIngredients() async {
+        if subscriptionService.hasActiveSubscription() {
+            await detectIngredients()
+        } else {
+            showPaywallPrompt = true
+        }
     }
 
     func presentCamera() {
@@ -91,7 +117,7 @@ class CameraViewModel: ObservableObject {
         manualItems.remove(at: index)
     }
 
-    // MARK: - Step 1: Detect Ingredients (Gemini Flash)
+    // MARK: - Step 1: Detect Ingredients (Backend API)
 
     func detectIngredients() async {
         guard let image = selectedImage else {
@@ -106,8 +132,8 @@ class CameraViewModel: ObservableObject {
         analysisStatus = .detectingIngredients
 
         do {
-            // Call Gemini Flash API to detect ingredients only
-            let ingredients = try await aiService.analyzeImageWithGemini(image)
+            // Call Backend API to detect ingredients
+            let ingredients = try await apiClient.analyzeImage(image)
 
             // Add manual items as ingredients
             var allIngredients = ingredients
@@ -122,21 +148,27 @@ class CameraViewModel: ObservableObject {
             // Navigate to ingredient review screen
             showingIngredientReview = true
 
-        } catch AIServiceError.noAPIKey {
-            errorMessage = "Please configure your Gemini API key in Config.swift"
-        } catch AIServiceError.noFoodDetected {
-            // Allow user to continue with manual items only
-            if !manualItems.isEmpty {
-                detectedIngredients = manualItems.map { Ingredient(name: $0, confidence: 1.0) }
-                analysisStatus = .ingredientsDetected
-                showingIngredientReview = true
+        } catch APIClientError.unauthorized {
+            errorMessage = "Unauthorized - check your API key configuration"
+        } catch APIClientError.serverError(_, let message) {
+            if message?.contains("No food detected") == true || message?.contains("noFoodDetected") == true {
+                // Allow user to continue with manual items only
+                if !manualItems.isEmpty {
+                    detectedIngredients = manualItems.map { Ingredient(name: $0, confidence: 1.0) }
+                    analysisStatus = .ingredientsDetected
+                    showingIngredientReview = true
+                } else {
+                    errorMessage = "No food detected in image. Try a clearer photo or add items manually."
+                    analysisStatus = .idle
+                    analysisProgress = 0.0
+                }
             } else {
-                errorMessage = "No food detected in image. Try a clearer photo or add items manually."
+                errorMessage = message ?? "Server error occurred"
                 analysisStatus = .idle
                 analysisProgress = 0.0
             }
-        } catch AIServiceError.networkError {
-            errorMessage = "API connection failed - please check your internet"
+        } catch APIClientError.networkError {
+            errorMessage = "Connection failed - please check your internet and ensure the backend server is running"
             analysisStatus = .idle
             analysisProgress = 0.0
         } catch {
@@ -149,7 +181,7 @@ class CameraViewModel: ObservableObject {
         isAnalyzing = false
     }
 
-    // MARK: - Step 2: Generate Recipes (Tavily + Gemini)
+    // MARK: - Step 2: Generate Recipes (Backend API)
 
     func generateRecipesFromIngredients(userProfile: UserProfile? = nil) async {
         guard !detectedIngredients.isEmpty else {
@@ -167,8 +199,8 @@ class CameraViewModel: ObservableObject {
             // Get user profile from storage if not provided
             let profile = userProfile ?? storageService.loadUserProfile()
 
-            // Call Tavily + Gemini to generate recipes
-            let recipes = try await aiService.generateRecipesWithTavily(
+            // Call Backend API to generate recipes
+            let recipes = try await apiClient.generateRecipes(
                 from: detectedIngredients,
                 userProfile: profile,
                 count: 5
@@ -189,20 +221,16 @@ class CameraViewModel: ObservableObject {
             // Navigate to results view
             showingAnalysisResults = true
 
-        } catch AIServiceError.noAPIKey {
-            errorMessage = "Please configure your API keys in Config.swift"
-            analysisStatus = .ingredientsDetected  // Go back to review state
-            analysisProgress = 0.5
-        } catch AIServiceError.recipeGenerationFailed {
-            errorMessage = "Unable to generate recipes - please try again"
+        } catch APIClientError.unauthorized {
+            errorMessage = "Unauthorized - check your API key configuration"
             analysisStatus = .ingredientsDetected
             analysisProgress = 0.5
-        } catch AIServiceError.apiError(let message) {
-            errorMessage = "Recipe generation error: \(message)"
+        } catch APIClientError.serverError(_, let message) {
+            errorMessage = message ?? "Failed to generate recipes"
             analysisStatus = .ingredientsDetected
             analysisProgress = 0.5
-        } catch AIServiceError.networkError {
-            errorMessage = "API connection failed - please check your internet"
+        } catch APIClientError.networkError {
+            errorMessage = "Connection failed - please check your internet"
             analysisStatus = .ingredientsDetected
             analysisProgress = 0.5
         } catch {
@@ -215,7 +243,7 @@ class CameraViewModel: ObservableObject {
         isAnalyzing = false
     }
 
-    // MARK: - Combined Analysis (Two-Step: Gemini + Tavily)
+    // MARK: - Combined Analysis (Two-Step: Backend API)
 
     func analyzeImage() async {
         guard let image = selectedImage else {
@@ -228,9 +256,9 @@ class CameraViewModel: ObservableObject {
         analysisProgress = 0.1
         analysisStatus = .detectingIngredients
 
-        // STEP 1: Detect ingredients (Gemini Flash)
+        // STEP 1: Detect ingredients (Backend API)
         do {
-            let ingredients = try await aiService.analyzeImageWithGemini(image)
+            let ingredients = try await apiClient.analyzeImage(image)
 
             // Add manual items as ingredients
             var allIngredients = ingredients
@@ -254,25 +282,33 @@ class CameraViewModel: ObservableObject {
             // Brief pause to show ingredients detected state
             try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
 
-        } catch AIServiceError.noAPIKey {
-            errorMessage = "Please configure your API keys in Config.swift"
+        } catch APIClientError.unauthorized {
+            errorMessage = "Unauthorized - check your API key configuration"
             analysisProgress = 0.0
             analysisStatus = .idle
             isAnalyzing = false
             return
-        } catch AIServiceError.noFoodDetected {
-            // Allow user to continue with manual items only
-            if !manualItems.isEmpty {
-                detectedIngredients = manualItems.map { Ingredient(name: $0, confidence: 1.0) }
+        } catch APIClientError.serverError(_, let message) {
+            if message?.contains("No food detected") == true {
+                // Allow user to continue with manual items only
+                if !manualItems.isEmpty {
+                    detectedIngredients = manualItems.map { Ingredient(name: $0, confidence: 1.0) }
+                } else {
+                    errorMessage = "No food detected in image. Try a clearer photo or add items manually."
+                    analysisProgress = 0.0
+                    analysisStatus = .idle
+                    isAnalyzing = false
+                    return
+                }
             } else {
-                errorMessage = "No food detected in image. Try a clearer photo or add items manually."
+                errorMessage = message ?? "Server error occurred"
                 analysisProgress = 0.0
                 analysisStatus = .idle
                 isAnalyzing = false
                 return
             }
-        } catch AIServiceError.networkError {
-            errorMessage = "API connection failed - please check your internet"
+        } catch APIClientError.networkError {
+            errorMessage = "Connection failed - is the backend server running? (localhost:8080)"
             analysisProgress = 0.0
             analysisStatus = .idle
             isAnalyzing = false
@@ -311,7 +347,7 @@ class CameraViewModel: ObservableObject {
 
         do {
             let profile = storageService.loadUserProfile()
-            let recipes = try await aiService.generateRecipesWithTavily(
+            let recipes = try await apiClient.generateRecipes(
                 from: ingredients,
                 userProfile: profile,
                 count: 5
@@ -340,13 +376,11 @@ class CameraViewModel: ObservableObject {
                 print("💾 Saved analysis with \(result.extractedIngredients.count) ingredients and \(result.suggestedRecipes.count) recipes")
             }
 
-        } catch AIServiceError.noAPIKey {
-            errorMessage = "Please configure your API keys in Config.swift"
-        } catch AIServiceError.recipeGenerationFailed {
-            errorMessage = "Unable to generate recipes - please try again"
-        } catch AIServiceError.apiError(let message) {
-            errorMessage = "Recipe search error: \(message)"
-        } catch AIServiceError.networkError {
+        } catch APIClientError.unauthorized {
+            errorMessage = "Unauthorized - check your API key configuration"
+        } catch APIClientError.serverError(_, let message) {
+            errorMessage = message ?? "Failed to generate recipes"
+        } catch APIClientError.networkError {
             errorMessage = "Connection failed - please check your internet"
         } catch {
             errorMessage = "Failed to generate recipes: \(error.localizedDescription)"
