@@ -236,7 +236,7 @@ struct APIRecipeSource: Codable {
 final class APIClient: @unchecked Sendable {
     static let shared = APIClient()
 
-    // Backend server URL - change this to your deployed server URL
+    // Backend server URL
     private let baseURL: String
 
     // API Key for authentication
@@ -246,7 +246,6 @@ final class APIClient: @unchecked Sendable {
     private let decoder: JSONDecoder
 
     private init() {
-        // Default to localhost for development
         self.baseURL = Config.backendBaseURL
         self.apiKey = Config.backendAPIKey
 
@@ -265,7 +264,11 @@ final class APIClient: @unchecked Sendable {
     func analyzeImage(_ image: UIImage) async throws -> [Ingredient] {
         print("📡 APIClient: Sending image to backend for analysis...")
 
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        // Resize image to reduce payload size (max 512px on longest side for Render.com limits)
+        let resizedImage = resizeImage(image, maxDimension: 512)
+
+        // Use low compression quality to keep well under payload limits
+        guard let imageData = resizedImage.jpegData(compressionQuality: 0.3) else {
             throw APIClientError.imageEncodingFailed
         }
 
@@ -298,6 +301,8 @@ final class APIClient: @unchecked Sendable {
                 throw APIClientError.unauthorized
             }
             let message = String(data: data, encoding: .utf8)
+            let preview = message.map { String($0.prefix(500)) } ?? "nil"
+            print("❌ APIClient: Error response preview: \(preview)")
             throw APIClientError.serverError(httpResponse.statusCode, message)
         }
 
@@ -417,5 +422,38 @@ final class APIClient: @unchecked Sendable {
             print("⚠️ Backend health check failed: \(error.localizedDescription)")
             return false
         }
+    }
+
+    // MARK: - Image Helpers
+
+    /// Resizes an image to fit within a square of maxDimension, cropping to center if needed
+    private func resizeImage(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
+        let size = image.size
+
+        // First, crop to square from center
+        let minDim = min(size.width, size.height)
+        let cropRect = CGRect(
+            x: (size.width - minDim) / 2,
+            y: (size.height - minDim) / 2,
+            width: minDim,
+            height: minDim
+        )
+
+        guard let cgImage = image.cgImage?.cropping(to: cropRect) else {
+            return image
+        }
+
+        let croppedImage = UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
+
+        // Now resize the square image to maxDimension x maxDimension
+        let targetSize = CGSize(width: maxDimension, height: maxDimension)
+
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        let resizedImage = renderer.image { _ in
+            croppedImage.draw(in: CGRect(origin: .zero, size: targetSize))
+        }
+
+        print("📐 Resized image from \(Int(size.width))x\(Int(size.height)) to \(Int(targetSize.width))x\(Int(targetSize.height))")
+        return resizedImage
     }
 }

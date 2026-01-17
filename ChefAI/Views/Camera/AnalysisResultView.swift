@@ -11,359 +11,341 @@ struct AnalysisResultView: View {
     @ObservedObject var viewModel: CameraViewModel
     @Environment(\.dismiss) private var dismiss
 
-    @State private var isCompleting = false
-    @State private var showingRecipeList = false
     @State private var selectedIngredients: Set<UUID> = []
+    @State private var showingAllIngredients = false
     @State private var editingIngredient: Ingredient?
     @State private var showingEditSheet = false
+    @State private var showingRecipeList = false
+    @State private var showingAddMore = false
+
+    private let maxVisibleIngredients = 6
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.white.ignoresSafeArea()
+        ZStack {
+            // Light gray background
+            Color(UIColor.systemGray6)
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // Header
+                headerView
 
                 if let result = viewModel.analysisResult {
                     ScrollView {
-                        VStack(spacing: 24) {
-                            // Image thumbnail
+                        VStack(spacing: 20) {
+                            // Image preview (smaller)
                             if let thumbnailImage = result.thumbnailImage {
                                 Image(uiImage: thumbnailImage)
                                     .resizable()
-                                    .scaledToFit()
-                                    .frame(height: 180)
+                                    .scaledToFill()
+                                    .frame(height: 160)
+                                    .frame(maxWidth: .infinity)
+                                    .clipped()
                                     .cornerRadius(16)
-                                    .shadow(color: .black.opacity(0.1), radius: 8)
+                                    .padding(.horizontal, 24)
                             }
 
-                            // Summary Stats
-                            summarySection(result)
+                            // Stats row
+                            statsRow(result)
+                                .padding(.horizontal, 24)
 
-                            // Detected Ingredients
-                            if !result.extractedIngredients.isEmpty {
-                                ingredientsSection(result.extractedIngredients)
+                            // Ingredients list
+                            ingredientsList(result.extractedIngredients)
+                                .padding(.horizontal, 24)
+
+                            // See more / Add more button
+                            if showingAllIngredients {
+                                Button {
+                                    showingAddMore = true
+                                } label: {
+                                    Text("Add more")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                .padding(.top, 8)
+                            } else if result.extractedIngredients.count > maxVisibleIngredients {
+                                Button {
+                                    withAnimation {
+                                        showingAllIngredients = true
+                                    }
+                                } label: {
+                                    Text("See more")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                .padding(.top, 8)
                             }
-
-                            // Manual Items
-                            if !result.manuallyAddedItems.isEmpty {
-                                manualItemsSection(result.manuallyAddedItems)
-                            }
-
-                            // Add Missing Ingredients
-                            addMissingSection
-
-                            // Action Buttons
-                            actionButtons(result)
                         }
-                        .padding()
-                        .padding(.bottom, 32)
+                        .padding(.top, 16)
+                        .padding(.bottom, 120) // Space for bottom buttons
                     }
+
+                    // Bottom buttons
+                    bottomButtons(result)
                 } else {
+                    Spacer()
                     emptyState
+                    Spacer()
                 }
             }
-            .navigationTitle("Scan Results")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.light, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        viewModel.cancel()
+        }
+        .sheet(isPresented: $showingEditSheet) {
+            if let ingredient = editingIngredient {
+                IngredientEditSheet(
+                    ingredient: ingredient,
+                    onSave: { updated in
+                        updateIngredient(updated)
+                    }
+                )
+            }
+        }
+        .sheet(isPresented: $showingAddMore) {
+            AddMoreIngredientsSheet(viewModel: viewModel)
+        }
+        .fullScreenCover(isPresented: $showingRecipeList) {
+            if let result = viewModel.analysisResult {
+                RecipeListView(
+                    ingredients: selectedIngredientsArray(from: result),
+                    onComplete: {
                         dismiss()
                     }
+                )
+            }
+        }
+        .onAppear {
+            // Select all ingredients by default
+            if let result = viewModel.analysisResult {
+                selectedIngredients = Set(result.extractedIngredients.map { $0.id })
+            }
+        }
+    }
+
+    // MARK: - Header
+
+    private var headerView: some View {
+        HStack {
+            Button {
+                viewModel.cancel()
+                dismiss()
+            } label: {
+                Image(systemName: "arrow.left")
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.black)
-                }
+                    .frame(width: 36, height: 36)
+                    .background(Color.white)
+                    .clipShape(Circle())
+            }
 
-                ToolbarItem(placement: .primaryAction) {
-                    if let result = viewModel.analysisResult, !result.extractedIngredients.isEmpty {
-                        Button {
-                            selectAllIngredients(result.extractedIngredients)
-                        } label: {
-                            Text(allSelected(result.extractedIngredients) ? "Deselect All" : "Select All")
-                                .font(.caption)
-                        }
-                        .foregroundColor(.accentColor)
-                    }
-                }
-            }
-            .fullScreenCover(isPresented: $showingRecipeList) {
-                if let result = viewModel.analysisResult {
-                    RecipeListView(
-                        ingredients: selectedIngredientsArray(from: result),
-                        onComplete: {
-                            dismiss()
-                        }
-                    )
-                }
-            }
-            .sheet(isPresented: $showingEditSheet) {
-                if let ingredient = editingIngredient {
-                    IngredientEditSheet(
-                        ingredient: ingredient,
-                        onSave: { updated in
-                            updateIngredient(updated)
-                        }
-                    )
-                }
-            }
-            .onAppear {
-                // Select all ingredients by default
-                if let result = viewModel.analysisResult {
-                    selectedIngredients = Set(result.extractedIngredients.map { $0.id })
-                }
-            }
+            Spacer()
+
+            Text("Chef AI")
+                .font(.headline)
+                .foregroundColor(.black)
+
+            Spacer()
+
+            // Placeholder for symmetry
+            Color.clear
+                .frame(width: 36, height: 36)
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
     }
 
-    // MARK: - Summary Section
+    // MARK: - Stats Row
 
-    private func summarySection(_ result: AnalysisResult) -> some View {
-        HStack(spacing: 24) {
-            summaryItem(
-                icon: "carrot.fill",
-                value: "\(result.extractedIngredients.count)",
-                label: "Ingredients"
-            )
-
-            summaryItem(
-                icon: "hand.tap.fill",
-                value: "\(result.manuallyAddedItems.count)",
-                label: "Added"
-            )
-
-            summaryItem(
-                icon: "checkmark.circle.fill",
-                value: "\(selectedIngredients.count)",
-                label: "Selected"
-            )
-        }
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(16)
-    }
-
-    private func summaryItem(icon: String, value: String, label: String) -> some View {
+    private func statsRow(_ result: AnalysisResult) -> some View {
         VStack(spacing: 4) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .foregroundColor(.green)
-                Text(value)
+            HStack(spacing: 0) {
+                // Ingredients count
+                HStack(spacing: 6) {
+                    Text("🥕")
+                        .font(.body)
+                    Text("\(result.extractedIngredients.count)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+                }
+                .frame(maxWidth: .infinity)
+
+                // Manually added count
+                Text("\(result.manuallyAddedItems.count)")
                     .font(.title2)
                     .fontWeight(.bold)
-            }
-            .foregroundColor(.primary)
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
 
-            Text(label)
-                .font(.caption)
-                .foregroundColor(.secondary)
+                // Selected count
+                Text("\(selectedIngredients.count)")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+            }
+
+            // Labels below
+            HStack(spacing: 0) {
+                Text("Ingredients")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity)
+
+                Text("")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity)
+
+                Text("")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity)
+            }
         }
-        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
     }
 
-    // MARK: - Ingredients Section
+    // MARK: - Ingredients List
 
-    private func ingredientsSection(_ ingredients: [Ingredient]) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("Detected Ingredients")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+    private func ingredientsList(_ ingredients: [Ingredient]) -> some View {
+        let displayIngredients = showingAllIngredients
+            ? ingredients
+            : Array(ingredients.prefix(maxVisibleIngredients))
 
-                Spacer()
+        return VStack(spacing: 0) {
+            ForEach(displayIngredients) { ingredient in
+                ingredientRow(ingredient)
 
-                Text("\(selectedIngredients.count) selected")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            VStack(spacing: 10) {
-                ForEach(ingredients) { ingredient in
-                    ingredientRow(ingredient)
+                if ingredient.id != displayIngredients.last?.id {
+                    Divider()
+                        .padding(.leading, 48)
                 }
             }
         }
+        .background(Color.white)
+        .cornerRadius(16)
     }
 
     private func ingredientRow(_ ingredient: Ingredient) -> some View {
         HStack(spacing: 12) {
-            // Selection Checkbox
+            // Checkbox
             Button {
                 toggleSelection(ingredient)
             } label: {
                 Image(systemName: selectedIngredients.contains(ingredient.id) ? "checkmark.circle.fill" : "circle")
                     .font(.title2)
-                    .foregroundColor(selectedIngredients.contains(ingredient.id) ? .green : .gray.opacity(0.5))
+                    .foregroundColor(selectedIngredients.contains(ingredient.id) ? .black : .gray.opacity(0.4))
             }
 
-            // Ingredient Info
-            VStack(alignment: .leading, spacing: 4) {
-                // Name with brand
-                HStack {
-                    Text(ingredient.displayName)
-                        .font(.headline)
-                        .foregroundColor(.primary)
+            // Ingredient info
+            VStack(alignment: .leading, spacing: 2) {
+                Text(ingredient.displayName)
+                    .font(.body)
+                    .fontWeight(.medium)
+                    .foregroundColor(.black)
 
-                    if let brand = ingredient.brandName, !brand.isEmpty {
-                        Text("(\(brand))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                // Category and quantity
-                HStack(spacing: 12) {
+                HStack(spacing: 4) {
                     if let category = ingredient.category {
-                        HStack(spacing: 4) {
-                            Image(systemName: category.icon)
-                                .font(.caption2)
-                            Text(category.rawValue)
-                                .font(.caption)
-                        }
-                        .foregroundColor(.secondary)
+                        Text(category.rawValue)
+                            .font(.caption)
+                            .foregroundColor(.gray)
                     }
 
                     if let qty = ingredient.quantityDisplay {
+                        Text("|")
+                            .font(.caption)
+                            .foregroundColor(.gray)
                         Text(qty)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.gray)
                     }
-                }
-
-                // Nutrition info if available
-                if let nutrition = ingredient.nutritionInfo, nutrition.hasMacros {
-                    Text(nutrition.macrosSummary)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
                 }
             }
 
             Spacer()
 
-            // Confidence Badge
+            // Confidence percentage
             if let confidence = ingredient.confidence {
-                VStack {
-                    Text("\(Int(confidence * 100))%")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(confidenceColor(confidence))
-                }
+                Text("\(Int(confidence * 100))%")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
             }
 
-            // Edit Button
+            // Edit button
             Button {
                 editingIngredient = ingredient
                 showingEditSheet = true
             } label: {
-                Image(systemName: "pencil.circle")
-                    .font(.title3)
+                Image(systemName: "pencil")
+                    .font(.subheadline)
                     .foregroundColor(.gray)
             }
         }
-        .padding()
-        .background(
-            selectedIngredients.contains(ingredient.id)
-                ? Color.green.opacity(0.1)
-                : Color.gray.opacity(0.08)
-        )
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(
-                    selectedIngredients.contains(ingredient.id)
-                        ? Color.green.opacity(0.3)
-                        : Color.gray.opacity(0.2),
-                    lineWidth: 1
-                )
-        )
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
     }
 
-    private func confidenceColor(_ confidence: Double) -> Color {
-        if confidence >= 0.8 { return .green }
-        if confidence >= 0.5 { return .yellow }
-        return .red
-    }
+    // MARK: - Bottom Buttons
 
-    // MARK: - Manual Items Section
+    private func bottomButtons(_ result: AnalysisResult) -> some View {
+        VStack {
+            Spacer()
 
-    private func manualItemsSection(_ items: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Manually Added")
-                .font(.headline)
-                .foregroundColor(.primary)
-
-            ForEach(items, id: \.self) { item in
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                        .foregroundColor(.blue)
-                    Text(item)
-                        .foregroundColor(.primary)
-                    Spacer()
-                }
-                .padding()
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(12)
-            }
-        }
-    }
-
-    // MARK: - Add Missing Section
-
-    private var addMissingSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Missing Anything?")
-                .font(.headline)
-                .foregroundColor(.primary)
-
-            Text("Add ingredients we may have missed")
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            ManualItemInputView(viewModel: viewModel)
-        }
-    }
-
-    // MARK: - Action Buttons
-
-    private func actionButtons(_ result: AnalysisResult) -> some View {
-        VStack(spacing: 16) {
-            // Generate Recipes Button
-            PrimaryButton(
-                title: "Generate \(selectedIngredients.count > 0 ? "\(selectedIngredients.count) " : "")Recipes",
-                action: {
+            HStack(spacing: 12) {
+                // Save button
+                Button {
                     Task {
-                        // Generate recipes first with selected ingredients
+                        await viewModel.saveAnalysisOnly()
+                        dismiss()
+                    }
+                } label: {
+                    Text("Save")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .frame(width: 80, height: 56)
+                        .background(Color.white)
+                        .cornerRadius(28)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 28)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                }
+
+                // Create Recipes button
+                Button {
+                    Task {
                         await viewModel.generateRecipesWithSelectedIngredients(
                             selectedIngredientsArray(from: result)
                         )
 
-                        // Only proceed if recipes were generated successfully
                         if viewModel.analysisResult?.suggestedRecipes.isEmpty == false {
-                            // Save analysis with recipes
                             await viewModel.completeAnalysis()
-                            // Then navigate to recipe list
                             showingRecipeList = true
                         }
                     }
-                },
-                isLoading: viewModel.isGeneratingRecipes
-            )
-            .disabled(selectedIngredients.isEmpty || viewModel.isGeneratingRecipes)
-            .opacity(selectedIngredients.isEmpty ? 0.5 : 1)
-
-            // Error message
-            if let error = viewModel.errorMessage {
-                Text(error)
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
+                } label: {
+                    Text("Create Recipes")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(Color.black)
+                        .cornerRadius(28)
+                }
+                .disabled(selectedIngredients.isEmpty || viewModel.isGeneratingRecipes)
+                .opacity(selectedIngredients.isEmpty ? 0.5 : 1)
             }
-
-            // Skip hint
-            Text("Recipes will use only selected ingredients")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 40)
+            .background(
+                LinearGradient(
+                    colors: [Color(UIColor.systemGray6).opacity(0), Color(UIColor.systemGray6)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 100)
+                .allowsHitTesting(false)
+            )
         }
-        .padding(.top, 16)
     }
 
     // MARK: - Empty State
@@ -376,11 +358,11 @@ struct AnalysisResultView: View {
 
             Text("No Results")
                 .font(.headline)
-                .foregroundColor(.primary)
+                .foregroundColor(.black)
 
             Text("Unable to analyze the image. Please try again.")
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
         }
         .padding()
@@ -396,31 +378,83 @@ struct AnalysisResultView: View {
         }
     }
 
-    private func selectAllIngredients(_ ingredients: [Ingredient]) {
-        if allSelected(ingredients) {
-            selectedIngredients.removeAll()
-        } else {
-            selectedIngredients = Set(ingredients.map { $0.id })
-        }
-    }
-
-    private func allSelected(_ ingredients: [Ingredient]) -> Bool {
-        ingredients.allSatisfy { selectedIngredients.contains($0.id) }
-    }
-
     private func selectedIngredientsArray(from result: AnalysisResult) -> [Ingredient] {
         var ingredients = result.extractedIngredients.filter { selectedIngredients.contains($0.id) }
-
-        // Add manual items as ingredients
         let manualIngredients = result.manuallyAddedItems.map { Ingredient(name: $0) }
         ingredients.append(contentsOf: manualIngredients)
-
         return ingredients
     }
 
     private func updateIngredient(_ ingredient: Ingredient) {
         // Update in viewModel's analysis result
-        // This is a simplified version - full implementation would update the actual result
+    }
+}
+
+// MARK: - Add More Ingredients Sheet
+
+struct AddMoreIngredientsSheet: View {
+    @ObservedObject var viewModel: CameraViewModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                TextField("Enter ingredient name", text: $viewModel.currentManualItem)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.horizontal)
+
+                Button {
+                    viewModel.addManualItem()
+                } label: {
+                    Text("Add Ingredient")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(Color.black)
+                        .cornerRadius(25)
+                }
+                .padding(.horizontal)
+                .disabled(viewModel.currentManualItem.isEmpty)
+
+                // Show added items
+                if !viewModel.manualItems.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Added:")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+
+                        ForEach(viewModel.manualItems, id: \.self) { item in
+                            HStack {
+                                Text(item)
+                                Spacer()
+                                Button {
+                                    if let index = viewModel.manualItems.firstIndex(of: item) {
+                                        viewModel.removeManualItem(at: index)
+                                    }
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+
+                Spacer()
+            }
+            .padding(.top, 20)
+            .navigationTitle("Add Ingredients")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 

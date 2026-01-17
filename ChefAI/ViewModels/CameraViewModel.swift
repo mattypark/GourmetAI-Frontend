@@ -417,6 +417,30 @@ class CameraViewModel: ObservableObject {
         // to avoid race condition with fullScreenCover binding.
     }
 
+    /// Save analysis without generating recipes (just ingredients + image)
+    func saveAnalysisOnly() async {
+        guard let result = analysisResult else { return }
+
+        // Merge manual items if any
+        var updatedResult = result
+        if !manualItems.isEmpty {
+            updatedResult = AnalysisResult(
+                id: result.id,
+                extractedIngredients: result.extractedIngredients,
+                suggestedRecipes: [], // No recipes when just saving
+                date: result.date,
+                imageData: result.imageData,
+                manuallyAddedItems: result.manuallyAddedItems + manualItems
+            )
+            analysisResult = updatedResult
+        }
+
+        // Save to storage
+        var analyses = storageService.loadAnalyses()
+        analyses.insert(updatedResult, at: 0)
+        storageService.saveAnalyses(analyses)
+    }
+
     func resetAfterAnalysis() {
         selectedImage = nil
         manualItems.removeAll()

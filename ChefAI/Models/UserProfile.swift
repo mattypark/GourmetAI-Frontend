@@ -139,7 +139,7 @@ struct UserProfile: Codable {
                 bmr = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) + 5
             case .female:
                 bmr = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) - 161
-            case .nonBinary, .preferNotToSay:
+            case .other, .preferNotToSay:
                 // Use average between male and female
                 let maleBMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) + 5
                 let femaleBMR = (10 * weightInKg) + (6.25 * heightInCm) - (5 * Double(age)) - 161

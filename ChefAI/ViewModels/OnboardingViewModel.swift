@@ -27,11 +27,15 @@ class OnboardingViewModel: ObservableObject {
         return ageComponents.year ?? 25
     }
     @Published var userWeight: Double = 150.0
+    @Published var goalWeight: Double = 143.0
+    @Published var targetDate: Date? = nil
     @Published var userHeight: Double = 68.0  // inches
     @Published var weightUnit: WeightUnit = .lbs
     @Published var heightUnit: HeightUnit = .inches
     @Published var useMetricSystem: Bool = false  // Toggle for Imperial/Metric
     @Published var selectedPhysiqueGoal: PhysiqueGoal?
+    @Published var selectedActivityLevel: ActivityLevel?
+    @Published var selectedCalorieBias: CalorieBias = .noBias
 
     // MARK: - Organic vs Processed Questions
     @Published var eatsOrganic: Bool? = nil  // true = organic, false = processed, nil = mix
@@ -71,27 +75,30 @@ class OnboardingViewModel: ObservableObject {
     // 0: Name
     // 1: Gender
     // 2: Age
-    // 3: Weight & Height
-    // 4: Physique Goal (OPTIONAL)
-    // 5: Organic vs Processed
-    // 6: Processed Food Impact (conditional - if processed)
-    // 7: Have you tried changing diet? (conditional - if processed)
-    // 8: Diet Barriers (conditional - if tried changing)
-    // 9: Organic Goals (conditional - if organic)
-    // 10: Aspirational Goals
-    // 11: Main Goal
-    // 12: Cooking Motivation
-    // 13: Days Per Week Cooking
-    // 14: Cooking Frequency & Skill (combined with skill level)
-    // 15: Time of Day Cooking
-    // 16: Dietary Restrictions
-    // 17: Meal Preferences
-    // 18: Time Availability
-    // 19: Cooking Equipment
-    // 20: Cooking Struggles
-    // 21: Adventure Level
-    // 22: How did you hear about us?
-    // 23: Summary
+    // 3: Height
+    // 4: Weight (current, goal, target date)
+    // 5: Activity Level
+    // 6: Calorie Bias
+    // 7: Physique Goal (OPTIONAL)
+    // 8: Organic vs Processed
+    // 9: Processed Food Impact (conditional - if processed)
+    // 10: Have you tried changing diet? (conditional - if processed)
+    // 11: Diet Barriers (conditional - if tried changing)
+    // 12: Organic Goals (conditional - if organic)
+    // 13: Aspirational Goals
+    // 14: Main Goal
+    // 15: Cooking Motivation
+    // 16: Days Per Week Cooking
+    // 17: Cooking Frequency & Skill (combined with skill level)
+    // 18: Time of Day Cooking
+    // 19: Dietary Restrictions
+    // 20: Meal Preferences
+    // 21: Time Availability
+    // 22: Cooking Equipment
+    // 23: Cooking Struggles
+    // 24: Adventure Level
+    // 25: How did you hear about us?
+    // 26: Summary
 
     let questions: [OnboardingQuestion] = [
         // Part 1: Personal Info
@@ -116,19 +123,37 @@ class OnboardingViewModel: ObservableObject {
         ),
         OnboardingQuestion(
             id: 3,
-            title: "Height & weight",
-            subtitle: "This will be used to calibrate your custom plan.",
-            type: .weightHeightPicker
+            title: "What's your height?",
+            subtitle: nil,
+            type: .heightPicker
         ),
         OnboardingQuestion(
             id: 4,
+            title: "What's your weight?",
+            subtitle: nil,
+            type: .weightPicker
+        ),
+        OnboardingQuestion(
+            id: 5,
+            title: "What's your activity level?",
+            subtitle: "Be honest! This affects your calorie needs",
+            type: .activityLevel
+        ),
+        OnboardingQuestion(
+            id: 6,
+            title: "How should Chef handle calorie uncertainty?",
+            subtitle: "When nutrition data varies, choose how Chef estimates based on your goals",
+            type: .calorieBias
+        ),
+        OnboardingQuestion(
+            id: 7,
             title: "What's your goal with your physique?",
             subtitle: "This is optional - skip if you prefer",
             type: .singleChoice(PhysiqueGoal.allCases.map { $0.rawValue }),
             isOptional: true
         ),
         OnboardingQuestion(
-            id: 5,
+            id: 8,
             title: "Do you eat organic or processed food?",
             subtitle: "Be honest, no shame! This helps us understand where you're starting from",
             type: .organicOrProcessed
@@ -136,19 +161,19 @@ class OnboardingViewModel: ObservableObject {
 
         // Part 2: Conditional - Processed Food Path
         OnboardingQuestion(
-            id: 6,
+            id: 9,
             title: "How has eating processed food affected your life?",
             subtitle: "Select all that apply",
             type: .multipleChoice(ProcessedFoodImpact.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 7,
+            id: 10,
             title: "Have you tried changing your diet before?",
             subtitle: "Understanding your journey helps us support you better",
             type: .singleChoice(["Yes", "No"])
         ),
         OnboardingQuestion(
-            id: 8,
+            id: 11,
             title: "What stopped you from sticking with it?",
             subtitle: "Select all that apply - we'll help address these",
             type: .multipleChoice(DietBarrier.allCases.map { $0.rawValue })
@@ -156,7 +181,7 @@ class OnboardingViewModel: ObservableObject {
 
         // Part 2: Conditional - Organic Food Path
         OnboardingQuestion(
-            id: 9,
+            id: 12,
             title: "What are your long-term goals with cooking organically?",
             subtitle: "Select all that apply",
             type: .multipleChoice(OrganicGoal.allCases.map { $0.rawValue })
@@ -164,85 +189,85 @@ class OnboardingViewModel: ObservableObject {
 
         // Part 3: Shared Flow
         OnboardingQuestion(
-            id: 10,
+            id: 13,
             title: "How should eating healthier affect your life?",
             subtitle: "Select all that you hope to achieve",
             type: .multipleChoice(AspirationalGoal.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 11,
+            id: 14,
             title: "What's your main goal?",
             subtitle: "This helps us suggest recipes that support your lifestyle",
             type: .singleChoice(MainGoal.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 12,
+            id: 15,
             title: "Why do you want to cook?",
             subtitle: "Select all that motivate you",
             type: .multipleChoice(CookingMotivation.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 13,
+            id: 16,
             title: "How many days a week do you cook?",
             subtitle: "Drag to select",
             type: .daysPerWeek
         ),
         OnboardingQuestion(
-            id: 14,
+            id: 17,
             title: "How experienced are you in the kitchen?",
             subtitle: "We'll match recipe difficulty to your skill level",
             type: .singleChoice(SkillLevel.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 15,
+            id: 18,
             title: "What time of day do you usually cook?",
             subtitle: "Select all that apply",
             type: .multipleChoice(CookingTimeOfDay.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 16,
+            id: 19,
             title: "Any dietary restrictions or allergies?",
             subtitle: "Select all that apply",
             type: .multipleChoice(ExtendedDietaryRestriction.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 17,
+            id: 20,
             title: "What types of meals do you like?",
             subtitle: "Select all that appeal to you",
             type: .multipleChoice(MealPreference.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 18,
+            id: 21,
             title: "How much time do you want to spend cooking?",
             subtitle: "We'll filter recipes to fit your schedule",
             type: .singleChoice(TimeAvailability.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 19,
+            id: 22,
             title: "What cooking equipment do you have?",
             subtitle: "Select all the tools available in your kitchen",
             type: .multipleChoice(CookingEquipment.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 20,
+            id: 23,
             title: "What do you struggle with most?",
             subtitle: "We'll help address these challenges",
             type: .multipleChoice(CookingStruggle.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 21,
+            id: 24,
             title: "How adventurous are you with food?",
             subtitle: "This affects how creative our suggestions get",
             type: .singleChoice(AdventureLevel.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 22,
+            id: 25,
             title: "How did you hear about us?",
             subtitle: "Help us understand how you found Chef AI",
             type: .singleChoice(AcquisitionSource.allCases.map { $0.rawValue })
         ),
         OnboardingQuestion(
-            id: 23,
+            id: 26,
             title: "You're all set!",
             subtitle: "Here's a summary of your preferences",
             type: .custom
@@ -254,25 +279,25 @@ class OnboardingViewModel: ObservableObject {
     var visibleQuestionIndices: [Int] {
         var indices: [Int] = []
 
-        // Questions 0-5 always visible (Name, Gender, Age, Weight/Height, Physique Goal, Organic/Processed)
-        indices.append(contentsOf: [0, 1, 2, 3, 4, 5])
+        // Questions 0-8 always visible (Name, Gender, Age, Height, Weight, Activity, Calorie Bias, Physique Goal, Organic/Processed)
+        indices.append(contentsOf: [0, 1, 2, 3, 4, 5, 6, 7, 8])
 
         // Conditional questions based on organic vs processed choice
         if eatsOrganic == false {
-            // Processed food path: 6, 7, and conditionally 8
-            indices.append(6)  // Processed food impact
-            indices.append(7)  // Have you tried changing diet?
+            // Processed food path: 9, 10, and conditionally 11
+            indices.append(9)  // Processed food impact
+            indices.append(10)  // Have you tried changing diet?
             if hasTriedDietChange == true {
-                indices.append(8)  // Diet barriers
+                indices.append(11)  // Diet barriers
             }
         } else if eatsOrganic == true {
-            // Organic food path: 9
-            indices.append(9)  // Organic goals
+            // Organic food path: 12
+            indices.append(12)  // Organic goals
         }
         // If eatsOrganic == nil (mix), skip both conditional paths
 
-        // Questions 10-23 always visible
-        indices.append(contentsOf: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23])
+        // Questions 13-26 always visible
+        indices.append(contentsOf: [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26])
 
         return indices
     }
@@ -346,27 +371,30 @@ class OnboardingViewModel: ObservableObject {
         case 0: return !userName.trimmingCharacters(in: .whitespaces).isEmpty  // Name required
         case 1: return true  // Gender optional
         case 2: return true  // Age has defaults
-        case 3: return true  // Weight/Height has defaults
-        case 4: return true  // Physique goal optional
-        case 5: return eatsOrganic != nil  // Must choose organic/processed/mix
-        case 6: return true  // Processed impact optional
-        case 7: return hasTriedDietChange != nil  // Must answer yes/no
-        case 8: return true  // Barriers optional
-        case 9: return true  // Organic goals optional
-        case 10: return true  // Aspirational goals optional
-        case 11: return selectedMainGoal != nil  // Required
-        case 12: return true  // Motivation optional
-        case 13: return true  // Days per week has default
-        case 14: return selectedSkillLevel != nil  // Required
-        case 15: return true  // Time of day optional
-        case 16: return true  // Dietary restrictions optional
-        case 17: return true  // Meal preferences optional
-        case 18: return selectedTimeAvailability != nil  // Required
-        case 19: return true  // Equipment optional
-        case 20: return true  // Struggles optional
-        case 21: return selectedAdventureLevel != nil  // Required
-        case 22: return true  // Acquisition source optional
-        case 23: return true  // Summary - always can proceed
+        case 3: return true  // Height has defaults
+        case 4: return true  // Weight has defaults
+        case 5: return selectedActivityLevel != nil  // Activity level required
+        case 6: return true  // Calorie bias has default
+        case 7: return true  // Physique goal optional
+        case 8: return eatsOrganic != nil  // Must choose organic/processed/mix
+        case 9: return true  // Processed impact optional
+        case 10: return hasTriedDietChange != nil  // Must answer yes/no
+        case 11: return true  // Barriers optional
+        case 12: return true  // Organic goals optional
+        case 13: return true  // Aspirational goals optional
+        case 14: return selectedMainGoal != nil  // Required
+        case 15: return true  // Motivation optional
+        case 16: return true  // Days per week has default
+        case 17: return selectedSkillLevel != nil  // Required
+        case 18: return true  // Time of day optional
+        case 19: return true  // Dietary restrictions optional
+        case 20: return true  // Meal preferences optional
+        case 21: return selectedTimeAvailability != nil  // Required
+        case 22: return true  // Equipment optional
+        case 23: return true  // Struggles optional
+        case 24: return selectedAdventureLevel != nil  // Required
+        case 25: return true  // Acquisition source optional
+        case 26: return true  // Summary - always can proceed
         default: return false
         }
     }
@@ -376,7 +404,7 @@ class OnboardingViewModel: ObservableObject {
     }
 
     var isSummaryPage: Bool {
-        currentQuestionIndex == 23
+        currentQuestionIndex == 26
     }
 
     var progressPercentage: Double {

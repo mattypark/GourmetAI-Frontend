@@ -28,7 +28,11 @@ struct OnboardingQuestion: Identifiable {
         case textInput(placeholder: String)
         case physicalStats  // Combined weight, height, age pickers (legacy)
         case agePicker  // Age only picker
-        case weightHeightPicker  // Weight and height pickers combined
+        case heightPicker  // Height only with bottom sheet
+        case weightPicker  // Weight (current, goal, target date)
+        case weightHeightPicker  // Weight and height pickers combined (legacy)
+        case activityLevel  // Activity level selection
+        case calorieBias  // Calorie uncertainty slider
         case organicOrProcessed  // Special organic vs processed question
         case daysPerWeek  // 0-7 days picker
         case custom  // For summary page

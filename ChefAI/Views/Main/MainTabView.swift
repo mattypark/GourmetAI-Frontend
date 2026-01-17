@@ -124,21 +124,13 @@ struct GalleryPreviewView: View {
 
                 // Full-screen loading overlay
                 if cameraViewModel.isAnalyzing || cameraViewModel.analysisStatus.isFinished {
-                    ZStack {
-                        Color.white
-                            .ignoresSafeArea()
-
-                        VStack {
-                            Spacer()
-
-                            AnalysisLoadingView(
-                                image: image,
-                                status: cameraViewModel.analysisStatus
-                            )
-
-                            Spacer()
+                    AnalysisLoadingView(
+                        image: image,
+                        onBack: {
+                            cameraViewModel.resetAfterAnalysis()
+                            dismiss()
                         }
-                    }
+                    )
                     .transition(.opacity)
                     .animation(.easeInOut(duration: 0.3), value: cameraViewModel.isAnalyzing)
                 }

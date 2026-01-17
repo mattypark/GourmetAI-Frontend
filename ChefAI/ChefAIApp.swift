@@ -6,7 +6,8 @@
 //
 
 import SwiftUI
-import SuperwallKit
+// TODO: Add SuperwallKit package in Xcode before uncommenting
+// import SuperwallKit
 
 @main
 struct ChefAIApp: App {
@@ -16,7 +17,8 @@ struct ChefAIApp: App {
     init() {
         // Initialize Superwall with your API key
         // Get your API key from: https://superwall.com/dashboard
-        Superwall.configure(apiKey: "pk_l2iDq2lf10Bfq7lnjPTFE")
+        // TODO: Uncomment after adding SuperwallKit package
+        // Superwall.configure(apiKey: "pk_l2iDq2lf10Bfq7lnjPTFE")
     }
 
     var body: some Scene {

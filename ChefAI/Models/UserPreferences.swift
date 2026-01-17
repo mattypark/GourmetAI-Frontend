@@ -261,15 +261,15 @@ enum HeightUnit: String, Codable, CaseIterable {
 enum Gender: String, Codable, CaseIterable {
     case male = "Male"
     case female = "Female"
-    case nonBinary = "Non-binary"
+    case other = "Other"
     case preferNotToSay = "Prefer not to say"
 
     var icon: String {
         switch self {
         case .male: return "figure.stand"
         case .female: return "figure.stand.dress"
-        case .nonBinary: return "figure.stand"
-        case .preferNotToSay: return "person.fill.questionmark"
+        case .other: return "figure.2"
+        case .preferNotToSay: return "questionmark.circle"
         }
     }
 }
@@ -468,6 +468,82 @@ enum AspirationalGoal: String, Codable, CaseIterable {
         case .strongerBody: return "figure.strengthtraining.traditional"
         case .happierMood: return "face.smiling.fill"
         case .familyHealth: return "heart.circle.fill"
+        }
+    }
+}
+
+// MARK: - NEW: Activity Level
+
+enum ActivityLevel: String, Codable, CaseIterable {
+    case sedentary = "Sedentary"
+    case lightlyActive = "Lightly Active"
+    case moderatelyActive = "Moderately Active"
+    case veryActive = "Very Active"
+
+    var icon: String {
+        switch self {
+        case .sedentary: return "chair.lounge.fill"
+        case .lightlyActive: return "figure.walk"
+        case .moderatelyActive: return "figure.run"
+        case .veryActive: return "figure.highintensity.intervaltraining"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .sedentary: return "Little to no exercise, desk job"
+        case .lightlyActive: return "Light exercise 1-3 days/week"
+        case .moderatelyActive: return "Moderate exercise 3-5 days/week"
+        case .veryActive: return "Intense exercise 6-7 days/week"
+        }
+    }
+
+    var multiplier: Double {
+        switch self {
+        case .sedentary: return 1.2
+        case .lightlyActive: return 1.375
+        case .moderatelyActive: return 1.55
+        case .veryActive: return 1.725
+        }
+    }
+}
+
+// MARK: - NEW: Calorie Bias
+
+enum CalorieBias: Int, Codable, CaseIterable {
+    case underMore = -2
+    case under = -1
+    case noBias = 0
+    case over = 1
+    case overMore = 2
+
+    var title: String {
+        switch self {
+        case .underMore: return "Under More"
+        case .under: return "Under"
+        case .noBias: return "No Bias"
+        case .over: return "Over"
+        case .overMore: return "Over More"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .underMore: return "Aggressive underestimate for weight loss"
+        case .under: return "Slight underestimate for weight loss"
+        case .noBias: return "Balanced approach for precise tracking"
+        case .over: return "Slight overestimate for muscle gain"
+        case .overMore: return "Aggressive overestimate for bulking"
+        }
+    }
+
+    var example: String {
+        switch self {
+        case .underMore: return "500-700 cal meal -> logs as 500 cal"
+        case .under: return "500-700 cal meal -> logs as 550 cal"
+        case .noBias: return "500-700 cal meal -> logs as 600 cal"
+        case .over: return "500-700 cal meal -> logs as 650 cal"
+        case .overMore: return "500-700 cal meal -> logs as 700 cal"
         }
     }
 }

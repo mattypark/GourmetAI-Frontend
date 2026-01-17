@@ -91,3 +91,7 @@ iOSInjectionProject/
 
 # IMPORTANT: Config file with API keys
 ChefAI/Utilities/Config.swift
+
+# Backend environment variables (contains API keys)
+ChefAI-Backend/.env
+.env

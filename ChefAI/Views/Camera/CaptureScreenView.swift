@@ -15,8 +15,8 @@ struct CaptureScreenView: View {
 
     var body: some View {
         ZStack {
-            // Light background
-            Color(UIColor.systemBackground)
+            // Light gray background (matches Figma)
+            Color(UIColor.systemGray6)
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -73,17 +73,17 @@ struct CaptureScreenView: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.primary)
+                    .foregroundColor(.black)
                     .frame(width: 36, height: 36)
-                    .background(Color(UIColor.secondarySystemBackground))
+                    .background(Color.white)
                     .clipShape(Circle())
             }
 
             Spacer()
 
-            Text("ChefAI")
+            Text("Chef AI")
                 .font(.headline)
-                .foregroundColor(.primary)
+                .foregroundColor(.black)
 
             Spacer()
 
@@ -113,15 +113,6 @@ struct CaptureScreenView: View {
                         )
                 }
 
-                // Frame overlay
-                FrameOverlayView(
-                    frameSize: min(geometry.size.width, geometry.size.height) * 0.7,
-                    cornerLength: 50,
-                    lineWidth: 4,
-                    cornerRadius: 16,
-                    color: .white.opacity(0.9)
-                )
-
                 // Error message
                 if let error = viewModel.errorMessage {
                     VStack {
@@ -148,17 +139,19 @@ struct CaptureScreenView: View {
             viewModel.capturePhoto()
         } label: {
             ZStack {
+                // Outer white ring
                 Circle()
                     .fill(Color.white)
-                    .frame(width: 72, height: 72)
-                    .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                    .frame(width: 80, height: 80)
 
+                // Inner black circle
                 Circle()
-                    .stroke(Color(UIColor.systemGray4), lineWidth: 4)
-                    .frame(width: 72, height: 72)
+                    .fill(Color.black)
+                    .frame(width: 64, height: 64)
 
                 if isProcessing {
                     ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
                         .scaleEffect(1.2)
                 }
             }
@@ -177,87 +170,104 @@ struct CapturePreviewView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.black.ignoresSafeArea()
+        ZStack {
+            // Light gray background (matches Figma)
+            Color(UIColor.systemGray6)
+                .ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: 24) {
-                        // Image preview
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .cornerRadius(16)
-                            .shadow(color: .white.opacity(0.1), radius: 8)
+            VStack(spacing: 0) {
+                // Header with close button
+                headerView
 
-                        // Manual item input
-                        ManualItemInputView(viewModel: cameraViewModel)
+                // Image preview
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .cornerRadius(24)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
 
-                        // Analyze button
-                        PrimaryButton(
-                            title: "Analyze",
-                            action: {
-                                cameraViewModel.selectedImage = image
-                                Task {
-                                    await cameraViewModel.analyzeImage()
-                                }
-                            },
-                            isLoading: cameraViewModel.isAnalyzing
-                        )
-                        .disabled(cameraViewModel.isAnalyzing)
+                Spacer()
 
-                        if let errorMessage = cameraViewModel.errorMessage {
-                            Text(errorMessage)
-                                .font(.caption)
-                                .foregroundColor(.red)
-                                .padding()
-                        }
+                // Analyze button
+                Button {
+                    cameraViewModel.selectedImage = image
+                    Task {
+                        await cameraViewModel.analyzeImage()
                     }
-                    .padding()
+                } label: {
+                    Text("Analyze")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 56)
+                        .background(Color.black)
+                        .cornerRadius(28)
                 }
+                .disabled(cameraViewModel.isAnalyzing)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 40)
 
-                // Full-screen loading overlay with dynamic status
-                if cameraViewModel.isAnalyzing || cameraViewModel.analysisStatus.isFinished {
-                    ZStack {
-                        Color.white
-                            .ignoresSafeArea()
-
-                        VStack {
-                            Spacer()
-
-                            AnalysisLoadingView(
-                                image: image,
-                                status: cameraViewModel.analysisStatus
-                            )
-
-                            Spacer()
-                        }
-                    }
-                    .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.3), value: cameraViewModel.isAnalyzing)
+                if let errorMessage = cameraViewModel.errorMessage {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .padding(.bottom, 8)
                 }
             }
-            .navigationTitle("Preview")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+
+            // Full-screen loading overlay
+            if cameraViewModel.isAnalyzing || cameraViewModel.analysisStatus.isFinished {
+                AnalysisLoadingView(
+                    image: image,
+                    onBack: {
+                        cameraViewModel.resetAfterAnalysis()
                         onDismiss()
                         dismiss()
                     }
-                    .foregroundColor(.white)
-                }
-            }
-            .fullScreenCover(isPresented: $cameraViewModel.showingAnalysisResults) {
-                AnalysisResultView(viewModel: cameraViewModel)
-                    .onDisappear {
-                        if cameraViewModel.analysisResult != nil {
-                            onComplete()
-                        }
-                    }
+                )
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.3), value: cameraViewModel.isAnalyzing)
             }
         }
+        .fullScreenCover(isPresented: $cameraViewModel.showingAnalysisResults) {
+            AnalysisResultView(viewModel: cameraViewModel)
+                .onDisappear {
+                    if cameraViewModel.analysisResult != nil {
+                        onComplete()
+                    }
+                }
+        }
+    }
+
+    private var headerView: some View {
+        HStack {
+            Button {
+                onDismiss()
+                dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.black)
+                    .frame(width: 36, height: 36)
+                    .background(Color.white)
+                    .clipShape(Circle())
+            }
+
+            Spacer()
+
+            Text("Chef AI")
+                .font(.headline)
+                .foregroundColor(.black)
+
+            Spacer()
+
+            // Placeholder for symmetry
+            Color.clear
+                .frame(width: 36, height: 36)
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
     }
 }
 

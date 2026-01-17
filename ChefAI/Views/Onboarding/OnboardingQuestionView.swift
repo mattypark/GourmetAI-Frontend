@@ -12,35 +12,56 @@ struct OnboardingQuestionView: View {
     @ObservedObject var viewModel: OnboardingViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            // Title and subtitle (except for summary page)
-            if question.id != 23 {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(question.title)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.black)
-                        .fixedSize(horizontal: false, vertical: true)
+        // Pages with their own centered layout (name=0, gender=1, birthday=2, height=3, weight=4)
+        if question.id == 0 {
+            NameInputView(name: $viewModel.userName)
+        } else if question.id == 1 {
+            GenderSelectionView(selectedGender: $viewModel.selectedGender)
+        } else if question.id == 2 {
+            AgePickerView(birthDate: $viewModel.birthDate)
+        } else if question.id == 3 {
+            HeightPickerView(
+                height: $viewModel.userHeight,
+                heightUnit: $viewModel.heightUnit,
+                useMetricSystem: $viewModel.useMetricSystem
+            )
+        } else if question.id == 4 {
+            CurrentWeightPickerView(
+                weight: $viewModel.userWeight,
+                weightUnit: $viewModel.weightUnit,
+                useMetricSystem: $viewModel.useMetricSystem
+            )
+        } else {
+            VStack(alignment: .leading, spacing: 24) {
+                // Title and subtitle (except for summary page)
+                if question.id != 23 {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(question.title)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.black)
+                            .fixedSize(horizontal: false, vertical: true)
 
-                    if let subtitle = question.subtitle {
-                        Text(subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+                        if let subtitle = question.subtitle {
+                            Text(subtitle)
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
                     }
+
+                    Spacer()
+                        .frame(height: 24)
                 }
 
-                Spacer()
-                    .frame(height: 24)
-            }
+                // Question content based on type
+                questionContent
 
-            // Question content based on type
-            questionContent
-
-            if question.id != 23 {
-                Spacer()
+                if question.id != 23 {
+                    Spacer()
+                }
             }
+            .padding(.horizontal, 24)
         }
-        .padding(.horizontal, 24)
     }
 
     @ViewBuilder
@@ -61,16 +82,32 @@ struct OnboardingQuestionView: View {
             AgePickerView(birthDate: $viewModel.birthDate)
 
         case 3:
-            // Weight and Height picker
-            WeightHeightPickerView(
-                weight: $viewModel.userWeight,
+            // Height picker (new style)
+            HeightPickerView(
                 height: $viewModel.userHeight,
-                weightUnit: $viewModel.weightUnit,
                 heightUnit: $viewModel.heightUnit,
                 useMetricSystem: $viewModel.useMetricSystem
             )
 
         case 4:
+            // Weight picker (new style with current, goal, target date)
+            WeightGoalPickerView(
+                currentWeight: $viewModel.userWeight,
+                goalWeight: $viewModel.goalWeight,
+                targetDate: $viewModel.targetDate,
+                weightUnit: $viewModel.weightUnit,
+                useMetricSystem: $viewModel.useMetricSystem
+            )
+
+        case 5:
+            // Activity level
+            ActivityLevelPickerView(selectedLevel: $viewModel.selectedActivityLevel)
+
+        case 6:
+            // Calorie bias slider
+            CalorieBiasPickerView(selectedBias: $viewModel.selectedCalorieBias)
+
+        case 7:
             // Physique goal
             ScrollView {
                 MultipleChoiceSelector(
@@ -80,11 +117,11 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 5:
+        case 8:
             // Organic vs Processed
             OrganicProcessedView(selection: $viewModel.eatsOrganic)
 
-        case 6:
+        case 9:
             // Processed food impact
             ScrollView {
                 TagPicker(
@@ -94,11 +131,11 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 7:
+        case 10:
             // Have you tried changing diet?
             YesNoSelectionView(selection: $viewModel.hasTriedDietChange)
 
-        case 8:
+        case 11:
             // Diet barriers
             ScrollView {
                 TagPicker(
@@ -108,7 +145,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 9:
+        case 12:
             // Organic goals
             ScrollView {
                 TagPicker(
@@ -118,7 +155,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 10:
+        case 13:
             // Aspirational goals
             ScrollView {
                 TagPicker(
@@ -128,7 +165,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 11:
+        case 14:
             // Main goal
             ScrollView {
                 MultipleChoiceSelector(
@@ -138,7 +175,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 12:
+        case 15:
             // Cooking motivation
             ScrollView {
                 TagPicker(
@@ -148,11 +185,11 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 13:
+        case 16:
             // Days per week
             DaysPerWeekPicker(days: $viewModel.cookingDaysPerWeek)
 
-        case 14:
+        case 17:
             // Skill level
             ScrollView {
                 MultipleChoiceSelector(
@@ -162,7 +199,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 15:
+        case 18:
             // Cooking time of day
             ScrollView {
                 TagPicker(
@@ -172,7 +209,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 16:
+        case 19:
             // Dietary restrictions
             ScrollView {
                 TagPicker(
@@ -182,7 +219,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 17:
+        case 20:
             // Meal preferences
             ScrollView {
                 TagPicker(
@@ -192,7 +229,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 18:
+        case 21:
             // Time availability
             ScrollView {
                 MultipleChoiceSelector(
@@ -202,7 +239,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 19:
+        case 22:
             // Cooking equipment
             ScrollView {
                 TagPicker(
@@ -212,7 +249,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 20:
+        case 23:
             // Cooking struggles
             ScrollView {
                 TagPicker(
@@ -222,7 +259,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 21:
+        case 24:
             // Adventure level
             ScrollView {
                 VStack(spacing: 12) {
@@ -238,7 +275,7 @@ struct OnboardingQuestionView: View {
                 }
             }
 
-        case 22:
+        case 25:
             // Acquisition source
             ScrollView {
                 MultipleChoiceSelector(
@@ -248,7 +285,7 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 23:
+        case 26:
             // Summary
             OnboardingSummaryView(viewModel: viewModel)
 
@@ -265,25 +302,38 @@ struct NameInputView: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            TextField("Your name", text: $name)
-                .font(.system(size: 24, weight: .medium))
-                .foregroundColor(.black)
-                .focused($isFocused)
-                .textContentType(.name)
-                .autocapitalization(.words)
-                .padding(.vertical, 16)
-                .padding(.horizontal, 20)
-                .background(Color.black.opacity(0.05))
-                .cornerRadius(16)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(isFocused ? Color.black : Color.clear, lineWidth: 2)
-                )
+        VStack(spacing: 0) {
+            Spacer()
 
-            Text("This is how we'll address you in the app")
-                .font(.caption)
-                .foregroundColor(.gray)
+            // Centered content
+            VStack(spacing: 12) {
+                // Title
+                Text("What's your name?")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.black)
+
+                // Subtitle
+                Text("We'll use this to personalize your experience")
+                    .font(.system(size: 15))
+                    .foregroundColor(.gray)
+
+                // Text field
+                TextField("Your name", text: $name)
+                    .font(.system(size: 17))
+                    .foregroundColor(.black)
+                    .multilineTextAlignment(.center)
+                    .focused($isFocused)
+                    .textContentType(.name)
+                    .autocapitalization(.words)
+                    .padding(.vertical, 16)
+                    .padding(.horizontal, 24)
+                    .background(Color(white: 0.93))
+                    .cornerRadius(30)
+                    .padding(.top, 20)
+            }
+            .padding(.horizontal, 24)
+
+            Spacer()
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -298,40 +348,66 @@ struct NameInputView: View {
 struct GenderSelectionView: View {
     @Binding var selectedGender: Gender?
 
+    private let purpleColor = Color(hex: "4B3CFA")
+
     var body: some View {
-        VStack(spacing: 12) {
-            ForEach(Gender.allCases, id: \.self) { gender in
-                Button(action: { selectedGender = gender }) {
-                    HStack(spacing: 16) {
-                        Image(systemName: gender.icon)
-                            .font(.title2)
-                            .foregroundColor(selectedGender == gender ? .white : .black)
-                            .frame(width: 44, height: 44)
-                            .background(selectedGender == gender ? Color.black : Color.black.opacity(0.05))
-                            .cornerRadius(12)
+        VStack(spacing: 0) {
+            Spacer()
 
-                        Text(gender.rawValue)
-                            .font(.headline)
-                            .foregroundColor(.black)
+            // Centered content
+            VStack(alignment: .leading, spacing: 12) {
+                // Title
+                Text("What's your gender?")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.black)
 
-                        Spacer()
+                // Subtitle
+                Text("This helps us calculate accurate calorie and macro goals")
+                    .font(.system(size: 15))
+                    .foregroundColor(.gray)
+                    .padding(.bottom, 20)
 
-                        if selectedGender == gender {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                                .font(.title2)
+                // Gender options
+                VStack(spacing: 16) {
+                    ForEach(Gender.allCases, id: \.self) { gender in
+                        Button(action: { selectedGender = gender }) {
+                            HStack(spacing: 16) {
+                                // Icon on left
+                                Image(systemName: gender.icon)
+                                    .font(.system(size: 20))
+                                    .foregroundColor(selectedGender == gender ? purpleColor : .black.opacity(0.6))
+                                    .frame(width: 24)
+
+                                // Gender text
+                                Text(gender.rawValue)
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.black)
+
+                                Spacer()
+
+                                // Checkmark on right when selected
+                                if selectedGender == gender {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 22))
+                                        .foregroundColor(purpleColor)
+                                }
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 18)
+                            .background(Color(white: 0.96))
+                            .cornerRadius(30)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 30)
+                                    .stroke(selectedGender == gender ? purpleColor : Color.clear, lineWidth: 2)
+                            )
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
-                    .padding()
-                    .background(selectedGender == gender ? Color.black.opacity(0.05) : Color.black.opacity(0.02))
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(selectedGender == gender ? Color.black.opacity(0.2) : Color.black.opacity(0.1), lineWidth: 1)
-                    )
                 }
-                .buttonStyle(PlainButtonStyle())
             }
+            .padding(.horizontal, 24)
+
+            Spacer()
         }
     }
 }
@@ -723,61 +799,108 @@ struct AdventureLevelCard: View {
 struct AgePickerView: View {
     @Binding var birthDate: Date
 
-    @State private var selectedMonth: Int = 1
-    @State private var selectedDay: Int = 1
+    @State private var showingPicker = false
+    @State private var selectedMonth: Int = 10
+    @State private var selectedDay: Int = 2
     @State private var selectedYear: Int = 2000
 
     private let months = ["January", "February", "March", "April", "May", "June",
                           "July", "August", "September", "October", "November", "December"]
 
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        return formatter.string(from: birthDate)
+    }
+
+    private var ageString: String {
+        let calendar = Calendar.current
+        let ageComponents = calendar.dateComponents([.year], from: birthDate, to: Date())
+        let age = ageComponents.year ?? 0
+        return "\(age) years old"
+    }
+
     var body: some View {
-        VStack(spacing: 24) {
-            // Three-column date picker
-            HStack(spacing: 0) {
-                // Month picker
-                Picker("Month", selection: $selectedMonth) {
-                    ForEach(1...12, id: \.self) { month in
-                        Text(months[month - 1])
-                            .tag(month)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(maxWidth: .infinity)
-                .clipped()
+        VStack(spacing: 0) {
+            Spacer()
 
-                // Day picker
-                Picker("Day", selection: $selectedDay) {
-                    ForEach(1...31, id: \.self) { day in
-                        Text("\(day)")
-                            .tag(day)
-                    }
-                }
-                .pickerStyle(.wheel)
-                .frame(width: 60)
-                .clipped()
+            // Centered content
+            VStack(alignment: .leading, spacing: 12) {
+                // Title
+                Text("When's your birthday?")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.black)
 
-                // Year picker
-                Picker("Year", selection: $selectedYear) {
-                    ForEach((1920...2015).reversed(), id: \.self) { year in
-                        Text("\(year)")
-                            .tag(year)
+                // Subtitle
+                Text("We'll only use this to calculate your age for health metrics and goals. Your birthday data is kept private and secure")
+                    .font(.system(size: 15))
+                    .foregroundColor(.gray)
+                    .padding(.bottom, 20)
+
+                // Birthday label
+                Text("Birthday")
+                    .font(.system(size: 15))
+                    .foregroundColor(.black)
+
+                // Date display box (tappable)
+                Button(action: { showingPicker = true }) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(formattedDate)
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.black)
+
+                        Text(ageString)
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 16)
+                    .background(Color(white: 0.93))
+                    .cornerRadius(16)
                 }
-                .pickerStyle(.wheel)
-                .frame(width: 80)
-                .clipped()
+                .buttonStyle(PlainButtonStyle())
+
+                // Privacy note
+                HStack(spacing: 8) {
+                    Image(systemName: "lock")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+
+                    Text("Your data is private and secure")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                }
+                .padding(.top, 16)
             }
-            .frame(height: 200)
+            .padding(.horizontal, 24)
+
+            Spacer()
         }
         .onAppear {
-            let calendar = Calendar.current
-            selectedMonth = calendar.component(.month, from: birthDate)
-            selectedDay = calendar.component(.day, from: birthDate)
-            selectedYear = calendar.component(.year, from: birthDate)
+            initializeFromDate()
         }
-        .onChange(of: selectedMonth) { _, _ in updateBirthDate() }
-        .onChange(of: selectedDay) { _, _ in updateBirthDate() }
-        .onChange(of: selectedYear) { _, _ in updateBirthDate() }
+        .sheet(isPresented: $showingPicker) {
+            BirthdayPickerSheet(
+                selectedMonth: $selectedMonth,
+                selectedDay: $selectedDay,
+                selectedYear: $selectedYear,
+                months: months,
+                onDone: {
+                    updateBirthDate()
+                    showingPicker = false
+                }
+            )
+            .presentationDetents([.height(350)])
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    private func initializeFromDate() {
+        let calendar = Calendar.current
+        selectedMonth = calendar.component(.month, from: birthDate)
+        selectedDay = calendar.component(.day, from: birthDate)
+        selectedYear = calendar.component(.year, from: birthDate)
     }
 
     private func updateBirthDate() {
@@ -799,13 +922,870 @@ struct AgePickerView: View {
     }
 }
 
+// MARK: - Birthday Picker Sheet
+
+struct BirthdayPickerSheet: View {
+    @Binding var selectedMonth: Int
+    @Binding var selectedDay: Int
+    @Binding var selectedYear: Int
+    let months: [String]
+    let onDone: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Spacer()
+
+                Text("Select Birthday")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.black)
+
+                Spacer()
+
+                Button("Done") {
+                    onDone()
+                }
+                .font(.system(size: 17))
+                .foregroundColor(.black)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 10)
+
+            // Three-column wheel picker - evenly distributed
+            GeometryReader { geometry in
+                HStack(spacing: 0) {
+                    // Month picker
+                    Picker("Month", selection: $selectedMonth) {
+                        ForEach(1...12, id: \.self) { month in
+                            Text(months[month - 1])
+                                .tag(month)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(width: geometry.size.width * 0.45)
+                    .clipped()
+
+                    // Day picker
+                    Picker("Day", selection: $selectedDay) {
+                        ForEach(1...31, id: \.self) { day in
+                            Text("\(day)")
+                                .tag(day)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(width: geometry.size.width * 0.2)
+                    .clipped()
+
+                    // Year picker
+                    Picker("Year", selection: $selectedYear) {
+                        ForEach((1920...2020).reversed(), id: \.self) { year in
+                            Text("\(year)")
+                                .tag(year)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(width: geometry.size.width * 0.35)
+                    .clipped()
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .frame(height: 200)
+
+            Spacer()
+        }
+        .background(Color.white)
+    }
+}
+
 private extension Date {
     var dayOfMonth: Int {
         Calendar.current.component(.day, from: self)
     }
 }
 
-// MARK: - Height & Weight Picker View (Imperial/Metric toggle)
+// MARK: - Height Picker View (New Style with Bottom Sheet)
+
+struct HeightPickerView: View {
+    @Binding var height: Double
+    @Binding var heightUnit: HeightUnit
+    @Binding var useMetricSystem: Bool
+
+    @State private var showingPicker = false
+    @State private var heightFeet: Int = 5
+    @State private var heightInches: Int = 10
+    @State private var heightCm: Int = 178
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            // Centered content
+            VStack(alignment: .leading, spacing: 16) {
+                // Title
+                Text("What's your height?")
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.black)
+
+                // Imperial / Metric Toggle
+                HStack(spacing: 0) {
+                    Button(action: {
+                        withAnimation {
+                            useMetricSystem = false
+                            heightUnit = .inches
+                            convertToImperial()
+                        }
+                    }) {
+                        Text("Imperial")
+                            .font(.system(size: 15, weight: useMetricSystem ? .regular : .semibold))
+                            .foregroundColor(.black)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(useMetricSystem ? Color.clear : Color.white)
+                            .cornerRadius(25)
+                    }
+
+                    Button(action: {
+                        withAnimation {
+                            useMetricSystem = true
+                            heightUnit = .cm
+                            convertToMetric()
+                        }
+                    }) {
+                        Text("Metric")
+                            .font(.system(size: 15, weight: useMetricSystem ? .semibold : .regular))
+                            .foregroundColor(.black)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(useMetricSystem ? Color.white : Color.clear)
+                            .cornerRadius(25)
+                    }
+                }
+                .background(Color(white: 0.85))
+                .cornerRadius(25)
+
+                // Big Display Box
+                Button(action: { showingPicker = true }) {
+                    VStack(spacing: 12) {
+                        // Large height display
+                        if useMetricSystem {
+                            Text("\(heightCm) cm")
+                                .font(.system(size: 64, weight: .heavy))
+                                .italic()
+                                .foregroundColor(.black)
+                        } else {
+                            Text("\(heightFeet)' \(heightInches)\"")
+                                .font(.system(size: 64, weight: .heavy))
+                                .italic()
+                                .foregroundColor(.black)
+                        }
+
+                        // Tap to change
+                        HStack(spacing: 6) {
+                            Text("Tap to change")
+                                .font(.system(size: 15))
+                                .foregroundColor(.gray)
+                            Image(systemName: "chevron.right.2")
+                                .font(.system(size: 12))
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 50)
+                    .background(Color.white)
+                    .cornerRadius(20)
+                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.top, 16)
+            }
+            .padding(.horizontal, 24)
+
+            Spacer()
+        }
+        .onAppear {
+            initializeValues()
+        }
+        .sheet(isPresented: $showingPicker) {
+            HeightPickerSheet(
+                heightFeet: $heightFeet,
+                heightInches: $heightInches,
+                heightCm: $heightCm,
+                useMetricSystem: useMetricSystem,
+                onDone: {
+                    updateHeight()
+                    showingPicker = false
+                }
+            )
+            .presentationDetents([.height(350)])
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    private func initializeValues() {
+        if heightUnit == .cm || useMetricSystem {
+            heightCm = Int(height)
+            let totalInches = Int(Double(heightCm) / 2.54)
+            heightFeet = totalInches / 12
+            heightInches = totalInches % 12
+        } else {
+            heightFeet = Int(height) / 12
+            heightInches = Int(height) % 12
+            heightCm = Int(Double(heightFeet * 12 + heightInches) * 2.54)
+        }
+    }
+
+    private func convertToMetric() {
+        heightCm = Int(Double(heightFeet * 12 + heightInches) * 2.54)
+        height = Double(heightCm)
+    }
+
+    private func convertToImperial() {
+        let totalInches = Int(Double(heightCm) / 2.54)
+        heightFeet = totalInches / 12
+        heightInches = totalInches % 12
+        height = Double(heightFeet * 12 + heightInches)
+    }
+
+    private func updateHeight() {
+        if useMetricSystem {
+            height = Double(heightCm)
+        } else {
+            height = Double(heightFeet * 12 + heightInches)
+        }
+    }
+}
+
+// MARK: - Height Picker Bottom Sheet
+
+struct HeightPickerSheet: View {
+    @Binding var heightFeet: Int
+    @Binding var heightInches: Int
+    @Binding var heightCm: Int
+    let useMetricSystem: Bool
+    let onDone: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Spacer()
+
+                Text("Select Height")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.black)
+
+                Spacer()
+
+                Button("Done") {
+                    onDone()
+                }
+                .font(.system(size: 17))
+                .foregroundColor(.black)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 10)
+
+            // Pickers
+            if useMetricSystem {
+                Picker("Height", selection: $heightCm) {
+                    ForEach(100...250, id: \.self) { cm in
+                        Text("\(cm) cm").tag(cm)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .frame(height: 200)
+            } else {
+                HStack(spacing: 0) {
+                    Picker("Feet", selection: $heightFeet) {
+                        ForEach(3...8, id: \.self) { ft in
+                            Text("\(ft)'").tag(ft)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(maxWidth: .infinity)
+
+                    Picker("Inches", selection: $heightInches) {
+                        ForEach(0...11, id: \.self) { inch in
+                            Text("\(inch)\"").tag(inch)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(maxWidth: .infinity)
+                }
+                .frame(height: 200)
+            }
+
+            Spacer()
+        }
+        .background(Color.white)
+    }
+}
+
+// MARK: - Current Weight Picker View (Horizontal Drag Ruler)
+
+struct CurrentWeightPickerView: View {
+    @Binding var weight: Double
+    @Binding var weightUnit: WeightUnit
+    @Binding var useMetricSystem: Bool
+
+    // Ruler configuration
+    private let rulerSpacing: CGFloat = 8  // Space between tick marks
+    private let minWeight: Double = 50
+    private let maxWeight: Double = 400
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            // Title
+            Text("What's your weight?")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.black)
+                .padding(.bottom, 80)
+
+            // Current Weight label and value
+            VStack(spacing: 8) {
+                Text("Current Weight")
+                    .font(.system(size: 15))
+                    .foregroundColor(.gray)
+
+                Text(String(format: "%.1f %@", weight, useMetricSystem ? "kg" : "lbs"))
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundColor(.black)
+            }
+            .padding(.bottom, 40)
+
+            // Horizontal Ruler
+            WeightRulerView(
+                weight: $weight,
+                minWeight: minWeight,
+                maxWeight: maxWeight,
+                rulerSpacing: rulerSpacing
+            )
+            .frame(height: 60)
+
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+    }
+}
+
+// MARK: - Weight Ruler View (Horizontal Drag)
+
+struct WeightRulerView: View {
+    @Binding var weight: Double
+    let minWeight: Double
+    let maxWeight: Double
+    let rulerSpacing: CGFloat
+
+    @State private var baseWeight: Double = 0
+    @State private var dragOffset: CGFloat = 0
+
+    private var tickCount: Int {
+        Int((maxWeight - minWeight) * 2) + 1  // 0.5 lb increments
+    }
+
+    // Calculate the displayed weight based on drag offset
+    private func displayedWeight(centerX: CGFloat) -> Double {
+        let weightChange = -dragOffset / rulerSpacing * 0.5
+        var newWeight = baseWeight + weightChange
+        newWeight = max(minWeight, min(maxWeight, newWeight))
+        return (newWeight * 2).rounded() / 2
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            let centerX = geometry.size.width / 2
+            let currentDisplayWeight = displayedWeight(centerX: centerX)
+
+            ZStack {
+                // Ruler ticks
+                Canvas { context, size in
+                    let weightOffset = (currentDisplayWeight - minWeight) * 2 * rulerSpacing
+                    let startX = centerX - weightOffset
+
+                    for i in 0..<tickCount {
+                        let x = startX + CGFloat(i) * rulerSpacing
+                        let tickWeight = minWeight + Double(i) * 0.5
+
+                        // Only draw if visible
+                        guard x > -50 && x < size.width + 50 else { continue }
+
+                        let isMajorTick = tickWeight.truncatingRemainder(dividingBy: 10) == 0
+                        let isMediumTick = tickWeight.truncatingRemainder(dividingBy: 5) == 0
+                        let isMinorTick = tickWeight.truncatingRemainder(dividingBy: 1) == 0
+
+                        let tickHeight: CGFloat
+                        let tickWidth: CGFloat
+                        let opacity: Double
+
+                        if isMajorTick {
+                            tickHeight = 40
+                            tickWidth = 2
+                            opacity = 1.0
+                        } else if isMediumTick {
+                            tickHeight = 30
+                            tickWidth = 1.5
+                            opacity = 0.7
+                        } else if isMinorTick {
+                            tickHeight = 20
+                            tickWidth = 1
+                            opacity = 0.5
+                        } else {
+                            tickHeight = 12
+                            tickWidth = 0.5
+                            opacity = 0.3
+                        }
+
+                        // Calculate fade based on distance from center
+                        let distanceFromCenter = abs(x - centerX)
+                        let fadeStart = size.width * 0.3
+                        let fadeFactor = max(0, 1 - max(0, distanceFromCenter - fadeStart) / (size.width * 0.25))
+
+                        let rect = CGRect(
+                            x: x - tickWidth / 2,
+                            y: (size.height - tickHeight) / 2,
+                            width: tickWidth,
+                            height: tickHeight
+                        )
+
+                        context.fill(
+                            Path(roundedRect: rect, cornerRadius: tickWidth / 2),
+                            with: .color(.black.opacity(opacity * fadeFactor))
+                        )
+                    }
+                }
+
+                // Center indicator line
+                Rectangle()
+                    .fill(Color.black)
+                    .frame(width: 3, height: 50)
+                    .position(x: centerX, y: 30)
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        dragOffset = value.translation.width
+                        // Update weight in real-time
+                        weight = displayedWeight(centerX: centerX)
+                    }
+                    .onEnded { value in
+                        // Finalize weight and reset drag state
+                        weight = displayedWeight(centerX: centerX)
+                        baseWeight = weight
+                        dragOffset = 0
+                    }
+            )
+            .onAppear {
+                baseWeight = weight
+            }
+        }
+    }
+}
+
+// MARK: - Weight Goal Picker View (for Goal Weight - kept for later use)
+
+struct WeightGoalPickerView: View {
+    @Binding var currentWeight: Double
+    @Binding var goalWeight: Double
+    @Binding var targetDate: Date?
+    @Binding var weightUnit: WeightUnit
+    @Binding var useMetricSystem: Bool
+
+    @State private var showingCurrentWeightPicker = false
+    @State private var showingGoalWeightPicker = false
+    @State private var showingDatePicker = false
+    @State private var currentWeightInt: Int = 154
+    @State private var goalWeightInt: Int = 143
+    @State private var selectedDate: Date = Calendar.current.date(byAdding: .month, value: 2, to: Date()) ?? Date()
+
+    var body: some View {
+        VStack(spacing: 16) {
+            // Current Weight
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Current Weight")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.black)
+
+                Button(action: { showingCurrentWeightPicker = true }) {
+                    HStack {
+                        Text("\(currentWeightInt) \(weightUnit.rawValue)")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(Color(hex: "4B3CFA"))
+                        Spacer()
+                        Image(systemName: "pencil")
+                            .foregroundColor(.gray)
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+
+            // Goal Weight
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Goal Weight")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.black)
+
+                Button(action: { showingGoalWeightPicker = true }) {
+                    HStack {
+                        Text("\(goalWeightInt) \(weightUnit.rawValue)")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(Color(hex: "4B3CFA"))
+                        Spacer()
+                        Image(systemName: "pencil")
+                            .foregroundColor(.gray)
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+
+            // Target Date (Optional)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Target Date")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.black)
+                    Text("(Optional)")
+                        .font(.system(size: 13))
+                        .foregroundColor(.gray)
+                }
+
+                Button(action: { showingDatePicker = true }) {
+                    HStack {
+                        if let date = targetDate {
+                            Text(date.formatted(date: .abbreviated, time: .omitted))
+                                .font(.system(size: 20, weight: .semibold))
+                                .foregroundColor(Color(hex: "4B3CFA"))
+                        } else {
+                            Text("Set target date")
+                                .font(.system(size: 17))
+                                .foregroundColor(Color(hex: "4B3CFA"))
+                        }
+                        Spacer()
+                        Image(systemName: "calendar")
+                            .foregroundColor(.gray)
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+        }
+        .onAppear {
+            currentWeightInt = Int(currentWeight)
+            goalWeightInt = Int(goalWeight)
+            if let date = targetDate {
+                selectedDate = date
+            }
+        }
+        .sheet(isPresented: $showingCurrentWeightPicker) {
+            WeightPickerSheet(
+                weightValue: $currentWeightInt,
+                weightUnit: weightUnit,
+                title: "Current Weight",
+                onDone: {
+                    currentWeight = Double(currentWeightInt)
+                    showingCurrentWeightPicker = false
+                }
+            )
+            .presentationDetents([.height(350)])
+        }
+        .sheet(isPresented: $showingGoalWeightPicker) {
+            WeightPickerSheet(
+                weightValue: $goalWeightInt,
+                weightUnit: weightUnit,
+                title: "Goal Weight",
+                onDone: {
+                    goalWeight = Double(goalWeightInt)
+                    showingGoalWeightPicker = false
+                }
+            )
+            .presentationDetents([.height(350)])
+        }
+        .sheet(isPresented: $showingDatePicker) {
+            TargetDatePickerSheet(
+                selectedDate: $selectedDate,
+                targetDate: $targetDate,
+                onDone: {
+                    showingDatePicker = false
+                },
+                onClear: {
+                    targetDate = nil
+                    showingDatePicker = false
+                }
+            )
+            .presentationDetents([.height(450)])
+        }
+    }
+}
+
+// MARK: - Weight Picker Bottom Sheet
+
+struct WeightPickerSheet: View {
+    @Binding var weightValue: Int
+    let weightUnit: WeightUnit
+    let title: String
+    let onDone: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text(title)
+                    .font(.system(size: 17, weight: .semibold))
+                Spacer()
+                Button("Done") {
+                    onDone()
+                }
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(.black)
+            }
+            .padding()
+            .background(Color(UIColor.systemBackground))
+
+            Divider()
+
+            // Picker
+            Picker("Weight", selection: $weightValue) {
+                if weightUnit == .lbs {
+                    ForEach(80...400, id: \.self) { lb in
+                        Text("\(lb) lbs").tag(lb)
+                    }
+                } else {
+                    ForEach(30...200, id: \.self) { kg in
+                        Text("\(kg) kg").tag(kg)
+                    }
+                }
+            }
+            .pickerStyle(.wheel)
+        }
+        .background(Color(UIColor.systemBackground))
+    }
+}
+
+// MARK: - Target Date Picker Sheet
+
+struct TargetDatePickerSheet: View {
+    @Binding var selectedDate: Date
+    @Binding var targetDate: Date?
+    let onDone: () -> Void
+    let onClear: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Button("Clear") {
+                    onClear()
+                }
+                .font(.system(size: 17))
+                .foregroundColor(.gray)
+
+                Spacer()
+
+                Text("Target Date")
+                    .font(.system(size: 17, weight: .semibold))
+
+                Spacer()
+
+                Button("Done") {
+                    targetDate = selectedDate
+                    onDone()
+                }
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(.black)
+            }
+            .padding()
+            .background(Color(UIColor.systemBackground))
+
+            Divider()
+
+            // Date Picker
+            DatePicker(
+                "Target Date",
+                selection: $selectedDate,
+                in: Date()...,
+                displayedComponents: .date
+            )
+            .datePickerStyle(.graphical)
+            .padding()
+        }
+        .background(Color(UIColor.systemBackground))
+    }
+}
+
+// MARK: - Activity Level Picker View
+
+struct ActivityLevelPickerView: View {
+    @Binding var selectedLevel: ActivityLevel?
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                ForEach(ActivityLevel.allCases, id: \.self) { level in
+                    Button(action: { selectedLevel = level }) {
+                        HStack(spacing: 16) {
+                            Image(systemName: level.icon)
+                                .font(.title2)
+                                .foregroundColor(selectedLevel == level ? .white : .black)
+                                .frame(width: 44, height: 44)
+                                .background(selectedLevel == level ? Color.black : Color.black.opacity(0.05))
+                                .cornerRadius(12)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(level.rawValue)
+                                    .font(.headline)
+                                    .foregroundColor(.black)
+
+                                Text(level.description)
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
+
+                            Spacer()
+
+                            if selectedLevel == level {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(Color(hex: "4B3CFA"))
+                                    .font(.title2)
+                            }
+                        }
+                        .padding()
+                        .background(selectedLevel == level ? Color(hex: "4B3CFA").opacity(0.05) : Color.white)
+                        .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(selectedLevel == level ? Color(hex: "4B3CFA").opacity(0.3) : Color.black.opacity(0.1), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Calorie Bias Picker View
+
+struct CalorieBiasPickerView: View {
+    @Binding var selectedBias: CalorieBias
+
+    private let biasValues: [CalorieBias] = [.underMore, .under, .noBias, .over, .overMore]
+
+    var body: some View {
+        VStack(spacing: 32) {
+            // Info Card
+            VStack(spacing: 12) {
+                Text(selectedBias.title)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.black)
+
+                HStack {
+                    Circle()
+                        .fill(Color.black)
+                        .frame(width: 8, height: 8)
+                    Text(selectedBias.description)
+                        .font(.system(size: 15))
+                        .foregroundColor(.gray)
+                }
+
+                HStack {
+                    Text("🍔")
+                    Text(selectedBias.example)
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                }
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+
+            // Slider
+            VStack(spacing: 16) {
+                // Custom slider
+                GeometryReader { geometry in
+                    let stepWidth = geometry.size.width / CGFloat(biasValues.count - 1)
+                    let currentIndex = biasValues.firstIndex(of: selectedBias) ?? 2
+
+                    ZStack(alignment: .leading) {
+                        // Track
+                        Rectangle()
+                            .fill(Color.black.opacity(0.2))
+                            .frame(height: 4)
+                            .frame(maxWidth: .infinity)
+
+                        // Thumb
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 32, height: 32)
+                            .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                            .offset(x: CGFloat(currentIndex) * stepWidth - 16)
+                            .gesture(
+                                DragGesture()
+                                    .onChanged { value in
+                                        let newIndex = Int(round(value.location.x / stepWidth))
+                                        let clampedIndex = max(0, min(biasValues.count - 1, newIndex))
+                                        selectedBias = biasValues[clampedIndex]
+                                    }
+                            )
+                    }
+                }
+                .frame(height: 32)
+
+                // Labels
+                HStack {
+                    ForEach(biasValues, id: \.self) { bias in
+                        VStack(spacing: 4) {
+                            Circle()
+                                .fill(colorForBias(bias))
+                                .frame(width: 8, height: 8)
+                            Text(bias.title.replacingOccurrences(of: " ", with: "\n"))
+                                .font(.system(size: 11))
+                                .foregroundColor(selectedBias == bias ? .black : .gray)
+                                .multilineTextAlignment(.center)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .onTapGesture {
+                            withAnimation {
+                                selectedBias = bias
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    private func colorForBias(_ bias: CalorieBias) -> Color {
+        switch bias {
+        case .underMore, .under:
+            return Color.blue.opacity(0.6)
+        case .noBias:
+            return Color.black
+        case .over, .overMore:
+            return Color.orange.opacity(0.6)
+        }
+    }
+}
+
+// MARK: - Height & Weight Picker View (Imperial/Metric toggle) - LEGACY
 
 struct WeightHeightPickerView: View {
     @Binding var weight: Double
