@@ -38,7 +38,7 @@ class OnboardingViewModel: ObservableObject {
     @Published var selectedCalorieBias: CalorieBias = .noBias
 
     // MARK: - Organic vs Processed Questions
-    @Published var eatsOrganic: Bool? = nil  // true = organic, false = processed, nil = mix
+    @Published var foodPreference: FoodPreference?  // nil = no selection yet
     @Published var selectedProcessedImpacts: Set<ProcessedFoodImpact> = []
     @Published var hasTriedDietChange: Bool?
     @Published var selectedDietBarriers: Set<DietBarrier> = []
@@ -283,18 +283,18 @@ class OnboardingViewModel: ObservableObject {
         indices.append(contentsOf: [0, 1, 2, 3, 4, 5, 6, 7, 8])
 
         // Conditional questions based on organic vs processed choice
-        if eatsOrganic == false {
+        if foodPreference == .processed {
             // Processed food path: 9, 10, and conditionally 11
             indices.append(9)  // Processed food impact
             indices.append(10)  // Have you tried changing diet?
             if hasTriedDietChange == true {
                 indices.append(11)  // Diet barriers
             }
-        } else if eatsOrganic == true {
+        } else if foodPreference == .organic {
             // Organic food path: 12
             indices.append(12)  // Organic goals
         }
-        // If eatsOrganic == nil (mix), skip both conditional paths
+        // If foodPreference == .mixed, skip both conditional paths
 
         // Questions 13-26 always visible
         indices.append(contentsOf: [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26])
@@ -335,7 +335,7 @@ class OnboardingViewModel: ObservableObject {
         self.selectedPhysiqueGoal = profile.physiqueGoal
 
         // Organic/processed
-        self.eatsOrganic = profile.eatsOrganic
+        self.foodPreference = FoodPreference.from(profile.eatsOrganic)
         self.selectedProcessedImpacts = Set(profile.processedFoodImpact ?? [])
         self.hasTriedDietChange = profile.hasTriedDietChange
         self.selectedDietBarriers = Set(profile.dietChangeBarriers ?? [])
@@ -376,7 +376,7 @@ class OnboardingViewModel: ObservableObject {
         case 5: return selectedActivityLevel != nil  // Activity level required
         case 6: return true  // Calorie bias has default
         case 7: return true  // Physique goal optional
-        case 8: return eatsOrganic != nil  // Must choose organic/processed/mix
+        case 8: return foodPreference != nil  // Must choose organic/processed/mix
         case 9: return true  // Processed impact optional
         case 10: return hasTriedDietChange != nil  // Must answer yes/no
         case 11: return true  // Barriers optional
@@ -478,7 +478,7 @@ class OnboardingViewModel: ObservableObject {
         userProfile.physiqueGoal = selectedPhysiqueGoal
 
         // Organic/processed
-        userProfile.eatsOrganic = eatsOrganic
+        userProfile.eatsOrganic = foodPreference?.toBool
         userProfile.processedFoodImpact = Array(selectedProcessedImpacts)
         userProfile.hasTriedDietChange = hasTriedDietChange
         userProfile.dietChangeBarriers = Array(selectedDietBarriers)
@@ -531,8 +531,8 @@ class OnboardingViewModel: ObservableObject {
             items.append(("Physique Goal", physique.rawValue, 4))
         }
 
-        if let organic = eatsOrganic {
-            items.append(("Diet Type", organic ? "Mostly organic" : "Mostly processed", 5))
+        if let preference = foodPreference {
+            items.append(("Diet Type", preference.rawValue, 5))
         }
 
         if let goal = selectedMainGoal {

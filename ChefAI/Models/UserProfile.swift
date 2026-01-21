@@ -275,6 +275,29 @@ struct UserProfile: Codable {
     }
 }
 
+// MARK: - Food Preference (Organic/Processed)
+
+enum FoodPreference: String, Codable, CaseIterable {
+    case organic = "Mostly organic"
+    case mixed = "Mix of both"
+    case processed = "Mostly processed"
+
+    /// Convert to Bool? for storage (legacy compatibility)
+    var toBool: Bool? {
+        switch self {
+        case .organic: return true
+        case .mixed: return nil
+        case .processed: return false
+        }
+    }
+
+    /// Create from Bool? (legacy compatibility)
+    static func from(_ bool: Bool?) -> FoodPreference? {
+        guard let value = bool else { return .mixed }
+        return value ? .organic : .processed
+    }
+}
+
 // MARK: - Legacy Cooking Goal (for migration)
 
 enum CookingGoal: String, Codable, CaseIterable {

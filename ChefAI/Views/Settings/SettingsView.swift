@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import Auth
 
 struct SettingsView: View {
     @StateObject private var viewModel = SettingsViewModel()
+    @StateObject private var supabase = SupabaseManager.shared
     @State private var showingAppSettings = false
     @State private var showingPrivacyPolicy = false
     @State private var showingClearDataAlert = false
+    @State private var showingAuthSheet = false
+    @State private var showingSignOutAlert = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -21,6 +25,68 @@ struct SettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
+                        // Account Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Account")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                                .padding(.horizontal)
+
+                            VStack(spacing: 0) {
+                                if supabase.isAuthenticated {
+                                    // Show user info and sign out
+                                    HStack(spacing: 16) {
+                                        Image(systemName: "person.circle.fill")
+                                            .font(.title3)
+                                            .foregroundColor(.black)
+                                            .frame(width: 24)
+
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Signed In")
+                                                .font(.body)
+                                                .foregroundColor(.black)
+
+                                            Text(supabase.currentUser?.email ?? "No email")
+                                                .font(.caption)
+                                                .foregroundColor(.gray)
+                                        }
+
+                                        Spacer()
+                                    }
+                                    .padding()
+
+                                    Divider()
+                                        .background(Color.black.opacity(0.1))
+                                        .padding(.leading, 56)
+
+                                    SettingsRowButton(
+                                        icon: "rectangle.portrait.and.arrow.right",
+                                        title: "Sign Out",
+                                        subtitle: "Sign out of your account",
+                                        destructive: true
+                                    ) {
+                                        showingSignOutAlert = true
+                                    }
+                                } else {
+                                    // Show sign in button
+                                    SettingsRowButton(
+                                        icon: "person.crop.circle.badge.plus",
+                                        title: "Sign In",
+                                        subtitle: "Sign in to save your data across devices"
+                                    ) {
+                                        showingAuthSheet = true
+                                    }
+                                }
+                            }
+                            .background(Color.black.opacity(0.03))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.black.opacity(0.08), lineWidth: 1)
+                            )
+                            .padding(.horizontal)
+                        }
+
                         // App Settings Section
                         VStack(alignment: .leading, spacing: 16) {
                             Text("App Settings")
@@ -128,6 +194,19 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("This will delete all your analyses, liked recipes, and reset your settings. This action cannot be undone.")
+            }
+            .alert("Sign Out", isPresented: $showingSignOutAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Sign Out", role: .destructive) {
+                    Task {
+                        try? await supabase.signOut()
+                    }
+                }
+            } message: {
+                Text("Are you sure you want to sign out?")
+            }
+            .sheet(isPresented: $showingAuthSheet) {
+                AuthenticationView()
             }
         }
     }

@@ -18,11 +18,13 @@ enum OnboardingStep {
 
 struct OnboardingFlowView: View {
     @StateObject private var viewModel = OnboardingViewModel()
+    @StateObject private var supabase = SupabaseManager.shared
     @AppStorage(StorageKeys.hasCompletedOnboarding)
     private var hasCompletedOnboarding = false
 
     @State private var currentStep: OnboardingStep = .splash
     @State private var showSplash = true
+    @State private var showingAuthSheet = false
 
     var body: some View {
         ZStack {
@@ -44,13 +46,12 @@ struct OnboardingFlowView: View {
             case .welcome:
                 WelcomeScreenView(
                     onGetStarted: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            currentStep = .questions
-                        }
+                        // Show auth sheet when Get Started is tapped
+                        showingAuthSheet = true
                     },
                     onSignIn: {
-                        // Handle sign in - for now just proceed
-                        print("Sign in tapped")
+                        // Show auth sheet when Sign In is tapped
+                        showingAuthSheet = true
                     }
                 )
                 .transition(.opacity)
@@ -70,6 +71,14 @@ struct OnboardingFlowView: View {
                 )
                 .transition(.opacity)
             }
+        }
+        .sheet(isPresented: $showingAuthSheet) {
+            AuthenticationView(onSuccess: {
+                // After successful auth, proceed to onboarding questions
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    currentStep = .questions
+                }
+            })
         }
     }
 
@@ -139,23 +148,11 @@ struct OnboardingQuestionsView: View {
             Color.white.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Header - same for all pages now (back button + skip)
+                // Header - no back button (back is always at bottom)
                 HStack {
-                    // Back button - goes to welcome on first page, previous page otherwise
-                    Button {
-                        if viewModel.currentPage == 0 {
-                            onBackToWelcome()
-                        } else {
-                            withAnimation {
-                                viewModel.previousPage()
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .medium))
-                            .foregroundColor(.black)
-                            .frame(width: 44, height: 44)
-                    }
+                    // Empty spacer to maintain layout
+                    Spacer()
+                        .frame(width: 44, height: 44)
 
                     Spacer()
 
@@ -250,13 +247,31 @@ struct OnboardingQuestionsView: View {
                     .padding(.horizontal, 24)
                     .padding(.bottom, 24)
                 } else {
-                    // Other pages: standard Continue button
-                    VStack(spacing: 12) {
+                    // Other pages: back arrow + Continue button
+                    HStack(spacing: 12) {
+                        // Back button (circle)
+                        Button {
+                            if viewModel.currentPage == 0 {
+                                onBackToWelcome()
+                            } else {
+                                withAnimation {
+                                    viewModel.previousPage()
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "arrow.left")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.black)
+                                .frame(width: 56, height: 56)
+                                .background(Color(white: 0.93))
+                                .clipShape(Circle())
+                        }
+
+                        // Continue button
                         Button(action: {
                             if viewModel.isLastQuestion {
                                 onComplete()
                             } else {
-                                // Use proceedFromCurrentQuestion to check for response screens
                                 viewModel.proceedFromCurrentQuestion()
                             }
                         }) {
@@ -269,8 +284,8 @@ struct OnboardingQuestionsView: View {
                                 .cornerRadius(28)
                         }
                         .disabled(!viewModel.canProceed)
-                        .padding(.horizontal, 24)
                     }
+                    .padding(.horizontal, 24)
                     .padding(.bottom, 24)
                 }
             }

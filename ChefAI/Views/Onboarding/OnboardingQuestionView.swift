@@ -119,7 +119,7 @@ struct OnboardingQuestionView: View {
 
         case 8:
             // Organic vs Processed
-            OrganicProcessedView(selection: $viewModel.eatsOrganic)
+            OrganicProcessedView(selection: $viewModel.foodPreference)
 
         case 9:
             // Processed food impact
@@ -348,8 +348,6 @@ struct NameInputView: View {
 struct GenderSelectionView: View {
     @Binding var selectedGender: Gender?
 
-    private let purpleColor = Color(hex: "4B3CFA")
-
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -370,38 +368,11 @@ struct GenderSelectionView: View {
                 // Gender options
                 VStack(spacing: 16) {
                     ForEach(Gender.allCases, id: \.self) { gender in
-                        Button(action: { selectedGender = gender }) {
-                            HStack(spacing: 16) {
-                                // Icon on left
-                                Image(systemName: gender.icon)
-                                    .font(.system(size: 20))
-                                    .foregroundColor(selectedGender == gender ? purpleColor : .black.opacity(0.6))
-                                    .frame(width: 24)
-
-                                // Gender text
-                                Text(gender.rawValue)
-                                    .font(.system(size: 17))
-                                    .foregroundColor(.black)
-
-                                Spacer()
-
-                                // Checkmark on right when selected
-                                if selectedGender == gender {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundColor(purpleColor)
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 18)
-                            .background(Color(white: 0.96))
-                            .cornerRadius(30)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 30)
-                                    .stroke(selectedGender == gender ? purpleColor : Color.clear, lineWidth: 2)
-                            )
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                        GenderOptionButton(
+                            gender: gender,
+                            isSelected: selectedGender == gender,
+                            onTap: { selectedGender = gender }
+                        )
                     }
                 }
             }
@@ -409,6 +380,55 @@ struct GenderSelectionView: View {
 
             Spacer()
         }
+    }
+}
+
+struct GenderOptionButton: View {
+    let gender: Gender
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 16) {
+                // Icon on left
+                Image(systemName: gender.icon)
+                    .font(.system(size: 20))
+                    .foregroundColor(isSelected ? .black : .black.opacity(0.6))
+                    .frame(width: 24)
+
+                // Gender text
+                Text(gender.rawValue)
+                    .font(.system(size: 17))
+                    .foregroundColor(.black)
+
+                Spacer()
+
+                // Checkmark on right when selected
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundColor(.black)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 18)
+            .background(Color(white: 0.96))
+            .cornerRadius(30)
+            .overlay(
+                RoundedRectangle(cornerRadius: 30)
+                    .stroke(isSelected ? Color.black : Color.clear, lineWidth: 2)
+            )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isPressed = pressing
+            }
+        }, perform: {})
     }
 }
 
@@ -565,7 +585,7 @@ struct PhysicalStatsView: View {
 // MARK: - Organic/Processed Selection View
 
 struct OrganicProcessedView: View {
-    @Binding var selection: Bool?
+    @Binding var selection: FoodPreference?
 
     var body: some View {
         VStack(spacing: 16) {
@@ -573,24 +593,24 @@ struct OrganicProcessedView: View {
                 title: "Mostly organic",
                 subtitle: "Whole foods, fresh ingredients",
                 icon: "leaf.fill",
-                isSelected: selection == true,
-                onTap: { selection = true }
+                isSelected: selection == .organic,
+                onTap: { selection = .organic }
             )
 
             SelectionButton(
                 title: "Mix of both",
                 subtitle: "A balance of organic and processed",
                 icon: "arrow.left.arrow.right",
-                isSelected: selection == nil,
-                onTap: { selection = nil }
+                isSelected: selection == .mixed,
+                onTap: { selection = .mixed }
             )
 
             SelectionButton(
                 title: "Mostly processed",
                 subtitle: "Packaged and convenience foods",
                 icon: "bag.fill",
-                isSelected: selection == false,
-                onTap: { selection = false }
+                isSelected: selection == .processed,
+                onTap: { selection = .processed }
             )
 
             Text("No judgment here! We just want to help you eat better.")
@@ -608,6 +628,8 @@ struct SelectionButton: View {
     let icon: String
     let isSelected: Bool
     let onTap: () -> Void
+
+    @State private var isPressed = false
 
     var body: some View {
         Button(action: onTap) {
@@ -633,7 +655,7 @@ struct SelectionButton: View {
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(.black)
                         .font(.title2)
                 }
             }
@@ -642,10 +664,16 @@ struct SelectionButton: View {
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? Color.black.opacity(0.2) : Color.black.opacity(0.1), lineWidth: 1)
+                    .stroke(isSelected ? Color.black : Color.black.opacity(0.1), lineWidth: isSelected ? 2 : 1)
             )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
+        .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isPressed = pressing
+            }
+        }, perform: {})
     }
 }
 
@@ -653,6 +681,9 @@ struct SelectionButton: View {
 
 struct YesNoSelectionView: View {
     @Binding var selection: Bool?
+
+    @State private var yesPressed = false
+    @State private var noPressed = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -666,7 +697,7 @@ struct YesNoSelectionView: View {
 
                     if selection == true {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(.black)
                             .font(.title2)
                     }
                 }
@@ -675,10 +706,16 @@ struct YesNoSelectionView: View {
                 .cornerRadius(16)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(selection == true ? Color.black.opacity(0.2) : Color.black.opacity(0.1), lineWidth: 1)
+                        .stroke(selection == true ? Color.black : Color.black.opacity(0.1), lineWidth: selection == true ? 2 : 1)
                 )
+                .scaleEffect(yesPressed ? 0.98 : 1.0)
             }
             .buttonStyle(PlainButtonStyle())
+            .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    yesPressed = pressing
+                }
+            }, perform: {})
 
             Button(action: { selection = false }) {
                 HStack {
@@ -690,7 +727,7 @@ struct YesNoSelectionView: View {
 
                     if selection == false {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundColor(.black)
                             .font(.title2)
                     }
                 }
@@ -699,10 +736,16 @@ struct YesNoSelectionView: View {
                 .cornerRadius(16)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(selection == false ? Color.black.opacity(0.2) : Color.black.opacity(0.1), lineWidth: 1)
+                        .stroke(selection == false ? Color.black : Color.black.opacity(0.1), lineWidth: selection == false ? 2 : 1)
                 )
+                .scaleEffect(noPressed ? 0.98 : 1.0)
             }
             .buttonStyle(PlainButtonStyle())
+            .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
+                withAnimation(.easeInOut(duration: 0.15)) {
+                    noPressed = pressing
+                }
+            }, perform: {})
         }
     }
 }
@@ -753,6 +796,8 @@ struct AdventureLevelCard: View {
     let isSelected: Bool
     let onTap: () -> Void
 
+    @State private var isPressed = false
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 16) {
@@ -778,7 +823,7 @@ struct AdventureLevelCard: View {
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
+                        .foregroundColor(.black)
                         .font(.title2)
                 }
             }
@@ -787,10 +832,16 @@ struct AdventureLevelCard: View {
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? Color.black.opacity(0.2) : Color.black.opacity(0.1), lineWidth: 1)
+                    .stroke(isSelected ? Color.black : Color.black.opacity(0.1), lineWidth: isSelected ? 2 : 1)
             )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
         }
         .buttonStyle(PlainButtonStyle())
+        .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isPressed = pressing
+            }
+        }, perform: {})
     }
 }
 
@@ -939,63 +990,51 @@ struct BirthdayPickerSheet: View {
 
                 Text("Select Birthday")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.black)
 
                 Spacer()
 
                 Button("Done") {
                     onDone()
                 }
-                .font(.system(size: 17))
-                .foregroundColor(.black)
+                .font(.system(size: 17, weight: .semibold))
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
             .padding(.bottom, 10)
 
-            // Three-column wheel picker - evenly distributed
-            GeometryReader { geometry in
-                HStack(spacing: 0) {
-                    // Month picker
-                    Picker("Month", selection: $selectedMonth) {
-                        ForEach(1...12, id: \.self) { month in
-                            Text(months[month - 1])
-                                .tag(month)
-                        }
+            // Three-column wheel picker
+            HStack(spacing: 0) {
+                // Month picker
+                Picker("Month", selection: $selectedMonth) {
+                    ForEach(1...12, id: \.self) { month in
+                        Text(months[month - 1]).tag(month)
                     }
-                    .pickerStyle(.wheel)
-                    .frame(width: geometry.size.width * 0.45)
-                    .clipped()
-
-                    // Day picker
-                    Picker("Day", selection: $selectedDay) {
-                        ForEach(1...31, id: \.self) { day in
-                            Text("\(day)")
-                                .tag(day)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(width: geometry.size.width * 0.2)
-                    .clipped()
-
-                    // Year picker
-                    Picker("Year", selection: $selectedYear) {
-                        ForEach((1920...2020).reversed(), id: \.self) { year in
-                            Text("\(year)")
-                                .tag(year)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(width: geometry.size.width * 0.35)
-                    .clipped()
                 }
+                .pickerStyle(.wheel)
+                .frame(maxWidth: .infinity)
+
+                // Day picker
+                Picker("Day", selection: $selectedDay) {
+                    ForEach(1...31, id: \.self) { day in
+                        Text("\(day)").tag(day)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .frame(width: 70)
+
+                // Year picker
+                Picker("Year", selection: $selectedYear) {
+                    ForEach((1920...2024).reversed(), id: \.self) { year in
+                        Text(String(year)).tag(year)
+                    }
+                }
+                .pickerStyle(.wheel)
                 .frame(maxWidth: .infinity)
             }
             .frame(height: 200)
 
             Spacer()
         }
-        .background(Color.white)
     }
 }
 
@@ -1174,15 +1213,13 @@ struct HeightPickerSheet: View {
 
                 Text("Select Height")
                     .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.black)
 
                 Spacer()
 
                 Button("Done") {
                     onDone()
                 }
-                .font(.system(size: 17))
-                .foregroundColor(.black)
+                .font(.system(size: 17, weight: .semibold))
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
@@ -1220,7 +1257,6 @@ struct HeightPickerSheet: View {
 
             Spacer()
         }
-        .background(Color.white)
     }
 }
 
@@ -1415,7 +1451,7 @@ struct WeightGoalPickerView: View {
                     HStack {
                         Text("\(currentWeightInt) \(weightUnit.rawValue)")
                             .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(Color(hex: "4B3CFA"))
+                            .foregroundColor(.black)
                         Spacer()
                         Image(systemName: "pencil")
                             .foregroundColor(.gray)
@@ -1438,7 +1474,7 @@ struct WeightGoalPickerView: View {
                     HStack {
                         Text("\(goalWeightInt) \(weightUnit.rawValue)")
                             .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(Color(hex: "4B3CFA"))
+                            .foregroundColor(.black)
                         Spacer()
                         Image(systemName: "pencil")
                             .foregroundColor(.gray)
@@ -1467,11 +1503,11 @@ struct WeightGoalPickerView: View {
                         if let date = targetDate {
                             Text(date.formatted(date: .abbreviated, time: .omitted))
                                 .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(Color(hex: "4B3CFA"))
+                                .foregroundColor(.black)
                         } else {
                             Text("Set target date")
                                 .font(.system(size: 17))
-                                .foregroundColor(Color(hex: "4B3CFA"))
+                                .foregroundColor(.black)
                         }
                         Spacer()
                         Image(systemName: "calendar")
@@ -1637,45 +1673,67 @@ struct ActivityLevelPickerView: View {
         ScrollView {
             VStack(spacing: 12) {
                 ForEach(ActivityLevel.allCases, id: \.self) { level in
-                    Button(action: { selectedLevel = level }) {
-                        HStack(spacing: 16) {
-                            Image(systemName: level.icon)
-                                .font(.title2)
-                                .foregroundColor(selectedLevel == level ? .white : .black)
-                                .frame(width: 44, height: 44)
-                                .background(selectedLevel == level ? Color.black : Color.black.opacity(0.05))
-                                .cornerRadius(12)
-
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(level.rawValue)
-                                    .font(.headline)
-                                    .foregroundColor(.black)
-
-                                Text(level.description)
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
-                            }
-
-                            Spacer()
-
-                            if selectedLevel == level {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(Color(hex: "4B3CFA"))
-                                    .font(.title2)
-                            }
-                        }
-                        .padding()
-                        .background(selectedLevel == level ? Color(hex: "4B3CFA").opacity(0.05) : Color.white)
-                        .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(selectedLevel == level ? Color(hex: "4B3CFA").opacity(0.3) : Color.black.opacity(0.1), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    ActivityLevelButton(
+                        level: level,
+                        isSelected: selectedLevel == level,
+                        onTap: { selectedLevel = level }
+                    )
                 }
             }
         }
+    }
+}
+
+struct ActivityLevelButton: View {
+    let level: ActivityLevel
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 16) {
+                Image(systemName: level.icon)
+                    .font(.title2)
+                    .foregroundColor(isSelected ? .white : .black)
+                    .frame(width: 44, height: 44)
+                    .background(isSelected ? Color.black : Color.black.opacity(0.05))
+                    .cornerRadius(12)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(level.rawValue)
+                        .font(.headline)
+                        .foregroundColor(.black)
+
+                    Text(level.description)
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
+
+                Spacer()
+
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.black)
+                        .font(.title2)
+                }
+            }
+            .padding()
+            .background(isSelected ? Color.black.opacity(0.05) : Color.white)
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isSelected ? Color.black : Color.black.opacity(0.1), lineWidth: isSelected ? 2 : 1)
+            )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isPressed = pressing
+            }
+        }, perform: {})
     }
 }
 

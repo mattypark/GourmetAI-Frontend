@@ -17,13 +17,17 @@ struct AnalysisResultView: View {
     @State private var showingEditSheet = false
     @State private var showingRecipeList = false
     @State private var showingAddMore = false
+    @State private var showingAuthSheet = false
 
     private let maxVisibleIngredients = 6
 
+    // Light gray background color (explicit, not system-adaptive)
+    private let lightGrayBackground = Color(red: 230/255, green: 230/255, blue: 230/255)
+
     var body: some View {
         ZStack {
-            // Light gray background
-            Color(UIColor.systemGray6)
+            // Light gray background (explicit color, ignores dark mode)
+            lightGrayBackground
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -31,6 +35,7 @@ struct AnalysisResultView: View {
                 headerView
 
                 if let result = viewModel.analysisResult {
+                    // Main content - fills available space
                     ScrollView {
                         VStack(spacing: 20) {
                             // Image preview (smaller)
@@ -77,11 +82,11 @@ struct AnalysisResultView: View {
                             }
                         }
                         .padding(.top, 16)
-                        .padding(.bottom, 120) // Space for bottom buttons
+                        .padding(.bottom, 24)
                     }
 
-                    // Bottom buttons
-                    bottomButtons(result)
+                    // Bottom buttons - pinned to bottom
+                    bottomButtonsView(result)
                 } else {
                     Spacer()
                     emptyState
@@ -110,6 +115,23 @@ struct AnalysisResultView: View {
                         dismiss()
                     }
                 )
+            }
+        }
+        .sheet(isPresented: $showingAuthSheet) {
+            AuthenticationView(onSuccess: {
+                // After successful auth, retry save
+                Task {
+                    await viewModel.saveAnalysisOnly()
+                    if !viewModel.needsAuthentication {
+                        dismiss()
+                    }
+                }
+            })
+        }
+        .onChange(of: viewModel.needsAuthentication) { _, needsAuth in
+            if needsAuth {
+                showingAuthSheet = true
+                viewModel.needsAuthentication = false
             }
         }
         .onAppear {
@@ -155,51 +177,55 @@ struct AnalysisResultView: View {
     // MARK: - Stats Row
 
     private func statsRow(_ result: AnalysisResult) -> some View {
-        VStack(spacing: 4) {
-            HStack(spacing: 0) {
-                // Ingredients count
+        HStack(spacing: 0) {
+            // Ingredients count
+            VStack(spacing: 4) {
                 HStack(spacing: 6) {
                     Text("🥕")
-                        .font(.body)
+                        .font(.title3)
                     Text("\(result.extractedIngredients.count)")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.black)
                 }
-                .frame(maxWidth: .infinity)
-
-                // Manually added count
-                Text("\(result.manuallyAddedItems.count)")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-
-                // Selected count
-                Text("\(selectedIngredients.count)")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-            }
-
-            // Labels below
-            HStack(spacing: 0) {
                 Text("Ingredients")
                     .font(.caption)
                     .foregroundColor(.gray)
-                    .frame(maxWidth: .infinity)
-
-                Text("")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .frame(maxWidth: .infinity)
-
-                Text("")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .frame(maxWidth: .infinity)
             }
+            .frame(maxWidth: .infinity)
+
+            // Manually added count
+            VStack(spacing: 4) {
+                HStack(spacing: 6) {
+                    Text("➕")
+                        .font(.title3)
+                    Text("\(result.manuallyAddedItems.count)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+                }
+                Text("Added")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            .frame(maxWidth: .infinity)
+
+            // Selected count
+            VStack(spacing: 4) {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark")
+                        .font(.title3)
+                        .foregroundColor(.black)
+                    Text("\(selectedIngredients.count)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+                }
+                Text("Selected")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
+            .frame(maxWidth: .infinity)
         }
         .padding(.vertical, 16)
     }
@@ -286,66 +312,62 @@ struct AnalysisResultView: View {
 
     // MARK: - Bottom Buttons
 
-    private func bottomButtons(_ result: AnalysisResult) -> some View {
-        VStack {
-            Spacer()
-
-            HStack(spacing: 12) {
-                // Save button
-                Button {
-                    Task {
-                        await viewModel.saveAnalysisOnly()
-                        dismiss()
-                    }
-                } label: {
-                    Text("Save")
-                        .font(.headline)
-                        .foregroundColor(.black)
-                        .frame(width: 80, height: 56)
-                        .background(Color.white)
-                        .cornerRadius(28)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 28)
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                        )
+    private func bottomButtonsView(_ result: AnalysisResult) -> some View {
+        HStack(spacing: 12) {
+            // Save button
+            Button {
+                Task {
+                    await viewModel.saveAnalysisOnly()
+                    dismiss()
                 }
-
-                // Create Recipes button
-                Button {
-                    Task {
-                        await viewModel.generateRecipesWithSelectedIngredients(
-                            selectedIngredientsArray(from: result)
-                        )
-
-                        if viewModel.analysisResult?.suggestedRecipes.isEmpty == false {
-                            await viewModel.completeAnalysis()
-                            showingRecipeList = true
-                        }
-                    }
-                } label: {
-                    Text("Create Recipes")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 56)
-                        .background(Color.black)
-                        .cornerRadius(28)
-                }
-                .disabled(selectedIngredients.isEmpty || viewModel.isGeneratingRecipes)
-                .opacity(selectedIngredients.isEmpty ? 0.5 : 1)
+            } label: {
+                Text("Save")
+                    .font(.headline)
+                    .foregroundColor(.black)
+                    .frame(width: 80, height: 56)
+                    .background(Color.white)
+                    .cornerRadius(28)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 28)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 40)
-            .background(
-                LinearGradient(
-                    colors: [Color(UIColor.systemGray6).opacity(0), Color(UIColor.systemGray6)],
-                    startPoint: .top,
-                    endPoint: .bottom
+
+            // Create Recipes button - starts background job and returns to home
+            Button {
+                // Get selected ingredients
+                let selectedIngredientsList = selectedIngredientsArray(from: result)
+
+                // Start background recipe generation job
+                RecipeJobService.shared.startRecipeGeneration(
+                    analysisId: result.id,
+                    ingredients: selectedIngredientsList,
+                    thumbnailData: result.imageData
                 )
-                .frame(height: 100)
-                .allowsHitTesting(false)
-            )
+
+                // Save the analysis
+                Task {
+                    await viewModel.saveAnalysisOnly()
+                }
+
+                // Dismiss back to home - the job will show progress there
+                dismiss()
+            } label: {
+                Text("Create Recipes")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .background(Color.black)
+                    .cornerRadius(28)
+            }
+            .disabled(selectedIngredients.isEmpty)
+            .opacity(selectedIngredients.isEmpty ? 0.5 : 1)
         }
+        .padding(.horizontal, 24)
+        .padding(.top, 16)
+        .padding(.bottom, 40)
+        .background(lightGrayBackground)
     }
 
     // MARK: - Empty State

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleSignIn
 // TODO: Add SuperwallKit package in Xcode before uncommenting
 // import SuperwallKit
 
@@ -19,14 +20,28 @@ struct ChefAIApp: App {
         // Get your API key from: https://superwall.com/dashboard
         // TODO: Uncomment after adding SuperwallKit package
         // Superwall.configure(apiKey: "pk_l2iDq2lf10Bfq7lnjPTFE")
+
+        // Configure Google Sign-In
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: Config.googleClientID)
     }
 
     var body: some Scene {
         WindowGroup {
-            if hasCompletedOnboarding {
-                MainTabView()
-            } else {
-                OnboardingFlowView()
+            Group {
+                if hasCompletedOnboarding {
+                    MainTabView()
+                } else {
+                    OnboardingFlowView()
+                }
+            }
+            .onOpenURL { url in
+                // Handle Google Sign-In callback
+                GIDSignIn.sharedInstance.handle(url)
+
+                // Handle Supabase OAuth callback
+                Task {
+                    await SupabaseManager.shared.handleOAuthCallback(url: url)
+                }
             }
         }
     }

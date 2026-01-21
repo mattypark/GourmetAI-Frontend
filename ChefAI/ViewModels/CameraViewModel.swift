@@ -57,6 +57,9 @@ class CameraViewModel: ObservableObject {
     // Subscription gating
     @Published var showPaywallPrompt = false
 
+    // Authentication state for save
+    @Published var needsAuthentication = false
+
     private let apiClient: APIClient
     private let storageService: StorageService
     private let subscriptionService: SubscriptionService
@@ -421,6 +424,13 @@ class CameraViewModel: ObservableObject {
     func saveAnalysisOnly() async {
         guard let result = analysisResult else { return }
 
+        // Check if user is authenticated
+        let supabase = SupabaseManager.shared
+        guard supabase.isAuthenticated else {
+            needsAuthentication = true
+            return
+        }
+
         // Merge manual items if any
         var updatedResult = result
         if !manualItems.isEmpty {
@@ -435,10 +445,21 @@ class CameraViewModel: ObservableObject {
             analysisResult = updatedResult
         }
 
-        // Save to storage
+        // Save to local storage
         var analyses = storageService.loadAnalyses()
         analyses.insert(updatedResult, at: 0)
         storageService.saveAnalyses(analyses)
+
+        // Also save to Supabase
+        do {
+            let ingredientItems = updatedResult.extractedIngredients.map {
+                IngredientItem(name: $0.name, quantity: $0.quantity, unit: $0.unit)
+            }
+            try await supabase.saveIngredientHistory(ingredients: ingredientItems)
+            print("Saved ingredients to Supabase")
+        } catch {
+            print("Failed to save to Supabase: \(error.localizedDescription)")
+        }
     }
 
     func resetAfterAnalysis() {

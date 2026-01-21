@@ -10,8 +10,15 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var settingsViewModel = SettingsViewModel()
+    @StateObject private var recipeJobService = RecipeJobService.shared
     @State private var showingProfile = false
     @State private var hasLoadedInitially = false
+    @State private var selectedCompletedJob: RecipeJob?
+
+    // Combined check for empty state
+    private var hasContent: Bool {
+        !viewModel.analyses.isEmpty || !recipeJobService.activeJobs.isEmpty || !recipeJobService.completedJobs.isEmpty
+    }
 
     var body: some View {
         NavigationStack {
@@ -25,7 +32,7 @@ struct HomeView: View {
                         .padding(.top, 8)
                         .padding(.bottom, 16)
 
-                    if viewModel.analyses.isEmpty {
+                    if !hasContent {
                         // Empty state - centered
                         Spacer()
                         emptyStateView
@@ -34,23 +41,19 @@ struct HomeView: View {
                         // Content
                         ScrollView {
                             VStack(alignment: .leading, spacing: 32) {
-                                // Recent Analyses
-                                VStack(alignment: .leading, spacing: 16) {
-                                    Text("Recent Analyses")
-                                        .font(.title2)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.black)
-                                        .padding(.horizontal)
+                                // Active Recipe Jobs Section
+                                if !recipeJobService.activeJobs.isEmpty {
+                                    activeJobsSection
+                                }
 
-                                    VStack(spacing: 16) {
-                                        ForEach(viewModel.analyses) { analysis in
-                                            NavigationLink(value: analysis) {
-                                                AnalysisCardView(analysis: analysis)
-                                            }
-                                            .buttonStyle(PlainButtonStyle())
-                                        }
-                                    }
-                                    .padding(.horizontal)
+                                // Completed Recipe Jobs Section (show only recent ones)
+                                if !recipeJobService.completedJobs.isEmpty {
+                                    completedJobsSection
+                                }
+
+                                // Recent Analyses
+                                if !viewModel.analyses.isEmpty {
+                                    recentAnalysesSection
                                 }
                             }
                             .padding(.vertical)
@@ -68,12 +71,93 @@ struct HomeView: View {
             .sheet(isPresented: $showingProfile) {
                 ProfileMenuView()
             }
+            .fullScreenCover(item: $selectedCompletedJob) { job in
+                RecipeListFromJobView(job: job)
+            }
             .onAppear {
                 if !hasLoadedInitially {
                     hasLoadedInitially = true
                     viewModel.loadData()
                 }
             }
+        }
+    }
+
+    // MARK: - Active Jobs Section
+
+    private var activeJobsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Creating Recipes")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.black)
+                .padding(.horizontal)
+
+            VStack(spacing: 12) {
+                ForEach(recipeJobService.activeJobs) { job in
+                    RecipeJobCardView(job: job) {
+                        // Active jobs are not tappable
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    // MARK: - Completed Jobs Section
+
+    private var completedJobsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text("Ready to View")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.black)
+
+                Spacer()
+
+                if recipeJobService.completedJobs.count > 3 {
+                    Button("Clear All") {
+                        recipeJobService.clearCompletedJobs()
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                }
+            }
+            .padding(.horizontal)
+
+            VStack(spacing: 12) {
+                ForEach(recipeJobService.completedJobs.prefix(5)) { job in
+                    RecipeJobCardView(job: job) {
+                        if job.status == .finished {
+                            selectedCompletedJob = job
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    // MARK: - Recent Analyses Section
+
+    private var recentAnalysesSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Recent Analyses")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.black)
+                .padding(.horizontal)
+
+            VStack(spacing: 16) {
+                ForEach(viewModel.analyses) { analysis in
+                    NavigationLink(value: analysis) {
+                        AnalysisCardView(analysis: analysis)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+            .padding(.horizontal)
         }
     }
 

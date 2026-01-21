@@ -13,10 +13,13 @@ struct CaptureScreenView: View {
     @StateObject private var cameraViewModel = CameraViewModel()
     @Environment(\.dismiss) private var dismiss
 
+    // Light gray background color (explicit, not system-adaptive)
+    private let lightGrayBackground = Color(red: 230/255, green: 230/255, blue: 230/255)
+
     var body: some View {
         ZStack {
-            // Light gray background (matches Figma)
-            Color(UIColor.systemGray6)
+            // Light gray background (explicit color, ignores dark mode)
+            lightGrayBackground
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -106,7 +109,7 @@ struct CaptureScreenView: View {
                         .cornerRadius(24)
                 } else {
                     RoundedRectangle(cornerRadius: 24)
-                        .fill(Color(UIColor.tertiarySystemBackground))
+                        .fill(Color.white)
                         .overlay(
                             ProgressView()
                                 .scaleEffect(1.5)
@@ -169,10 +172,13 @@ struct CapturePreviewView: View {
     let onComplete: () -> Void
     @Environment(\.dismiss) private var dismiss
 
+    // Light gray background color (explicit, not system-adaptive)
+    private let lightGrayBackground = Color(red: 230/255, green: 230/255, blue: 230/255)
+
     var body: some View {
         ZStack {
-            // Light gray background (matches Figma)
-            Color(UIColor.systemGray6)
+            // Light gray background (explicit color, ignores dark mode)
+            lightGrayBackground
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {

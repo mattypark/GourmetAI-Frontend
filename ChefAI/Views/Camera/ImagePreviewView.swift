@@ -28,7 +28,7 @@ struct ImagePreviewView: View {
                             .font(.system(size: 16, weight: .medium))
                             .foregroundColor(.black)
                             .frame(width: 40, height: 40)
-                            .background(Color(UIColor.systemGray5))
+                            .background(Color(red: 200/255, green: 200/255, blue: 200/255))
                             .clipShape(Circle())
                     }
                     .disabled(viewModel.isAnalyzing)

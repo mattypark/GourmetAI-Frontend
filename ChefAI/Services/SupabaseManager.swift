@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import Supabase
+import Auth
 
 /// Manages all Supabase interactions for authentication and data persistence
 @MainActor
@@ -22,7 +23,12 @@ class SupabaseManager: ObservableObject {
     private init() {
         client = SupabaseClient(
             supabaseURL: URL(string: Config.supabaseURL)!,
-            supabaseKey: Config.supabaseAnonKey
+            supabaseKey: Config.supabaseAnonKey,
+            options: .init(
+                auth: .init(
+                    emitLocalSessionAsInitialSession: true
+                )
+            )
         )
 
         Task {
@@ -56,6 +62,46 @@ class SupabaseManager: ObservableObject {
         let session = try await client.auth.signIn(email: email, password: password)
         currentUser = session.user
         isAuthenticated = true
+    }
+
+    /// Sign in with Apple ID token
+    func signInWithApple(idToken: String, nonce: String) async throws {
+        let session = try await client.auth.signInWithIdToken(
+            credentials: .init(
+                provider: .apple,
+                idToken: idToken,
+                nonce: nonce
+            )
+        )
+        currentUser = session.user
+        isAuthenticated = true
+        print("Apple sign in successful for user: \(session.user.id)")
+    }
+
+    /// Sign in with Google tokens
+    func signInWithGoogle(idToken: String, accessToken: String) async throws {
+        let session = try await client.auth.signInWithIdToken(
+            credentials: .init(
+                provider: .google,
+                idToken: idToken,
+                accessToken: accessToken
+            )
+        )
+        currentUser = session.user
+        isAuthenticated = true
+        print("Google sign in successful for user: \(session.user.id)")
+    }
+
+    /// Handle OAuth callback URL (for web-based OAuth flows)
+    func handleOAuthCallback(url: URL) async {
+        do {
+            let session = try await client.auth.session(from: url)
+            currentUser = session.user
+            isAuthenticated = true
+            print("OAuth callback handled for user: \(session.user.id)")
+        } catch {
+            print("OAuth callback error: \(error.localizedDescription)")
+        }
     }
 
     /// Sign out
