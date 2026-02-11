@@ -74,6 +74,29 @@ class RecipeJobService: ObservableObject {
         saveJobs()
     }
 
+    /// Retry a failed job
+    func retryJob(_ jobId: UUID) {
+        guard let index = completedJobs.firstIndex(where: { $0.id == jobId }),
+              completedJobs[index].status == .error else {
+            print("⚠️ RecipeJobService: Cannot retry job \(jobId) - not found or not in error state")
+            return
+        }
+
+        var job = completedJobs.remove(at: index)
+        job.status = .thinking
+        job.errorMessage = nil
+        job.completedAt = nil
+        activeJobs.insert(job, at: 0)
+        saveJobs()
+
+        let task = Task {
+            await generateRecipes(jobId: job.id)
+        }
+        tasks[job.id] = task
+
+        print("🔄 RecipeJobService: Retrying job \(jobId)")
+    }
+
     // MARK: - Recipe Generation (with simulated status updates)
 
     private func generateRecipes(jobId: UUID) async {
@@ -102,7 +125,7 @@ class RecipeJobService: ObservableObject {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(Config.backendAPIKey, forHTTPHeaderField: "X-API-Key")
-        request.timeoutInterval = 120
+        request.timeoutInterval = 60
 
         // Build request body
         let body: [String: Any] = [
@@ -129,8 +152,19 @@ class RecipeJobService: ObservableObject {
             }
 
             guard httpResponse.statusCode == 200 else {
-                let errorMessage = String(data: data, encoding: .utf8) ?? "Server error"
-                updateJob(jobId: jobId, status: .error, errorMessage: "Server error: \(httpResponse.statusCode) - \(errorMessage)")
+                let errorBody = String(data: data, encoding: .utf8) ?? "<non-UTF8 body>"
+                print("❌ RecipeJobService: HTTP \(httpResponse.statusCode) for job \(jobId). Body: \(errorBody.prefix(500))")
+
+                let userMessage: String
+                switch httpResponse.statusCode {
+                case 502, 503, 504:
+                    userMessage = "Server is temporarily unavailable. Please try again in a moment."
+                case 408:
+                    userMessage = "Request timed out. Please try again."
+                default:
+                    userMessage = "Server error (\(httpResponse.statusCode)). Please try again."
+                }
+                updateJob(jobId: jobId, status: .error, errorMessage: userMessage)
                 return
             }
 
@@ -163,7 +197,9 @@ class RecipeJobService: ObservableObject {
 
         } catch {
             if !Task.isCancelled {
-                updateJob(jobId: jobId, status: .error, errorMessage: error.localizedDescription)
+                let userMessage = Self.userFriendlyErrorMessage(from: error)
+                print("❌ RecipeJobService: Job \(jobId) failed: \(error)")
+                updateJob(jobId: jobId, status: .error, errorMessage: userMessage)
             }
         }
     }
@@ -228,6 +264,28 @@ class RecipeJobService: ObservableObject {
         saveJobs()
     }
 
+    private static func userFriendlyErrorMessage(from error: Error) -> String {
+        let nsError = error as NSError
+
+        if nsError.code == NSURLErrorTimedOut || nsError.code == NSURLErrorNetworkConnectionLost {
+            return "Recipe generation timed out. Please try again in a moment."
+        }
+
+        if nsError.code == NSURLErrorNotConnectedToInternet {
+            return "No internet connection. Please check your network and try again."
+        }
+
+        if nsError.code == NSURLErrorCannotConnectToHost {
+            return "Cannot reach the server. Please try again later."
+        }
+
+        if error is DecodingError {
+            return "Received an unexpected response from the server. Please try again."
+        }
+
+        return "Something went wrong generating recipes. Please try again."
+    }
+
     // MARK: - Persistence
 
     private func loadJobs() {
@@ -243,7 +301,27 @@ class RecipeJobService: ObservableObject {
             activeJobs = allJobs.filter { $0.status.isProcessing }
             completedJobs = allJobs.filter { !$0.status.isProcessing }
 
-            // Restart any active jobs that were interrupted
+            // Check for stale jobs that were interrupted (app was killed/crashed)
+            let staleThreshold: TimeInterval = 120 // 2 minutes
+            let now = Date()
+            var staleCount = 0
+
+            for i in stride(from: activeJobs.count - 1, through: 0, by: -1) {
+                if now.timeIntervalSince(activeJobs[i].createdAt) > staleThreshold {
+                    activeJobs[i].status = .error
+                    activeJobs[i].errorMessage = "Recipe generation was interrupted. Please try again."
+                    activeJobs[i].completedAt = now
+                    let failedJob = activeJobs.remove(at: i)
+                    completedJobs.insert(failedJob, at: 0)
+                    staleCount += 1
+                }
+            }
+
+            if staleCount > 0 {
+                saveJobs()
+            }
+
+            // Only retry recent jobs
             for job in activeJobs {
                 let task = Task {
                     await generateRecipes(jobId: job.id)
@@ -251,7 +329,7 @@ class RecipeJobService: ObservableObject {
                 tasks[job.id] = task
             }
 
-            print("📦 RecipeJobService: Loaded \(activeJobs.count) active, \(completedJobs.count) completed jobs")
+            print("📦 RecipeJobService: Loaded \(activeJobs.count) active (retrying), \(staleCount) stale (marked error), \(completedJobs.count) completed jobs")
         } catch {
             print("❌ RecipeJobService: Failed to load jobs: \(error)")
         }

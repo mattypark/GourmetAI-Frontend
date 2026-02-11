@@ -85,7 +85,7 @@ struct GalleryPreviewView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.white.ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 24) {
@@ -94,7 +94,7 @@ struct GalleryPreviewView: View {
                             .resizable()
                             .scaledToFit()
                             .cornerRadius(16)
-                            .shadow(color: .white.opacity(0.1), radius: 8)
+                            .shadow(color: .black.opacity(0.1), radius: 8)
 
                         // Manual item input
                         ManualItemInputView(viewModel: cameraViewModel)
@@ -137,13 +137,12 @@ struct GalleryPreviewView: View {
             }
             .navigationTitle("Preview")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
                 }
             }
             .fullScreenCover(isPresented: $cameraViewModel.showingAnalysisResults) {

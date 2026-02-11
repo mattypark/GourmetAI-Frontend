@@ -94,7 +94,7 @@ struct RecipeJobCardView: View {
                 Image(systemName: "sparkles")
                     .foregroundColor(.green)
             case .error:
-                Image(systemName: "exclamationmark.triangle")
+                Image(systemName: "arrow.clockwise.circle")
                     .foregroundColor(.red)
             }
         }
@@ -114,7 +114,7 @@ struct RecipeJobCardView: View {
         case .finished:
             return "Finished"
         case .error:
-            return "Error"
+            return "Tap to Retry"
         }
     }
 

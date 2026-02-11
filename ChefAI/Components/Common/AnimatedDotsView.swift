@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct AnimatedDotsView: View {
     @State private var dotIndex = 0

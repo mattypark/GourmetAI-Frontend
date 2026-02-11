@@ -71,9 +71,12 @@ struct RecipeDetailView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Image(systemName: "xmark")
+                    Image(systemName: "chevron.left")
+                        .font(.title3)
                         .foregroundColor(.black)
                 }
+                .accessibilityLabel("Back")
+                .accessibilityHint("Return to recipe list")
             }
 
             ToolbarItem(placement: .primaryAction) {

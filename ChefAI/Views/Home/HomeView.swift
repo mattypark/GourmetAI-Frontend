@@ -10,14 +10,14 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var settingsViewModel = SettingsViewModel()
-    @StateObject private var recipeJobService = RecipeJobService.shared
+    @ObservedObject private var recipeJobService = RecipeJobService.shared
     @State private var showingProfile = false
     @State private var hasLoadedInitially = false
     @State private var selectedCompletedJob: RecipeJob?
 
     // Combined check for empty state
     private var hasContent: Bool {
-        !viewModel.analyses.isEmpty || !recipeJobService.activeJobs.isEmpty || !recipeJobService.completedJobs.isEmpty
+        !recipeJobService.activeJobs.isEmpty || !recipeJobService.completedJobs.isEmpty
     }
 
     var body: some View {
@@ -46,14 +46,9 @@ struct HomeView: View {
                                     activeJobsSection
                                 }
 
-                                // Completed Recipe Jobs Section (show only recent ones)
+                                // Completed Recipe Jobs Section
                                 if !recipeJobService.completedJobs.isEmpty {
                                     completedJobsSection
-                                }
-
-                                // Recent Analyses
-                                if !viewModel.analyses.isEmpty {
-                                    recentAnalysesSection
                                 }
                             }
                             .padding(.vertical)
@@ -109,7 +104,7 @@ struct HomeView: View {
     private var completedJobsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Ready to View")
+                Text("\(settingsViewModel.userName.isEmpty ? "Chef" : settingsViewModel.userName)'s Recipes")
                     .font(.title2)
                     .fontWeight(.semibold)
                     .foregroundColor(.black)
@@ -128,33 +123,14 @@ struct HomeView: View {
 
             VStack(spacing: 12) {
                 ForEach(recipeJobService.completedJobs.prefix(5)) { job in
-                    RecipeJobCardView(job: job) {
+                    RecipeJobCardView(job: job, onTap: {
+                        print("🔘 Card tapped for job \(job.id), status: \(job.status.rawValue)")
                         if job.status == .finished {
                             selectedCompletedJob = job
+                        } else if job.status == .error {
+                            RecipeJobService.shared.retryJob(job.id)
                         }
-                    }
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-
-    // MARK: - Recent Analyses Section
-
-    private var recentAnalysesSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Recent Analyses")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(.black)
-                .padding(.horizontal)
-
-            VStack(spacing: 16) {
-                ForEach(viewModel.analyses) { analysis in
-                    NavigationLink(value: analysis) {
-                        AnalysisCardView(analysis: analysis)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    })
                 }
             }
             .padding(.horizontal)

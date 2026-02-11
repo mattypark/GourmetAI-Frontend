@@ -76,7 +76,9 @@ struct AuthenticationView: View {
                     } label: {
                         HStack(spacing: 12) {
                             // Google "G" logo
-                            GoogleLogoAuth()
+                            Image("GoogleLogo")
+                                .resizable()
+                                .scaledToFit()
                                 .frame(width: 20, height: 20)
 
                             Text("Continue with Google")
@@ -269,53 +271,6 @@ struct AuthenticationView: View {
     }
 }
 
-// MARK: - Google Logo
-
-struct GoogleLogoAuth: View {
-    var body: some View {
-        GeometryReader { geometry in
-            let size = min(geometry.size.width, geometry.size.height)
-            let lineWidth = size * 0.18
-
-            ZStack {
-                // Blue arc (right side, top portion)
-                Circle()
-                    .trim(from: 0.0, to: 0.25)
-                    .stroke(Color(red: 66/255, green: 133/255, blue: 244/255), lineWidth: lineWidth)
-                    .frame(width: size - lineWidth, height: size - lineWidth)
-                    .rotationEffect(.degrees(-45))
-
-                // Green arc (bottom right)
-                Circle()
-                    .trim(from: 0.0, to: 0.25)
-                    .stroke(Color(red: 52/255, green: 168/255, blue: 83/255), lineWidth: lineWidth)
-                    .frame(width: size - lineWidth, height: size - lineWidth)
-                    .rotationEffect(.degrees(45))
-
-                // Yellow arc (bottom left)
-                Circle()
-                    .trim(from: 0.0, to: 0.25)
-                    .stroke(Color(red: 251/255, green: 188/255, blue: 5/255), lineWidth: lineWidth)
-                    .frame(width: size - lineWidth, height: size - lineWidth)
-                    .rotationEffect(.degrees(135))
-
-                // Red arc (top left)
-                Circle()
-                    .trim(from: 0.0, to: 0.25)
-                    .stroke(Color(red: 234/255, green: 67/255, blue: 53/255), lineWidth: lineWidth)
-                    .frame(width: size - lineWidth, height: size - lineWidth)
-                    .rotationEffect(.degrees(225))
-
-                // Blue horizontal bar (the "cut" part of the G)
-                Rectangle()
-                    .fill(Color(red: 66/255, green: 133/255, blue: 244/255))
-                    .frame(width: size * 0.5, height: lineWidth)
-                    .offset(x: size * 0.12)
-            }
-            .frame(width: size, height: size)
-        }
-    }
-}
 
 #Preview {
     AuthenticationView()

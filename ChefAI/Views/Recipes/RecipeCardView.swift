@@ -29,7 +29,7 @@ struct RecipeCardView: View {
                             case .empty:
                                 ProgressView()
                                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                    .background(Color.white.opacity(0.1))
+                                    .background(Color.gray.opacity(0.1))
                             @unknown default:
                                 imagePlaceholder
                             }
@@ -47,7 +47,7 @@ struct RecipeCardView: View {
                     Text(recipe.name)
                         .font(.headline)
                         .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
@@ -60,7 +60,7 @@ struct RecipeCardView: View {
                             Text(recipe.totalTimeDisplay)
                                 .font(.caption)
                         }
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.gray)
 
                         // Difficulty
                         if let difficulty = recipe.difficulty {
@@ -81,10 +81,10 @@ struct RecipeCardView: View {
                                 ForEach(recipe.tags.prefix(3), id: \.self) { tag in
                                     Text(tag)
                                         .font(.caption2)
-                                        .foregroundColor(.white.opacity(0.8))
+                                        .foregroundColor(.gray)
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
-                                        .background(Color.white.opacity(0.15))
+                                        .background(Color.gray.opacity(0.1))
                                         .cornerRadius(8)
                                 }
                             }
@@ -94,12 +94,9 @@ struct RecipeCardView: View {
                 .padding(12)
             }
             .frame(width: 240)
-            .background(Color.white.opacity(0.08))
+            .background(Color.white)
             .cornerRadius(20)
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-            )
+            .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
         }
         .buttonStyle(.plain)
     }
@@ -107,7 +104,7 @@ struct RecipeCardView: View {
     private var imagePlaceholder: some View {
         ZStack {
             LinearGradient(
-                colors: [Color.gray.opacity(0.3), Color.gray.opacity(0.1)],
+                colors: [Color.gray.opacity(0.2), Color.gray.opacity(0.1)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -115,12 +112,12 @@ struct RecipeCardView: View {
             VStack(spacing: 8) {
                 Image(systemName: "photo")
                     .font(.largeTitle)
-                    .foregroundColor(.white.opacity(0.3))
+                    .foregroundColor(.gray.opacity(0.4))
 
                 if let cuisine = recipe.cuisineType {
                     Text(cuisine)
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.4))
+                        .foregroundColor(.gray)
                 }
             }
         }
@@ -220,7 +217,7 @@ struct LargeRecipeCardView: View {
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        Color.white.ignoresSafeArea()
 
         VStack(spacing: 20) {
             RecipeCardView(

@@ -37,11 +37,16 @@ struct RecipeListView: View {
             .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
+                    Button {
                         onComplete()
                         dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.title3)
+                            .foregroundColor(.black)
                     }
-                    .foregroundColor(.black)
+                    .accessibilityLabel("Back")
+                    .accessibilityHint("Return to previous screen")
                 }
 
                 if viewModel.hasRecipes {
@@ -70,7 +75,9 @@ struct RecipeListView: View {
             }
             .fullScreenCover(isPresented: $viewModel.showingRecipeDetail) {
                 if let recipe = viewModel.selectedRecipe {
-                    RecipeDetailView(recipe: recipe)
+                    NavigationStack {
+                        RecipeDetailView(recipe: recipe)
+                    }
                 }
             }
         }
@@ -219,16 +226,51 @@ struct RecipeRowView: View {
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 16) {
-                // Recipe Image Placeholder
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.black.opacity(0.05))
+                // Recipe Image
+                Group {
+                    if let imageURL = recipe.imageURL, !imageURL.isEmpty {
+                        AsyncImage(url: URL(string: imageURL)) { phase in
+                            switch phase {
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            case .failure, .empty:
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.black.opacity(0.05))
 
-                    Image(systemName: "photo")
-                        .font(.title2)
-                        .foregroundColor(.gray)
+                                    Image(systemName: "photo")
+                                        .font(.title2)
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(width: 80, height: 80)
+                            @unknown default:
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.black.opacity(0.05))
+
+                                    Image(systemName: "photo")
+                                        .font(.title2)
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(width: 80, height: 80)
+                            }
+                        }
+                    } else {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.black.opacity(0.05))
+
+                            Image(systemName: "photo")
+                                .font(.title2)
+                                .foregroundColor(.gray)
+                        }
+                        .frame(width: 80, height: 80)
+                    }
                 }
-                .frame(width: 80, height: 80)
 
                 // Recipe Info
                 VStack(alignment: .leading, spacing: 6) {

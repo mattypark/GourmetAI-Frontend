@@ -28,14 +28,21 @@ struct RecipeListFromJobView: View {
             .toolbarColorScheme(.light, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.title3)
+                            .foregroundColor(.black)
                     }
-                    .foregroundColor(.black)
+                    .accessibilityLabel("Back")
+                    .accessibilityHint("Return to previous screen")
                 }
             }
             .fullScreenCover(item: $selectedRecipe) { recipe in
-                RecipeDetailView(recipe: recipe)
+                NavigationStack {
+                    RecipeDetailView(recipe: recipe)
+                }
             }
         }
     }
