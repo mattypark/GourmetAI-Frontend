@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct AnalysisLoadingView: View {
-    let image: UIImage?
+    let images: [UIImage]
+    @ObservedObject var cameraViewModel: CameraViewModel
     let onBack: () -> Void
 
-    @State private var progress: Double = 0
     @State private var currentFact: String = ""
 
     private let foodFacts = [
@@ -27,6 +27,29 @@ struct AnalysisLoadingView: View {
         "Nutmeg is a hallucinogen in large doses. Don't eat too much!"
     ]
 
+    /// Backward-compatible init for single image
+    init(image: UIImage?, cameraViewModel: CameraViewModel, onBack: @escaping () -> Void) {
+        self.images = image.map { [$0] } ?? []
+        self.cameraViewModel = cameraViewModel
+        self.onBack = onBack
+    }
+
+    /// Multi-image init
+    init(images: [UIImage], cameraViewModel: CameraViewModel, onBack: @escaping () -> Void) {
+        self.images = images
+        self.cameraViewModel = cameraViewModel
+        self.onBack = onBack
+    }
+
+    private var progressPercent: Int {
+        Int(cameraViewModel.analysisProgress * 100)
+    }
+
+    private var statusText: String {
+        let text = cameraViewModel.analysisStatus.displayText
+        return text.isEmpty ? "Finding Ingredients..." : text
+    }
+
     var body: some View {
         ZStack {
             // White background
@@ -34,31 +57,26 @@ struct AnalysisLoadingView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Header
+                // Header — pinned to top
                 headerView
 
-                // Content
-                VStack(spacing: 24) {
-                    // Image preview (smaller)
-                    if let image = image {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(height: 180)
-                            .frame(maxWidth: .infinity)
-                            .clipped()
-                            .cornerRadius(16)
-                            .padding(.horizontal, 24)
-                    }
+                // Push content down from header
+                Spacer()
+                    .frame(minHeight: 24, maxHeight: 48)
 
-                    // Finding Ingredients text
-                    Text("Finding Ingredients...")
+                // Centered content group
+                VStack(spacing: 24) {
+                    // Image preview(s)
+                    imagePreview
+
+                    // Status text
+                    Text(statusText)
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundColor(.black)
 
                     // Progress percentage
-                    Text("\(Int(progress))%")
+                    Text("\(progressPercent)%")
                         .font(.title3)
                         .fontWeight(.medium)
                         .foregroundColor(.black)
@@ -74,7 +92,8 @@ struct AnalysisLoadingView: View {
                             // Progress fill
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color.black)
-                                .frame(width: geometry.size.width * (progress / 100), height: 16)
+                                .frame(width: geometry.size.width * cameraViewModel.analysisProgress, height: 16)
+                                .animation(.easeInOut(duration: 0.4), value: cameraViewModel.analysisProgress)
                         }
                     }
                     .frame(height: 16)
@@ -96,15 +115,46 @@ struct AnalysisLoadingView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
                     }
-
-                    Spacer()
                 }
-                .padding(.top, 16)
+
+                // Balance the bottom space
+                Spacer()
+                    .frame(minHeight: 60)
             }
         }
         .onAppear {
             currentFact = foodFacts.randomElement() ?? foodFacts[0]
-            startProgressAnimation()
+        }
+    }
+
+    // MARK: - Image Preview
+
+    @ViewBuilder
+    private var imagePreview: some View {
+        if images.count == 1, let image = images.first {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(height: 180)
+                .frame(maxWidth: .infinity)
+                .clipped()
+                .cornerRadius(16)
+                .padding(.horizontal, 24)
+        } else if images.count > 1 {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(Array(images.enumerated()), id: \.offset) { _, img in
+                        Image(uiImage: img)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 120, height: 120)
+                            .clipped()
+                            .cornerRadius(12)
+                    }
+                }
+                .padding(.horizontal, 24)
+            }
+            .frame(height: 120)
         }
     }
 
@@ -136,38 +186,12 @@ struct AnalysisLoadingView: View {
         .padding(.horizontal, 16)
         .padding(.top, 8)
     }
-
-    private func startProgressAnimation() {
-        // Animate progress from 0 to 100 with random increments
-        progress = 0
-        animateProgress()
-    }
-
-    private func animateProgress() {
-        guard progress < 100 else { return }
-
-        // Random increment between 8 and 25
-        let increment = Double.random(in: 8...25)
-        let nextProgress = min(progress + increment, 100)
-
-        // Random delay between 0.3 and 0.8 seconds
-        let delay = Double.random(in: 0.3...0.8)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                progress = nextProgress
-            }
-
-            if progress < 100 {
-                animateProgress()
-            }
-        }
-    }
 }
 
 #Preview {
     AnalysisLoadingView(
         image: nil,
+        cameraViewModel: CameraViewModel(),
         onBack: {}
     )
 }

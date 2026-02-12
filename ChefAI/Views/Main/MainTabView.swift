@@ -11,9 +11,8 @@ import PhotosUI
 struct MainTabView: View {
     @State private var showingCamera = false
     @State private var showingGalleryPicker = false
-    @State private var selectedPhotoItem: PhotosPickerItem?
-    @State private var selectedImage: UIImage?
-    @State private var showingImagePreview = false
+    @State private var selectedPhotoItems: [PhotosPickerItem] = []
+    @State private var showingMultiImageReview = false
     @StateObject private var cameraViewModel = CameraViewModel()
 
     var body: some View {
@@ -28,9 +27,11 @@ struct MainTabView: View {
                     Spacer()
                     FloatingPlusButton(
                         onCameraSelected: {
+                            cameraViewModel.resetAfterAnalysis()
                             showingCamera = true
                         },
                         onGallerySelected: {
+                            cameraViewModel.resetAfterAnalysis()
                             showingGalleryPicker = true
                         }
                     )
@@ -39,42 +40,56 @@ struct MainTabView: View {
                 }
             }
         }
-        // Camera flow - opens simplified CaptureScreenView
+        // Camera flow: capture first photo, then show multi-image review
         .fullScreenCover(isPresented: $showingCamera) {
-            CaptureScreenView()
+            CaptureScreenForMultiImage(
+                onImageCaptured: { image in
+                    cameraViewModel.addImage(image)
+                    showingCamera = false
+                    showingMultiImageReview = true
+                },
+                onDismiss: {
+                    showingCamera = false
+                }
+            )
         }
-        // Gallery flow - direct PhotosPicker
-        .photosPicker(isPresented: $showingGalleryPicker, selection: $selectedPhotoItem, matching: .images)
-        .onChange(of: selectedPhotoItem) { _, newItem in
+        // Gallery flow: multi-select photos, then show multi-image review
+        .photosPicker(
+            isPresented: $showingGalleryPicker,
+            selection: $selectedPhotoItems,
+            maxSelectionCount: AppConstants.maxCapturedImages,
+            matching: .images
+        )
+        .onChange(of: selectedPhotoItems) { _, newItems in
+            guard !newItems.isEmpty else { return }
             Task {
-                if let data = try? await newItem?.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data) {
-                    // Reset ViewModel state before showing preview
-                    cameraViewModel.resetAfterAnalysis()
-                    selectedImage = image
-                    showingImagePreview = true
+                for item in newItems {
+                    if let data = try? await item.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        cameraViewModel.addImage(image)
+                    }
+                }
+                selectedPhotoItems = []
+                if !cameraViewModel.selectedImages.isEmpty {
+                    showingMultiImageReview = true
                 }
             }
         }
-        // Show preview after gallery selection
-        .fullScreenCover(isPresented: $showingImagePreview, onDismiss: {
-            selectedImage = nil
-            selectedPhotoItem = nil
+        // Multi-image review screen
+        .fullScreenCover(isPresented: $showingMultiImageReview, onDismiss: {
+            cameraViewModel.resetAfterAnalysis()
         }) {
-            if let image = selectedImage {
-                GalleryPreviewView(
-                    image: image,
-                    cameraViewModel: cameraViewModel,
-                    onComplete: {
-                        showingImagePreview = false
-                    }
-                )
-            }
+            MultiImageReviewView(
+                cameraViewModel: cameraViewModel,
+                onDismiss: {
+                    showingMultiImageReview = false
+                }
+            )
         }
     }
 }
 
-// MARK: - Gallery Preview View
+// MARK: - Gallery Preview View (Legacy — kept for compatibility)
 
 struct GalleryPreviewView: View {
     let image: UIImage
@@ -103,7 +118,7 @@ struct GalleryPreviewView: View {
                         PrimaryButton(
                             title: "Analyze",
                             action: {
-                                cameraViewModel.selectedImage = image
+                                cameraViewModel.selectedImages = [image]
                                 Task {
                                     await cameraViewModel.analyzeImage()
                                 }
@@ -126,6 +141,7 @@ struct GalleryPreviewView: View {
                 if cameraViewModel.isAnalyzing || cameraViewModel.analysisStatus.isFinished {
                     AnalysisLoadingView(
                         image: image,
+                        cameraViewModel: cameraViewModel,
                         onBack: {
                             cameraViewModel.resetAfterAnalysis()
                             dismiss()

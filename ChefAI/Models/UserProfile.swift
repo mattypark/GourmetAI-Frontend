@@ -17,35 +17,38 @@ struct UserProfile: Codable {
     var userGender: Gender?
     var userAge: Int?
     var userWeight: Double? // in lbs or kg
+    var desiredWeight: Double? // in lbs or kg
     var userHeight: Double? // in inches or cm
     var weightUnit: WeightUnit?
     var heightUnit: HeightUnit?
+    var activityLevel: ActivityLevel?
     var physiqueGoal: PhysiqueGoal? // OPTIONAL
 
-    // NEW: Onboarding questions
-    var eatsOrganic: Bool? // true = organic, false = processed
-    var processedFoodImpact: [ProcessedFoodImpact]?
-    var organicCookingGoals: [OrganicGoal]?
+    // Onboarding questions (new flow)
     var cookingDaysPerWeek: Int? // 0-7
-    var cookingFrequency: CookingFrequency?
-    var cookingTimesOfDay: [CookingTimeOfDay]?
+    var eatingStruggles: [CookingStruggle]?
+    var timeAvailability: TimeAvailability?
+    var dietaryRestrictions: [ExtendedDietaryRestriction]
+    var adventureLevel: AdventureLevel?
     var hasTriedDietChange: Bool?
     var dietChangeBarriers: [DietBarrier]?
+    var healthImprovementGoals: [HealthImprovementGoal]?
+    var commitmentPriority: CommitmentPriority?
+
+    // Legacy fields (kept for backward compatibility with old profiles)
+    var eatsOrganic: Bool?
+    var processedFoodImpact: [ProcessedFoodImpact]?
+    var organicCookingGoals: [OrganicGoal]?
+    var cookingFrequency: CookingFrequency?
+    var cookingTimesOfDay: [CookingTimeOfDay]?
     var motivationToCook: [CookingMotivation]?
     var acquisitionSource: AcquisitionSource?
     var aspirationalGoals: [AspirationalGoal]?
-
-    // Primary onboarding fields (existing)
     var mainGoal: MainGoal?
-    var dietaryRestrictions: [ExtendedDietaryRestriction]
     var cookingSkillLevel: SkillLevel?
     var mealPreferences: [MealPreference]
-    var timeAvailability: TimeAvailability?
     var cookingEquipment: [CookingEquipment]
     var cookingStruggles: [CookingStruggle]
-    var adventureLevel: AdventureLevel?
-
-    // Legacy/additional fields (kept for backward compatibility)
     var cookingStyle: CookingStyle?
     var cuisinePreferences: [CuisineType]
 
@@ -61,11 +64,8 @@ struct UserProfile: Codable {
     }
 
     var isOnboardingComplete: Bool {
-        // Check if minimum required fields are filled
+        // Check if minimum required fields are filled (new flow)
         userName != nil &&
-        userGender != nil &&
-        mainGoal != nil &&
-        cookingSkillLevel != nil &&
         timeAvailability != nil &&
         adventureLevel != nil
     }
@@ -191,87 +191,66 @@ struct UserProfile: Codable {
     // Custom decoder to handle migration from old profiles
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let legacyContainer = try? decoder.container(keyedBy: LegacyCodingKeys.self)
 
         id = try container.decode(UUID.self, forKey: .id)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
 
-        // NEW: Personal information
+        // Personal information
         userName = try container.decodeIfPresent(String.self, forKey: .userName)
         userGender = try container.decodeIfPresent(Gender.self, forKey: .userGender)
         userAge = try container.decodeIfPresent(Int.self, forKey: .userAge)
         userWeight = try container.decodeIfPresent(Double.self, forKey: .userWeight)
+        desiredWeight = try container.decodeIfPresent(Double.self, forKey: .desiredWeight)
         userHeight = try container.decodeIfPresent(Double.self, forKey: .userHeight)
         weightUnit = try container.decodeIfPresent(WeightUnit.self, forKey: .weightUnit)
         heightUnit = try container.decodeIfPresent(HeightUnit.self, forKey: .heightUnit)
+        activityLevel = try container.decodeIfPresent(ActivityLevel.self, forKey: .activityLevel)
         physiqueGoal = try container.decodeIfPresent(PhysiqueGoal.self, forKey: .physiqueGoal)
 
-        // NEW: Onboarding questions
+        // New onboarding flow
+        cookingDaysPerWeek = try container.decodeIfPresent(Int.self, forKey: .cookingDaysPerWeek)
+        eatingStruggles = try container.decodeIfPresent([CookingStruggle].self, forKey: .eatingStruggles)
+        timeAvailability = try container.decodeIfPresent(TimeAvailability.self, forKey: .timeAvailability)
+        dietaryRestrictions = try container.decodeIfPresent([ExtendedDietaryRestriction].self, forKey: .dietaryRestrictions) ?? []
+        adventureLevel = try container.decodeIfPresent(AdventureLevel.self, forKey: .adventureLevel)
+        hasTriedDietChange = try container.decodeIfPresent(Bool.self, forKey: .hasTriedDietChange)
+        dietChangeBarriers = try container.decodeIfPresent([DietBarrier].self, forKey: .dietChangeBarriers)
+        healthImprovementGoals = try container.decodeIfPresent([HealthImprovementGoal].self, forKey: .healthImprovementGoals)
+        commitmentPriority = try container.decodeIfPresent(CommitmentPriority.self, forKey: .commitmentPriority)
+
+        // Legacy fields
         eatsOrganic = try container.decodeIfPresent(Bool.self, forKey: .eatsOrganic)
         processedFoodImpact = try container.decodeIfPresent([ProcessedFoodImpact].self, forKey: .processedFoodImpact)
         organicCookingGoals = try container.decodeIfPresent([OrganicGoal].self, forKey: .organicCookingGoals)
-        cookingDaysPerWeek = try container.decodeIfPresent(Int.self, forKey: .cookingDaysPerWeek)
         cookingFrequency = try container.decodeIfPresent(CookingFrequency.self, forKey: .cookingFrequency)
         cookingTimesOfDay = try container.decodeIfPresent([CookingTimeOfDay].self, forKey: .cookingTimesOfDay)
-        hasTriedDietChange = try container.decodeIfPresent(Bool.self, forKey: .hasTriedDietChange)
-        dietChangeBarriers = try container.decodeIfPresent([DietBarrier].self, forKey: .dietChangeBarriers)
         motivationToCook = try container.decodeIfPresent([CookingMotivation].self, forKey: .motivationToCook)
         acquisitionSource = try container.decodeIfPresent(AcquisitionSource.self, forKey: .acquisitionSource)
         aspirationalGoals = try container.decodeIfPresent([AspirationalGoal].self, forKey: .aspirationalGoals)
-
-        // Existing fields - try to decode, or migrate from old
-        if let newGoal = try? container.decodeIfPresent(MainGoal.self, forKey: .mainGoal) {
-            mainGoal = newGoal
-        } else if let legacyContainer = legacyContainer,
-                  let oldGoal = try? legacyContainer.decodeIfPresent(CookingGoal.self, forKey: .mainGoal) {
-            mainGoal = MainGoal.migrateFrom(oldGoal)
-        } else {
-            mainGoal = nil
-        }
-
-        if let newRestrictions = try? container.decodeIfPresent([ExtendedDietaryRestriction].self, forKey: .dietaryRestrictions) {
-            dietaryRestrictions = newRestrictions
-        } else if let legacyContainer = legacyContainer,
-                  let oldRestrictions = try? legacyContainer.decodeIfPresent([DietaryRestriction].self, forKey: .dietaryRestrictions) {
-            dietaryRestrictions = oldRestrictions.map { ExtendedDietaryRestriction.migrateFrom($0) }
-        } else {
-            dietaryRestrictions = []
-        }
-
+        mainGoal = try container.decodeIfPresent(MainGoal.self, forKey: .mainGoal)
         cookingSkillLevel = try container.decodeIfPresent(SkillLevel.self, forKey: .cookingSkillLevel)
         mealPreferences = try container.decodeIfPresent([MealPreference].self, forKey: .mealPreferences) ?? []
-        timeAvailability = try container.decodeIfPresent(TimeAvailability.self, forKey: .timeAvailability)
         cookingEquipment = try container.decodeIfPresent([CookingEquipment].self, forKey: .cookingEquipment) ?? []
         cookingStruggles = try container.decodeIfPresent([CookingStruggle].self, forKey: .cookingStruggles) ?? []
-        adventureLevel = try container.decodeIfPresent(AdventureLevel.self, forKey: .adventureLevel)
-
-        // Legacy fields
         cookingStyle = try container.decodeIfPresent(CookingStyle.self, forKey: .cookingStyle)
         cuisinePreferences = try container.decodeIfPresent([CuisineType].self, forKey: .cuisinePreferences) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, createdAt, updatedAt
-        // NEW: Personal information
-        case userName, userGender, userAge, userWeight, userHeight
-        case weightUnit, heightUnit, physiqueGoal
-        // NEW: Onboarding questions
+        case userName, userGender, userAge, userWeight, desiredWeight, userHeight
+        case weightUnit, heightUnit, activityLevel, physiqueGoal
+        case cookingDaysPerWeek, eatingStruggles, timeAvailability
+        case dietaryRestrictions, adventureLevel
+        case hasTriedDietChange, dietChangeBarriers
+        case healthImprovementGoals, commitmentPriority
+        // Legacy
         case eatsOrganic, processedFoodImpact, organicCookingGoals
-        case cookingDaysPerWeek, cookingFrequency, cookingTimesOfDay
-        case hasTriedDietChange, dietChangeBarriers, motivationToCook
-        case acquisitionSource, aspirationalGoals
-        // Existing fields
-        case mainGoal, dietaryRestrictions, cookingSkillLevel
-        case mealPreferences, timeAvailability, cookingEquipment
-        case cookingStruggles, adventureLevel
-        case cookingStyle, cuisinePreferences
-    }
-
-    // Legacy keys used only for migration decoding
-    private enum LegacyCodingKeys: String, CodingKey {
-        case mainGoal = "oldMainGoal"
-        case dietaryRestrictions = "oldDietaryRestrictions"
+        case cookingFrequency, cookingTimesOfDay, motivationToCook
+        case acquisitionSource, aspirationalGoals, mainGoal
+        case cookingSkillLevel, mealPreferences, cookingEquipment
+        case cookingStruggles, cookingStyle, cuisinePreferences
     }
 }
 

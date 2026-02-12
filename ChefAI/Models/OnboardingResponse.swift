@@ -25,32 +25,21 @@ extension OnboardingResponse {
     /// Dictionary mapping question IDs to their responses
     /// Add/remove entries here to control which questions show response screens
     static let responses: [Int: OnboardingResponse] = [
-        // After Q10 (Main Goal)
-        10: OnboardingResponse(
+        // After Q6 (Activity Level)
+        6: OnboardingResponse(
             id: 1,
-            triggerAfterQuestionId: 10,
+            triggerAfterQuestionId: 6,
             lines: [
-                "Great choice!",
-                "Did you know 73% of people want to cook more but don't know where to start?",
-                "ChefAI will make it easy for you."
+                "Great!",
+                "We'll use your activity level to personalize your calorie and nutrition goals.",
+                "Let's learn about your cooking habits next."
             ]
         ),
 
-        // After Q13 (Skill Level)
-        13: OnboardingResponse(
+        // After Q9 (Time Availability)
+        9: OnboardingResponse(
             id: 2,
-            triggerAfterQuestionId: 13,
-            lines: [
-                "Perfect!",
-                "We'll match recipes to your exact skill level.",
-                "No more overly complicated recipes."
-            ]
-        ),
-
-        // After Q17 (Time Availability)
-        17: OnboardingResponse(
-            id: 3,
-            triggerAfterQuestionId: 17,
+            triggerAfterQuestionId: 9,
             lines: [
                 "Time is precious!",
                 "Research shows meal planning saves 3+ hours per week.",
@@ -58,14 +47,25 @@ extension OnboardingResponse {
             ]
         ),
 
-        // After Q20 (Adventure Level)
-        20: OnboardingResponse(
-            id: 4,
-            triggerAfterQuestionId: 20,
+        // After Q11 (Adventure Level)
+        11: OnboardingResponse(
+            id: 3,
+            triggerAfterQuestionId: 11,
             lines: [
                 "Love it!",
                 "Food is an adventure waiting to happen.",
                 "Let's explore new flavors together."
+            ]
+        ),
+
+        // After Q14 (Health Improvement Goals)
+        14: OnboardingResponse(
+            id: 4,
+            triggerAfterQuestionId: 14,
+            lines: [
+                "You're almost there!",
+                "We're building your personalized plan right now.",
+                "Just one more question..."
             ]
         )
     ]

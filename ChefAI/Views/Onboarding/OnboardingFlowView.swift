@@ -3,17 +3,17 @@
 //  ChefAI
 //
 //  Master view that coordinates the entire onboarding flow:
-//  Splash -> Welcome -> Onboarding Questions -> Superwall Paywall
+//  Splash -> Welcome -> Onboarding Questions -> Completion -> Home
 //
 
 import SwiftUI
-// TODO: Add SuperwallKit package in Xcode before uncommenting
-// import SuperwallKit
+import Auth
 
 enum OnboardingStep {
     case splash
     case welcome
     case questions
+    case completion
 }
 
 struct OnboardingFlowView: View {
@@ -46,11 +46,9 @@ struct OnboardingFlowView: View {
             case .welcome:
                 WelcomeScreenView(
                     onGetStarted: {
-                        // Show auth sheet when Get Started is tapped
                         showingAuthSheet = true
                     },
                     onSignIn: {
-                        // Show auth sheet when Sign In is tapped
                         showingAuthSheet = true
                     }
                 )
@@ -60,8 +58,11 @@ struct OnboardingFlowView: View {
                 OnboardingQuestionsView(
                     viewModel: viewModel,
                     onComplete: {
-                        // Show Superwall paywall when onboarding completes
-                        showSuperwallPaywall()
+                        // Save onboarding data, then show completion screen
+                        viewModel.completeOnboarding()
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            currentStep = .completion
+                        }
                     },
                     onBackToWelcome: {
                         withAnimation(.easeInOut(duration: 0.3)) {
@@ -70,11 +71,19 @@ struct OnboardingFlowView: View {
                     }
                 )
                 .transition(.opacity)
+
+            case .completion:
+                OnboardingCompletionView(
+                    userName: viewModel.userName,
+                    onStartCooking: {
+                        finishOnboarding()
+                    }
+                )
+                .transition(.opacity)
             }
         }
         .sheet(isPresented: $showingAuthSheet) {
             AuthenticationView(onSuccess: {
-                // After successful auth, proceed to onboarding questions
                 withAnimation(.easeInOut(duration: 0.3)) {
                     currentStep = .questions
                 }
@@ -82,23 +91,13 @@ struct OnboardingFlowView: View {
         }
     }
 
-    // MARK: - Superwall Integration
+    // MARK: - Finish Onboarding
 
-    private func showSuperwallPaywall() {
-        // TODO: Uncomment after adding SuperwallKit package
-        // Register the paywall event with Superwall
-        // "onboarding_complete" is the event name you'll configure in Superwall dashboard
-        // Superwall.shared.register(event: "onboarding_complete") {
-        //     // This handler is called when user subscribes or paywall is dismissed
-        //     handlePaywallResult()
-        // }
-
-        // Temporary: Skip paywall and complete onboarding directly
-        handlePaywallResult()
-    }
-
-    private func handlePaywallResult() {
-        viewModel.completeOnboarding()
+    private func finishOnboarding() {
+        // Save per-user onboarding flag so re-login skips onboarding
+        if let userId = supabase.currentUser?.id.uuidString {
+            StorageService.shared.setOnboardingComplete(true, for: userId)
+        }
         withAnimation {
             hasCompletedOnboarding = true
         }
@@ -112,34 +111,15 @@ struct OnboardingQuestionsView: View {
     var onComplete: () -> Void
     var onBackToWelcome: () -> Void
 
-    // Check if we're on pages with special layout (name=0, gender=1, birthday=2, height=3, weight=4)
+    // Check if we're on pages with special layout (name=0, gender=1, birthday=2, height=3, weight=4, desired weight=5)
     private var isSpecialLayoutPage: Bool {
-        viewModel.currentQuestionIndex == 0 || viewModel.currentQuestionIndex == 1 || viewModel.currentQuestionIndex == 2 || viewModel.currentQuestionIndex == 3 || viewModel.currentQuestionIndex == 4
+        let idx = viewModel.currentQuestionIndex
+        return idx >= 0 && idx <= 5
     }
 
-    private var isNamePage: Bool {
-        viewModel.currentQuestionIndex == 0
-    }
-
-    private var isGenderPage: Bool {
-        viewModel.currentQuestionIndex == 1
-    }
-
-    private var isBirthdayPage: Bool {
-        viewModel.currentQuestionIndex == 2
-    }
-
-    private var isHeightPage: Bool {
-        viewModel.currentQuestionIndex == 3
-    }
-
-    private var isWeightPage: Bool {
-        viewModel.currentQuestionIndex == 4
-    }
-
-    // Pages that show back + next buttons (name, gender, birthday, height, weight)
+    // Pages that show back + next buttons (special layout pages)
     private var showsBackNextButtons: Bool {
-        viewModel.currentQuestionIndex == 0 || viewModel.currentQuestionIndex == 1 || viewModel.currentQuestionIndex == 2 || viewModel.currentQuestionIndex == 3 || viewModel.currentQuestionIndex == 4
+        isSpecialLayoutPage
     }
 
     var body: some View {
@@ -148,7 +128,7 @@ struct OnboardingQuestionsView: View {
             Color.white.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Header - no back button (back is always at bottom)
+                // Header
                 HStack {
                     // Empty spacer to maintain layout
                     Spacer()
@@ -172,15 +152,13 @@ struct OnboardingQuestionsView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
 
-                // Progress bar - shown on all pages
+                // Progress bar
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        // Background bar
                         RoundedRectangle(cornerRadius: 2)
                             .fill(Color.gray.opacity(0.2))
                             .frame(height: 4)
 
-                        // Progress bar - uses visible question count for proper progress
                         RoundedRectangle(cornerRadius: 2)
                             .fill(Color.black)
                             .frame(
@@ -195,20 +173,19 @@ struct OnboardingQuestionsView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 16)
 
-                // Question content - shows current question based on visible indices
+                // Question content
                 OnboardingQuestionView(
                     question: viewModel.currentQuestion,
                     viewModel: viewModel
                 )
-                .id(viewModel.currentQuestionIndex)  // Force view refresh when question changes
+                .id(viewModel.currentQuestionIndex)
                 .transition(.opacity)
                 .animation(.easeInOut(duration: 0.3), value: viewModel.currentPage)
 
-                // Bottom buttons - different style for special layout pages
+                // Bottom buttons
                 if showsBackNextButtons {
-                    // Special pages: back arrow + "Next →" button
+                    // Special pages: back arrow + "Next" button
                     HStack(spacing: 12) {
-                        // Back button (circle) - goes to welcome on first page
                         Button {
                             if viewModel.currentPage == 0 {
                                 onBackToWelcome()
@@ -226,7 +203,6 @@ struct OnboardingQuestionsView: View {
                                 .clipShape(Circle())
                         }
 
-                        // Next button
                         Button(action: {
                             viewModel.proceedFromCurrentQuestion()
                         }) {
@@ -249,7 +225,6 @@ struct OnboardingQuestionsView: View {
                 } else {
                     // Other pages: back arrow + Continue button
                     HStack(spacing: 12) {
-                        // Back button (circle)
                         Button {
                             if viewModel.currentPage == 0 {
                                 onBackToWelcome()
@@ -267,7 +242,6 @@ struct OnboardingQuestionsView: View {
                                 .clipShape(Circle())
                         }
 
-                        // Continue button
                         Button(action: {
                             if viewModel.isLastQuestion {
                                 onComplete()
@@ -275,7 +249,7 @@ struct OnboardingQuestionsView: View {
                                 viewModel.proceedFromCurrentQuestion()
                             }
                         }) {
-                            Text(buttonTitle)
+                            Text("Continue")
                                 .font(.system(size: 17, weight: .semibold))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
@@ -300,14 +274,6 @@ struct OnboardingQuestionsView: View {
                     }
                 )
             }
-        }
-    }
-
-    private var buttonTitle: String {
-        if viewModel.isLastQuestion {
-            return "Continue"
-        } else {
-            return "Continue"
         }
     }
 }

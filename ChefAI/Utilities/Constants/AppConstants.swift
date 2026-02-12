@@ -13,4 +13,5 @@ struct AppConstants {
     static let imageCompressionQuality: CGFloat = 0.7
     static let maxImageSizeKB = 1024
     static let maxStoredAnalyses = 50
+    static let maxCapturedImages = 5
 }

@@ -38,9 +38,10 @@ struct AnalysisResultView: View {
                     // Main content - fills available space
                     ScrollView {
                         VStack(spacing: 20) {
-                            // Image preview (smaller)
-                            if let thumbnailImage = result.thumbnailImage {
-                                Image(uiImage: thumbnailImage)
+                            // Image preview(s)
+                            let thumbnails = result.thumbnailImages
+                            if thumbnails.count == 1, let img = thumbnails.first {
+                                Image(uiImage: img)
                                     .resizable()
                                     .scaledToFill()
                                     .frame(height: 160)
@@ -48,6 +49,21 @@ struct AnalysisResultView: View {
                                     .clipped()
                                     .cornerRadius(16)
                                     .padding(.horizontal, 24)
+                            } else if thumbnails.count > 1 {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(Array(thumbnails.enumerated()), id: \.offset) { _, img in
+                                            Image(uiImage: img)
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 120, height: 120)
+                                                .clipped()
+                                                .cornerRadius(12)
+                                        }
+                                    }
+                                    .padding(.horizontal, 24)
+                                }
+                                .frame(height: 120)
                             }
 
                             // Stats row

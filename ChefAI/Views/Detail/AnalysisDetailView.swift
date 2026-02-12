@@ -14,14 +14,28 @@ struct AnalysisDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                // Fridge Photo
-                if let imageData = analysis.imageData,
-                   let uiImage = UIImage(data: imageData) {
-                    Image(uiImage: uiImage)
+                // Fridge Photo(s)
+                let thumbnails = analysis.thumbnailImages
+                if thumbnails.count == 1, let img = thumbnails.first {
+                    Image(uiImage: img)
                         .resizable()
                         .scaledToFit()
                         .cornerRadius(16)
                         .shadow(color: .black.opacity(0.1), radius: 8)
+                } else if thumbnails.count > 1 {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(Array(thumbnails.enumerated()), id: \.offset) { _, img in
+                                Image(uiImage: img)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 200, height: 200)
+                                    .clipped()
+                                    .cornerRadius(16)
+                                    .shadow(color: .black.opacity(0.1), radius: 8)
+                            }
+                        }
+                    }
                 }
 
                 // Analysis Info

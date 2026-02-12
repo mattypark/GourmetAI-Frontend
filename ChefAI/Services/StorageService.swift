@@ -108,21 +108,46 @@ final class StorageService: @unchecked Sendable {
         try? fileManager.removeItem(at: profileImageURL)
     }
 
-    // MARK: - Onboarding
+    // MARK: - Onboarding (per-user)
 
     @AppStorage(StorageKeys.hasCompletedOnboarding)
     private var hasCompletedOnboardingStorage = false
 
-    func setOnboardingComplete(_ complete: Bool) {
+    /// Mark onboarding complete for a specific user
+    func setOnboardingComplete(_ complete: Bool, for userId: String? = nil) {
+        if let userId = userId {
+            UserDefaults.standard.set(complete, forKey: StorageKeys.onboardingKey(for: userId))
+        }
+        // Also set the global flag for the current session
         hasCompletedOnboardingStorage = complete
     }
 
-    func hasCompletedOnboarding() -> Bool {
-        hasCompletedOnboardingStorage
+    /// Check if a specific user has completed onboarding
+    func hasCompletedOnboarding(for userId: String? = nil) -> Bool {
+        if let userId = userId {
+            return UserDefaults.standard.bool(forKey: StorageKeys.onboardingKey(for: userId))
+        }
+        return hasCompletedOnboardingStorage
+    }
+
+    /// Reset onboarding for a specific user (for "Redo Onboarding" in settings)
+    func resetOnboarding(for userId: String) {
+        UserDefaults.standard.set(false, forKey: StorageKeys.onboardingKey(for: userId))
+        hasCompletedOnboardingStorage = false
     }
 
     // MARK: - Clear Data
 
+    /// Clears session data (profile files, analyses) but preserves per-user onboarding flags
+    func clearSessionData() {
+        try? fileManager.removeItem(at: userProfileURL)
+        try? fileManager.removeItem(at: analysesURL)
+        try? fileManager.removeItem(at: profileImageURL)
+        hasCompletedOnboardingStorage = false
+        UserDefaults.standard.removeObject(forKey: StorageKeys.currentUserId)
+    }
+
+    /// Legacy: clears everything including onboarding flags (used for full reset)
     func clearAllData() {
         try? fileManager.removeItem(at: userProfileURL)
         try? fileManager.removeItem(at: analysesURL)

@@ -10,6 +10,7 @@ import SwiftUI
 struct CameraSheetView: View {
     @StateObject private var viewModel = CameraViewModel()
     @Environment(\.dismiss) private var dismiss
+    @State private var pickerImage: UIImage?
 
     var body: some View {
         NavigationStack {
@@ -70,7 +71,7 @@ struct CameraSheetView: View {
             .sheet(isPresented: $viewModel.isShowingCamera) {
                 ImagePicker(
                     sourceType: .camera,
-                    selectedImage: $viewModel.selectedImage,
+                    selectedImage: $pickerImage,
                     onImageSelected: { image in
                         viewModel.imageSelected(image)
                     }
@@ -79,7 +80,7 @@ struct CameraSheetView: View {
             .sheet(isPresented: $viewModel.isShowingPhotoPicker) {
                 ImagePicker(
                     sourceType: .photoLibrary,
-                    selectedImage: $viewModel.selectedImage,
+                    selectedImage: $pickerImage,
                     onImageSelected: { image in
                         viewModel.imageSelected(image)
                     }

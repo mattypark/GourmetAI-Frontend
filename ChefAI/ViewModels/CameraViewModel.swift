@@ -35,7 +35,7 @@ enum AnalysisStatus: Equatable {
 
 @MainActor
 class CameraViewModel: ObservableObject {
-    @Published var selectedImage: UIImage?
+    @Published var selectedImages: [UIImage] = []
     @Published var isShowingCamera = false
     @Published var isShowingPhotoPicker = false
     @Published var isShowingPreview = false
@@ -47,6 +47,7 @@ class CameraViewModel: ObservableObject {
     @Published var showingAnalysisResults = false
     @Published var analysisProgress: Double = 0.0
     @Published var analysisStatus: AnalysisStatus = .idle
+    @Published var showingMultiImageReview = false
 
     // Two-step flow state
     @Published var detectedIngredients: [Ingredient] = []
@@ -74,9 +75,33 @@ class CameraViewModel: ObservableObject {
         self.subscriptionService = subscriptionService ?? SubscriptionService.shared
     }
 
+    // MARK: - Multi-Image Management
+
+    /// Backward-compatible computed property for code expecting a single image
+    var selectedImage: UIImage? {
+        selectedImages.first
+    }
+
+    var canAddMoreImages: Bool {
+        selectedImages.count < AppConstants.maxCapturedImages
+    }
+
+    var remainingImageSlots: Int {
+        AppConstants.maxCapturedImages - selectedImages.count
+    }
+
+    func addImage(_ image: UIImage) {
+        guard selectedImages.count < AppConstants.maxCapturedImages else { return }
+        selectedImages.append(image)
+    }
+
+    func removeImage(at index: Int) {
+        guard index >= 0 && index < selectedImages.count else { return }
+        selectedImages.remove(at: index)
+    }
+
     // MARK: - Subscription Check
 
-    /// Check if user has an active subscription before allowing image analysis
     func checkSubscriptionAndAnalyze() async {
         if subscriptionService.hasActiveSubscription() {
             await analyzeImage()
@@ -85,7 +110,6 @@ class CameraViewModel: ObservableObject {
         }
     }
 
-    /// Check subscription before detecting ingredients
     func checkSubscriptionAndDetectIngredients() async {
         if subscriptionService.hasActiveSubscription() {
             await detectIngredients()
@@ -103,7 +127,7 @@ class CameraViewModel: ObservableObject {
     }
 
     func imageSelected(_ image: UIImage) {
-        selectedImage = image
+        addImage(image)
         isShowingCamera = false
         isShowingPhotoPicker = false
         isShowingPreview = true
@@ -120,23 +144,113 @@ class CameraViewModel: ObservableObject {
         manualItems.remove(at: index)
     }
 
+    // MARK: - Multi-Image Analysis (Parallel)
+
+    /// Analyzes multiple images in parallel, collecting successes and tolerating partial failures.
+    /// Updates `analysisProgress` as each image completes (0.05 → 0.50 range).
+    private func analyzeMultipleImages(_ images: [UIImage]) async throws -> [Ingredient] {
+        var allIngredients: [[Ingredient]] = []
+        var failureCount = 0
+        let totalCount = images.count
+        var completedCount = 0
+
+        await withTaskGroup(of: Result<[Ingredient], Error>.self) { group in
+            for image in images {
+                group.addTask { [apiClient] in
+                    do {
+                        let ingredients = try await apiClient.analyzeImage(image)
+                        return .success(ingredients)
+                    } catch {
+                        return .failure(error)
+                    }
+                }
+            }
+
+            for await result in group {
+                completedCount += 1
+                // Progress from 0.05 to 0.50 proportional to completed images
+                analysisProgress = 0.05 + Double(completedCount) / Double(totalCount) * 0.45
+
+                switch result {
+                case .success(let ingredients):
+                    allIngredients.append(ingredients)
+                case .failure:
+                    failureCount += 1
+                }
+            }
+        }
+
+        // Handle partial or total failure
+        if allIngredients.isEmpty {
+            // All failed — throw the generic error so callers handle it
+            throw APIClientError.serverError(500, "No food detected in any of the images.")
+        }
+
+        if failureCount > 0 {
+            let successCount = totalCount - failureCount
+            errorMessage = "\(successCount) of \(totalCount) photos analyzed successfully"
+        }
+
+        let flatIngredients = allIngredients.flatMap { $0 }
+        return deduplicateIngredients(flatIngredients)
+    }
+
+    /// Deduplicates ingredients by lowercased name, keeping highest confidence and merging fields
+    private func deduplicateIngredients(_ ingredients: [Ingredient]) -> [Ingredient] {
+        var seen: [String: Ingredient] = [:]
+
+        for ingredient in ingredients {
+            let key = ingredient.name.lowercased().trimmingCharacters(in: .whitespaces)
+
+            if let existing = seen[key] {
+                let existingConfidence = existing.confidence ?? 0.0
+                let newConfidence = ingredient.confidence ?? 0.0
+
+                if newConfidence > existingConfidence {
+                    var better = ingredient
+                    if better.quantity == nil && existing.quantity != nil {
+                        better.quantity = existing.quantity
+                        better.unit = existing.unit
+                    }
+                    if better.category == nil && existing.category != nil {
+                        better.category = existing.category
+                    }
+                    seen[key] = better
+                } else {
+                    var kept = existing
+                    if kept.quantity == nil && ingredient.quantity != nil {
+                        kept.quantity = ingredient.quantity
+                        kept.unit = ingredient.unit
+                    }
+                    if kept.category == nil && ingredient.category != nil {
+                        kept.category = ingredient.category
+                    }
+                    seen[key] = kept
+                }
+            } else {
+                seen[key] = ingredient
+            }
+        }
+
+        return Array(seen.values).sorted { ($0.confidence ?? 0) > ($1.confidence ?? 0) }
+    }
+
     // MARK: - Step 1: Detect Ingredients (Backend API)
 
     func detectIngredients() async {
-        guard let image = selectedImage else {
-            errorMessage = "No image selected"
+        guard !selectedImages.isEmpty else {
+            errorMessage = "No images selected"
             return
         }
 
         isDetectingIngredients = true
         isAnalyzing = true
         errorMessage = nil
-        analysisProgress = 0.1
+        analysisProgress = 0.05
         analysisStatus = .detectingIngredients
 
         do {
-            // Call Backend API to detect ingredients
-            let ingredients = try await apiClient.analyzeImage(image)
+            let ingredients = try await analyzeMultipleImages(selectedImages)
 
             // Add manual items as ingredients
             var allIngredients = ingredients
@@ -148,20 +262,18 @@ class CameraViewModel: ObservableObject {
             analysisProgress = 0.5
             analysisStatus = .ingredientsDetected
 
-            // Navigate to ingredient review screen
             showingIngredientReview = true
 
         } catch APIClientError.unauthorized {
             errorMessage = "Unauthorized - check your API key configuration"
         } catch APIClientError.serverError(_, let message) {
             if message?.contains("No food detected") == true || message?.contains("noFoodDetected") == true {
-                // Allow user to continue with manual items only
                 if !manualItems.isEmpty {
                     detectedIngredients = manualItems.map { Ingredient(name: $0, confidence: 1.0) }
                     analysisStatus = .ingredientsDetected
                     showingIngredientReview = true
                 } else {
-                    errorMessage = "No food detected in image. Try a clearer photo or add items manually."
+                    errorMessage = "No food detected in images. Try clearer photos or add items manually."
                     analysisStatus = .idle
                     analysisProgress = 0.0
                 }
@@ -195,33 +307,29 @@ class CameraViewModel: ObservableObject {
         isGeneratingRecipes = true
         isAnalyzing = true
         errorMessage = nil
-        analysisProgress = 0.6
+        analysisProgress = 0.55
         analysisStatus = .generatingRecipes
 
         do {
-            // Get user profile from storage if not provided
             let profile = userProfile ?? storageService.loadUserProfile()
 
-            // Call Backend API to generate recipes
             let recipes = try await apiClient.generateRecipes(
                 from: detectedIngredients,
                 userProfile: profile,
                 count: 5
             )
 
-            // Create analysis result with ingredients and recipes
-            let imageData = selectedImage?.jpegData(compressionQuality: 0.7)
+            let imagesData = selectedImages.compactMap { $0.jpegData(compressionQuality: 0.7) }
             analysisResult = AnalysisResult(
                 extractedIngredients: detectedIngredients,
                 suggestedRecipes: recipes,
-                imageData: imageData,
+                imagesData: imagesData,
                 manuallyAddedItems: manualItems
             )
 
             analysisProgress = 1.0
             analysisStatus = .finished
 
-            // Navigate to results view
             showingAnalysisResults = true
 
         } catch APIClientError.unauthorized {
@@ -249,19 +357,19 @@ class CameraViewModel: ObservableObject {
     // MARK: - Combined Analysis (Two-Step: Backend API)
 
     func analyzeImage() async {
-        guard let image = selectedImage else {
-            errorMessage = "No image selected"
+        guard !selectedImages.isEmpty else {
+            errorMessage = "No images selected"
             return
         }
 
         isAnalyzing = true
         errorMessage = nil
-        analysisProgress = 0.1
+        analysisProgress = 0.05
         analysisStatus = .detectingIngredients
 
-        // STEP 1: Detect ingredients (Backend API)
+        // STEP 1: Detect ingredients (Backend API) — parallel for all images
         do {
-            let ingredients = try await apiClient.analyzeImage(image)
+            let ingredients = try await analyzeMultipleImages(selectedImages)
 
             // Add manual items as ingredients
             var allIngredients = ingredients
@@ -269,9 +377,8 @@ class CameraViewModel: ObservableObject {
                 allIngredients.append(Ingredient(name: item, confidence: 1.0))
             }
 
-            // Check if any ingredients were found
             if allIngredients.isEmpty {
-                errorMessage = "No food items detected. Try taking a clearer photo or add items manually."
+                errorMessage = "No food items detected. Try taking clearer photos or add items manually."
                 isAnalyzing = false
                 analysisProgress = 0.0
                 analysisStatus = .idle
@@ -282,7 +389,6 @@ class CameraViewModel: ObservableObject {
             analysisProgress = 0.5
             analysisStatus = .ingredientsDetected
 
-            // Brief pause to show ingredients detected state
             try? await Task.sleep(nanoseconds: 300_000_000) // 0.3s
 
         } catch APIClientError.unauthorized {
@@ -293,11 +399,10 @@ class CameraViewModel: ObservableObject {
             return
         } catch APIClientError.serverError(_, let message) {
             if message?.contains("No food detected") == true {
-                // Allow user to continue with manual items only
                 if !manualItems.isEmpty {
                     detectedIngredients = manualItems.map { Ingredient(name: $0, confidence: 1.0) }
                 } else {
-                    errorMessage = "No food detected in image. Try a clearer photo or add items manually."
+                    errorMessage = "No food detected in images. Try clearer photos or add items manually."
                     analysisProgress = 0.0
                     analysisStatus = .idle
                     isAnalyzing = false
@@ -325,12 +430,13 @@ class CameraViewModel: ObservableObject {
         }
 
         // Step 2 is triggered manually when user taps "Generate Recipes" button
-        // Create analysisResult with just ingredients (no recipes yet)
-        let imageData = selectedImage?.jpegData(compressionQuality: 0.7)
+        analysisProgress = 0.90
+
+        let imagesData = selectedImages.compactMap { $0.jpegData(compressionQuality: 0.7) }
         analysisResult = AnalysisResult(
             extractedIngredients: detectedIngredients,
-            suggestedRecipes: [],  // Empty - will be populated when user generates recipes
-            imageData: imageData,
+            suggestedRecipes: [],
+            imagesData: imagesData,
             manuallyAddedItems: manualItems
         )
 
@@ -356,22 +462,19 @@ class CameraViewModel: ObservableObject {
                 count: 5
             )
 
-            // Update analysisResult with the selected ingredients and new recipes
-            let imageData = selectedImage?.jpegData(compressionQuality: 0.7)
+            let imagesData = selectedImages.compactMap { $0.jpegData(compressionQuality: 0.7) }
             analysisResult = AnalysisResult(
                 id: analysisResult?.id ?? UUID(),
                 extractedIngredients: ingredients,
                 suggestedRecipes: recipes,
                 date: analysisResult?.date ?? Date(),
-                imageData: imageData,
+                imagesData: imagesData,
                 manuallyAddedItems: manualItems
             )
 
             analysisStatus = .finished
 
-            // Save the updated analysis with recipes
             var analyses = storageService.loadAnalyses()
-            // Remove any existing analysis with same ID
             analyses.removeAll { $0.id == analysisResult?.id }
             if let result = analysisResult {
                 analyses.insert(result, at: 0)
@@ -396,7 +499,6 @@ class CameraViewModel: ObservableObject {
     func completeAnalysis() async {
         guard let result = analysisResult else { return }
 
-        // Merge new manual items with existing result if user added more
         var updatedResult = result
         if !manualItems.isEmpty {
             updatedResult = AnalysisResult(
@@ -404,53 +506,44 @@ class CameraViewModel: ObservableObject {
                 extractedIngredients: result.extractedIngredients,
                 suggestedRecipes: result.suggestedRecipes,
                 date: result.date,
-                imageData: result.imageData,
+                imagesData: result.imagesData,
                 manuallyAddedItems: result.manuallyAddedItems + manualItems
             )
             analysisResult = updatedResult
         }
 
-        // NOW save to storage
         var analyses = storageService.loadAnalyses()
         analyses.insert(updatedResult, at: 0)
         storageService.saveAnalyses(analyses)
-
-        // NOTE: Do NOT call resetAfterAnalysis() here.
-        // Let the view call dismiss() first, then reset state via onDismiss callback
-        // to avoid race condition with fullScreenCover binding.
     }
 
     /// Save analysis without generating recipes (just ingredients + image)
     func saveAnalysisOnly() async {
         guard let result = analysisResult else { return }
 
-        // Check if user is authenticated
         let supabase = SupabaseManager.shared
         guard supabase.isAuthenticated else {
             needsAuthentication = true
             return
         }
 
-        // Merge manual items if any
         var updatedResult = result
         if !manualItems.isEmpty {
             updatedResult = AnalysisResult(
                 id: result.id,
                 extractedIngredients: result.extractedIngredients,
-                suggestedRecipes: [], // No recipes when just saving
+                suggestedRecipes: [],
                 date: result.date,
-                imageData: result.imageData,
+                imagesData: result.imagesData,
                 manuallyAddedItems: result.manuallyAddedItems + manualItems
             )
             analysisResult = updatedResult
         }
 
-        // Save to local storage
         var analyses = storageService.loadAnalyses()
         analyses.insert(updatedResult, at: 0)
         storageService.saveAnalyses(analyses)
 
-        // Also save to Supabase
         do {
             let ingredientItems = updatedResult.extractedIngredients.map {
                 IngredientItem(name: $0.name, quantity: $0.quantity, unit: $0.unit)
@@ -463,12 +556,13 @@ class CameraViewModel: ObservableObject {
     }
 
     func resetAfterAnalysis() {
-        selectedImage = nil
+        selectedImages = []
         manualItems.removeAll()
         currentManualItem = ""
         isShowingPreview = false
         showingAnalysisResults = false
         showingIngredientReview = false
+        showingMultiImageReview = false
         analysisStatus = .idle
         analysisProgress = 0.0
         detectedIngredients = []
@@ -477,11 +571,12 @@ class CameraViewModel: ObservableObject {
     }
 
     func cancel() {
-        selectedImage = nil
+        selectedImages = []
         manualItems.removeAll()
         currentManualItem = ""
         isShowingPreview = false
         isShowingCamera = false
         isShowingPhotoPicker = false
+        showingMultiImageReview = false
     }
 }

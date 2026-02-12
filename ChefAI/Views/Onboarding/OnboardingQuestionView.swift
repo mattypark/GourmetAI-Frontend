@@ -12,7 +12,7 @@ struct OnboardingQuestionView: View {
     @ObservedObject var viewModel: OnboardingViewModel
 
     var body: some View {
-        // Pages with their own centered layout (name=0, gender=1, birthday=2, height=3, weight=4)
+        // Pages with their own centered layout (name=0, gender=1, birthday=2, height=3, weight=4, desired weight=5)
         if question.id == 0 {
             NameInputView(name: $viewModel.userName)
         } else if question.id == 1 {
@@ -31,34 +31,36 @@ struct OnboardingQuestionView: View {
                 weightUnit: $viewModel.weightUnit,
                 useMetricSystem: $viewModel.useMetricSystem
             )
+        } else if question.id == 5 {
+            DesiredWeightPickerView(
+                weight: $viewModel.desiredWeight,
+                weightUnit: $viewModel.weightUnit,
+                useMetricSystem: $viewModel.useMetricSystem
+            )
         } else {
             VStack(alignment: .leading, spacing: 24) {
-                // Title and subtitle (except for summary page)
-                if question.id != 23 {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(question.title)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.black)
-                            .fixedSize(horizontal: false, vertical: true)
+                // Title and subtitle
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(question.title)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                        if let subtitle = question.subtitle {
-                            Text(subtitle)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                        }
+                    if let subtitle = question.subtitle {
+                        Text(subtitle)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
                     }
-
-                    Spacer()
-                        .frame(height: 24)
                 }
+
+                Spacer()
+                    .frame(height: 24)
 
                 // Question content based on type
                 questionContent
 
-                if question.id != 23 {
-                    Spacer()
-                }
+                Spacer()
             }
             .padding(.horizontal, 24)
         }
@@ -67,169 +69,53 @@ struct OnboardingQuestionView: View {
     @ViewBuilder
     private var questionContent: some View {
         switch question.id {
+        // These cases are handled by the special layout above, but kept for completeness
         case 0:
-            // Name input
             NameInputView(name: $viewModel.userName)
-
         case 1:
-            // Gender selection
             ScrollView {
                 GenderSelectionView(selectedGender: $viewModel.selectedGender)
             }
-
         case 2:
-            // Birthday picker
             AgePickerView(birthDate: $viewModel.birthDate)
-
         case 3:
-            // Height picker (new style)
             HeightPickerView(
                 height: $viewModel.userHeight,
                 heightUnit: $viewModel.heightUnit,
                 useMetricSystem: $viewModel.useMetricSystem
             )
-
         case 4:
-            // Weight picker (new style with current, goal, target date)
-            WeightGoalPickerView(
-                currentWeight: $viewModel.userWeight,
-                goalWeight: $viewModel.goalWeight,
-                targetDate: $viewModel.targetDate,
+            CurrentWeightPickerView(
+                weight: $viewModel.userWeight,
+                weightUnit: $viewModel.weightUnit,
+                useMetricSystem: $viewModel.useMetricSystem
+            )
+        case 5:
+            DesiredWeightPickerView(
+                weight: $viewModel.desiredWeight,
                 weightUnit: $viewModel.weightUnit,
                 useMetricSystem: $viewModel.useMetricSystem
             )
 
-        case 5:
+        case 6:
             // Activity level
             ActivityLevelPickerView(selectedLevel: $viewModel.selectedActivityLevel)
 
-        case 6:
-            // Calorie bias slider
-            CalorieBiasPickerView(selectedBias: $viewModel.selectedCalorieBias)
-
         case 7:
-            // Physique goal
-            ScrollView {
-                MultipleChoiceSelector(
-                    items: PhysiqueGoal.allCases,
-                    selected: $viewModel.selectedPhysiqueGoal,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 8:
-            // Organic vs Processed
-            OrganicProcessedView(selection: $viewModel.foodPreference)
-
-        case 9:
-            // Processed food impact
-            ScrollView {
-                TagPicker(
-                    items: ProcessedFoodImpact.allCases,
-                    selectedItems: $viewModel.selectedProcessedImpacts,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 10:
-            // Have you tried changing diet?
-            YesNoSelectionView(selection: $viewModel.hasTriedDietChange)
-
-        case 11:
-            // Diet barriers
-            ScrollView {
-                TagPicker(
-                    items: DietBarrier.allCases,
-                    selectedItems: $viewModel.selectedDietBarriers,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 12:
-            // Organic goals
-            ScrollView {
-                TagPicker(
-                    items: OrganicGoal.allCases,
-                    selectedItems: $viewModel.selectedOrganicGoals,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 13:
-            // Aspirational goals
-            ScrollView {
-                TagPicker(
-                    items: AspirationalGoal.allCases,
-                    selectedItems: $viewModel.selectedAspirationalGoals,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 14:
-            // Main goal
-            ScrollView {
-                MultipleChoiceSelector(
-                    items: MainGoal.allCases,
-                    selected: $viewModel.selectedMainGoal,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 15:
-            // Cooking motivation
-            ScrollView {
-                TagPicker(
-                    items: CookingMotivation.allCases,
-                    selectedItems: $viewModel.selectedMotivations,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 16:
             // Days per week
             DaysPerWeekPicker(days: $viewModel.cookingDaysPerWeek)
 
-        case 17:
-            // Skill level
-            ScrollView {
-                MultipleChoiceSelector(
-                    items: SkillLevel.allCases,
-                    selected: $viewModel.selectedSkillLevel,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 18:
-            // Cooking time of day
+        case 8:
+            // Biggest struggle with eating healthy
             ScrollView {
                 TagPicker(
-                    items: CookingTimeOfDay.allCases,
-                    selectedItems: $viewModel.selectedCookingTimes,
+                    items: CookingStruggle.allCases,
+                    selectedItems: $viewModel.selectedStruggles,
                     iconProvider: { $0.icon }
                 )
             }
 
-        case 19:
-            // Dietary restrictions
-            ScrollView {
-                TagPicker(
-                    items: ExtendedDietaryRestriction.allCases,
-                    selectedItems: $viewModel.selectedRestrictions,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 20:
-            // Meal preferences
-            ScrollView {
-                TagPicker(
-                    items: MealPreference.allCases,
-                    selectedItems: $viewModel.selectedMealPreferences,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 21:
+        case 9:
             // Time availability
             ScrollView {
                 MultipleChoiceSelector(
@@ -239,27 +125,17 @@ struct OnboardingQuestionView: View {
                 )
             }
 
-        case 22:
-            // Cooking equipment
+        case 10:
+            // Dietary restrictions
             ScrollView {
                 TagPicker(
-                    items: CookingEquipment.allCases,
-                    selectedItems: $viewModel.selectedEquipment,
+                    items: ExtendedDietaryRestriction.allCases,
+                    selectedItems: $viewModel.selectedRestrictions,
                     iconProvider: { $0.icon }
                 )
             }
 
-        case 23:
-            // Cooking struggles
-            ScrollView {
-                TagPicker(
-                    items: CookingStruggle.allCases,
-                    selectedItems: $viewModel.selectedStruggles,
-                    iconProvider: { $0.icon }
-                )
-            }
-
-        case 24:
+        case 11:
             // Adventure level
             ScrollView {
                 VStack(spacing: 12) {
@@ -275,19 +151,39 @@ struct OnboardingQuestionView: View {
                 }
             }
 
-        case 25:
-            // Acquisition source
+        case 12:
+            // Have you tried dieting before?
+            YesNoSelectionView(selection: $viewModel.hasTriedDietChange)
+
+        case 13:
+            // What stopped you last time?
             ScrollView {
-                MultipleChoiceSelector(
-                    items: AcquisitionSource.allCases,
-                    selected: $viewModel.selectedAcquisitionSource,
+                TagPicker(
+                    items: DietBarrier.allCases,
+                    selectedItems: $viewModel.selectedDietBarriers,
                     iconProvider: { $0.icon }
                 )
             }
 
-        case 26:
-            // Summary
-            OnboardingSummaryView(viewModel: viewModel)
+        case 14:
+            // How would eating healthier improve your life?
+            ScrollView {
+                TagPicker(
+                    items: HealthImprovementGoal.allCases,
+                    selectedItems: $viewModel.selectedHealthGoals,
+                    iconProvider: { $0.icon }
+                )
+            }
+
+        case 15:
+            // What matters most to you right now?
+            ScrollView {
+                MultipleChoiceSelector(
+                    items: CommitmentPriority.allCases,
+                    selected: $viewModel.selectedCommitmentPriority,
+                    iconProvider: { $0.icon }
+                )
+            }
 
         default:
             EmptyView()
@@ -432,195 +328,7 @@ struct GenderOptionButton: View {
     }
 }
 
-// MARK: - Physical Stats View
-
-struct PhysicalStatsView: View {
-    @Binding var age: Int
-    @Binding var weight: Double
-    @Binding var height: Double
-    @Binding var weightUnit: WeightUnit
-    @Binding var heightUnit: HeightUnit
-
-    var body: some View {
-        VStack(spacing: 32) {
-            // Age picker
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Age")
-                    .font(.headline)
-                    .foregroundColor(.black)
-
-                HStack {
-                    Picker("Age", selection: $age) {
-                        ForEach(13...100, id: \.self) { year in
-                            Text("\(year)").tag(year)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 120)
-
-                    Text("years")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-            }
-
-            // Weight picker
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Weight")
-                        .font(.headline)
-                        .foregroundColor(.black)
-
-                    Spacer()
-
-                    // Unit toggle
-                    Picker("Unit", selection: $weightUnit) {
-                        Text("lbs").tag(WeightUnit.lbs)
-                        Text("kg").tag(WeightUnit.kg)
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 100)
-                    .onChange(of: weightUnit) { _, newValue in
-                        // Convert weight when unit changes
-                        if newValue == .kg {
-                            weight = weight * 0.453592
-                        } else {
-                            weight = weight / 0.453592
-                        }
-                    }
-                }
-
-                HStack {
-                    Picker("Weight", selection: Binding(
-                        get: { Int(weight) },
-                        set: { weight = Double($0) }
-                    )) {
-                        ForEach(weightUnit == .lbs ? 80...400 : 36...181, id: \.self) { w in
-                            Text("\(w)").tag(w)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 120)
-
-                    Text(weightUnit.rawValue)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-            }
-
-            // Height picker
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Height")
-                        .font(.headline)
-                        .foregroundColor(.black)
-
-                    Spacer()
-
-                    // Unit toggle
-                    Picker("Unit", selection: $heightUnit) {
-                        Text("ft/in").tag(HeightUnit.inches)
-                        Text("cm").tag(HeightUnit.cm)
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 100)
-                    .onChange(of: heightUnit) { _, newValue in
-                        // Convert height when unit changes
-                        if newValue == .cm {
-                            height = height * 2.54
-                        } else {
-                            height = height / 2.54
-                        }
-                    }
-                }
-
-                if heightUnit == .inches {
-                    // Feet and inches pickers
-                    HStack {
-                        Picker("Feet", selection: Binding(
-                            get: { Int(height) / 12 },
-                            set: { height = Double($0 * 12 + Int(height) % 12) }
-                        )) {
-                            ForEach(4...7, id: \.self) { ft in
-                                Text("\(ft) ft").tag(ft)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 120)
-
-                        Picker("Inches", selection: Binding(
-                            get: { Int(height) % 12 },
-                            set: { height = Double((Int(height) / 12) * 12 + $0) }
-                        )) {
-                            ForEach(0...11, id: \.self) { inch in
-                                Text("\(inch) in").tag(inch)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 120)
-                    }
-                } else {
-                    HStack {
-                        Picker("Height", selection: Binding(
-                            get: { Int(height) },
-                            set: { height = Double($0) }
-                        )) {
-                            ForEach(120...220, id: \.self) { cm in
-                                Text("\(cm)").tag(cm)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 120)
-
-                        Text("cm")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Organic/Processed Selection View
-
-struct OrganicProcessedView: View {
-    @Binding var selection: FoodPreference?
-
-    var body: some View {
-        VStack(spacing: 16) {
-            SelectionButton(
-                title: "Mostly organic",
-                subtitle: "Whole foods, fresh ingredients",
-                icon: "leaf.fill",
-                isSelected: selection == .organic,
-                onTap: { selection = .organic }
-            )
-
-            SelectionButton(
-                title: "Mix of both",
-                subtitle: "A balance of organic and processed",
-                icon: "arrow.left.arrow.right",
-                isSelected: selection == .mixed,
-                onTap: { selection = .mixed }
-            )
-
-            SelectionButton(
-                title: "Mostly processed",
-                subtitle: "Packaged and convenience foods",
-                icon: "bag.fill",
-                isSelected: selection == .processed,
-                onTap: { selection = .processed }
-            )
-
-            Text("No judgment here! We just want to help you eat better.")
-                .font(.caption)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 8)
-        }
-    }
-}
+// MARK: - Selection Button (reusable)
 
 struct SelectionButton: View {
     let title: String
@@ -1268,7 +976,7 @@ struct CurrentWeightPickerView: View {
     @Binding var useMetricSystem: Bool
 
     // Ruler configuration
-    private let rulerSpacing: CGFloat = 8  // Space between tick marks
+    private let rulerSpacing: CGFloat = 8
     private let minWeight: Double = 50
     private let maxWeight: Double = 400
 
@@ -1285,6 +993,61 @@ struct CurrentWeightPickerView: View {
             // Current Weight label and value
             VStack(spacing: 8) {
                 Text("Current Weight")
+                    .font(.system(size: 15))
+                    .foregroundColor(.gray)
+
+                Text(String(format: "%.1f %@", weight, useMetricSystem ? "kg" : "lbs"))
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundColor(.black)
+            }
+            .padding(.bottom, 40)
+
+            // Horizontal Ruler
+            WeightRulerView(
+                weight: $weight,
+                minWeight: minWeight,
+                maxWeight: maxWeight,
+                rulerSpacing: rulerSpacing
+            )
+            .frame(height: 60)
+
+            Spacer()
+        }
+        .padding(.horizontal, 24)
+    }
+}
+
+// MARK: - Desired Weight Picker View (Same ruler style as Current Weight)
+
+struct DesiredWeightPickerView: View {
+    @Binding var weight: Double
+    @Binding var weightUnit: WeightUnit
+    @Binding var useMetricSystem: Bool
+
+    // Ruler configuration
+    private let rulerSpacing: CGFloat = 8
+    private let minWeight: Double = 50
+    private let maxWeight: Double = 400
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            // Title
+            Text("What's your desired weight?")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(.black)
+                .padding(.bottom, 12)
+
+            // Subtitle
+            Text("We'll help you get there")
+                .font(.system(size: 15))
+                .foregroundColor(.gray)
+                .padding(.bottom, 60)
+
+            // Desired Weight label and value
+            VStack(spacing: 8) {
+                Text("Desired Weight")
                     .font(.system(size: 15))
                     .foregroundColor(.gray)
 
@@ -1423,247 +1186,6 @@ struct WeightRulerView: View {
     }
 }
 
-// MARK: - Weight Goal Picker View (for Goal Weight - kept for later use)
-
-struct WeightGoalPickerView: View {
-    @Binding var currentWeight: Double
-    @Binding var goalWeight: Double
-    @Binding var targetDate: Date?
-    @Binding var weightUnit: WeightUnit
-    @Binding var useMetricSystem: Bool
-
-    @State private var showingCurrentWeightPicker = false
-    @State private var showingGoalWeightPicker = false
-    @State private var showingDatePicker = false
-    @State private var currentWeightInt: Int = 154
-    @State private var goalWeightInt: Int = 143
-    @State private var selectedDate: Date = Calendar.current.date(byAdding: .month, value: 2, to: Date()) ?? Date()
-
-    var body: some View {
-        VStack(spacing: 16) {
-            // Current Weight
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Current Weight")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.black)
-
-                Button(action: { showingCurrentWeightPicker = true }) {
-                    HStack {
-                        Text("\(currentWeightInt) \(weightUnit.rawValue)")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(.black)
-                        Spacer()
-                        Image(systemName: "pencil")
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-
-            // Goal Weight
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Goal Weight")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.black)
-
-                Button(action: { showingGoalWeightPicker = true }) {
-                    HStack {
-                        Text("\(goalWeightInt) \(weightUnit.rawValue)")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(.black)
-                        Spacer()
-                        Image(systemName: "pencil")
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-
-            // Target Date (Optional)
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Target Date")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(.black)
-                    Text("(Optional)")
-                        .font(.system(size: 13))
-                        .foregroundColor(.gray)
-                }
-
-                Button(action: { showingDatePicker = true }) {
-                    HStack {
-                        if let date = targetDate {
-                            Text(date.formatted(date: .abbreviated, time: .omitted))
-                                .font(.system(size: 20, weight: .semibold))
-                                .foregroundColor(.black)
-                        } else {
-                            Text("Set target date")
-                                .font(.system(size: 17))
-                                .foregroundColor(.black)
-                        }
-                        Spacer()
-                        Image(systemName: "calendar")
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-        }
-        .onAppear {
-            currentWeightInt = Int(currentWeight)
-            goalWeightInt = Int(goalWeight)
-            if let date = targetDate {
-                selectedDate = date
-            }
-        }
-        .sheet(isPresented: $showingCurrentWeightPicker) {
-            WeightPickerSheet(
-                weightValue: $currentWeightInt,
-                weightUnit: weightUnit,
-                title: "Current Weight",
-                onDone: {
-                    currentWeight = Double(currentWeightInt)
-                    showingCurrentWeightPicker = false
-                }
-            )
-            .presentationDetents([.height(350)])
-        }
-        .sheet(isPresented: $showingGoalWeightPicker) {
-            WeightPickerSheet(
-                weightValue: $goalWeightInt,
-                weightUnit: weightUnit,
-                title: "Goal Weight",
-                onDone: {
-                    goalWeight = Double(goalWeightInt)
-                    showingGoalWeightPicker = false
-                }
-            )
-            .presentationDetents([.height(350)])
-        }
-        .sheet(isPresented: $showingDatePicker) {
-            TargetDatePickerSheet(
-                selectedDate: $selectedDate,
-                targetDate: $targetDate,
-                onDone: {
-                    showingDatePicker = false
-                },
-                onClear: {
-                    targetDate = nil
-                    showingDatePicker = false
-                }
-            )
-            .presentationDetents([.height(450)])
-        }
-    }
-}
-
-// MARK: - Weight Picker Bottom Sheet
-
-struct WeightPickerSheet: View {
-    @Binding var weightValue: Int
-    let weightUnit: WeightUnit
-    let title: String
-    let onDone: () -> Void
-
-    var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Text(title)
-                    .font(.system(size: 17, weight: .semibold))
-                Spacer()
-                Button("Done") {
-                    onDone()
-                }
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.black)
-            }
-            .padding()
-            .background(Color(UIColor.systemBackground))
-
-            Divider()
-
-            // Picker
-            Picker("Weight", selection: $weightValue) {
-                if weightUnit == .lbs {
-                    ForEach(80...400, id: \.self) { lb in
-                        Text("\(lb) lbs").tag(lb)
-                    }
-                } else {
-                    ForEach(30...200, id: \.self) { kg in
-                        Text("\(kg) kg").tag(kg)
-                    }
-                }
-            }
-            .pickerStyle(.wheel)
-        }
-        .background(Color(UIColor.systemBackground))
-    }
-}
-
-// MARK: - Target Date Picker Sheet
-
-struct TargetDatePickerSheet: View {
-    @Binding var selectedDate: Date
-    @Binding var targetDate: Date?
-    let onDone: () -> Void
-    let onClear: () -> Void
-
-    var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            HStack {
-                Button("Clear") {
-                    onClear()
-                }
-                .font(.system(size: 17))
-                .foregroundColor(.gray)
-
-                Spacer()
-
-                Text("Target Date")
-                    .font(.system(size: 17, weight: .semibold))
-
-                Spacer()
-
-                Button("Done") {
-                    targetDate = selectedDate
-                    onDone()
-                }
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.black)
-            }
-            .padding()
-            .background(Color(UIColor.systemBackground))
-
-            Divider()
-
-            // Date Picker
-            DatePicker(
-                "Target Date",
-                selection: $selectedDate,
-                in: Date()...,
-                displayedComponents: .date
-            )
-            .datePickerStyle(.graphical)
-            .padding()
-        }
-        .background(Color(UIColor.systemBackground))
-    }
-}
-
 // MARK: - Activity Level Picker View
 
 struct ActivityLevelPickerView: View {
@@ -1734,268 +1256,6 @@ struct ActivityLevelButton: View {
                 isPressed = pressing
             }
         }, perform: {})
-    }
-}
-
-// MARK: - Calorie Bias Picker View
-
-struct CalorieBiasPickerView: View {
-    @Binding var selectedBias: CalorieBias
-
-    private let biasValues: [CalorieBias] = [.underMore, .under, .noBias, .over, .overMore]
-
-    var body: some View {
-        VStack(spacing: 32) {
-            // Info Card
-            VStack(spacing: 12) {
-                Text(selectedBias.title)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.black)
-
-                HStack {
-                    Circle()
-                        .fill(Color.black)
-                        .frame(width: 8, height: 8)
-                    Text(selectedBias.description)
-                        .font(.system(size: 15))
-                        .foregroundColor(.gray)
-                }
-
-                HStack {
-                    Text("🍔")
-                    Text(selectedBias.example)
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
-                }
-            }
-            .padding(20)
-            .frame(maxWidth: .infinity)
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
-
-            // Slider
-            VStack(spacing: 16) {
-                // Custom slider
-                GeometryReader { geometry in
-                    let stepWidth = geometry.size.width / CGFloat(biasValues.count - 1)
-                    let currentIndex = biasValues.firstIndex(of: selectedBias) ?? 2
-
-                    ZStack(alignment: .leading) {
-                        // Track
-                        Rectangle()
-                            .fill(Color.black.opacity(0.2))
-                            .frame(height: 4)
-                            .frame(maxWidth: .infinity)
-
-                        // Thumb
-                        Circle()
-                            .fill(Color.white)
-                            .frame(width: 32, height: 32)
-                            .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-                            .offset(x: CGFloat(currentIndex) * stepWidth - 16)
-                            .gesture(
-                                DragGesture()
-                                    .onChanged { value in
-                                        let newIndex = Int(round(value.location.x / stepWidth))
-                                        let clampedIndex = max(0, min(biasValues.count - 1, newIndex))
-                                        selectedBias = biasValues[clampedIndex]
-                                    }
-                            )
-                    }
-                }
-                .frame(height: 32)
-
-                // Labels
-                HStack {
-                    ForEach(biasValues, id: \.self) { bias in
-                        VStack(spacing: 4) {
-                            Circle()
-                                .fill(colorForBias(bias))
-                                .frame(width: 8, height: 8)
-                            Text(bias.title.replacingOccurrences(of: " ", with: "\n"))
-                                .font(.system(size: 11))
-                                .foregroundColor(selectedBias == bias ? .black : .gray)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .onTapGesture {
-                            withAnimation {
-                                selectedBias = bias
-                            }
-                        }
-                    }
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-
-    private func colorForBias(_ bias: CalorieBias) -> Color {
-        switch bias {
-        case .underMore, .under:
-            return Color.blue.opacity(0.6)
-        case .noBias:
-            return Color.black
-        case .over, .overMore:
-            return Color.orange.opacity(0.6)
-        }
-    }
-}
-
-// MARK: - Height & Weight Picker View (Imperial/Metric toggle) - LEGACY
-
-struct WeightHeightPickerView: View {
-    @Binding var weight: Double
-    @Binding var height: Double
-    @Binding var weightUnit: WeightUnit
-    @Binding var heightUnit: HeightUnit
-    @Binding var useMetricSystem: Bool
-
-    // Local state for picker values
-    @State private var heightFeet: Int = 5
-    @State private var heightInches: Int = 8
-    @State private var heightCm: Int = 170
-    @State private var weightLbs: Int = 155
-    @State private var weightKg: Int = 70
-
-    var body: some View {
-        VStack(spacing: 32) {
-            // Imperial / Metric Toggle
-            HStack(spacing: 16) {
-                Text("Imperial")
-                    .font(.system(size: 16, weight: useMetricSystem ? .regular : .semibold))
-                    .foregroundColor(useMetricSystem ? .gray : .black)
-
-                Toggle("", isOn: $useMetricSystem)
-                    .labelsHidden()
-                    .tint(.gray)
-                    .onChange(of: useMetricSystem) { _, isMetric in
-                        if isMetric {
-                            weightUnit = .kg
-                            heightUnit = .cm
-                            // Convert values
-                            weightKg = Int(Double(weightLbs) * 0.453592)
-                            heightCm = Int(Double(heightFeet * 12 + heightInches) * 2.54)
-                        } else {
-                            weightUnit = .lbs
-                            heightUnit = .inches
-                            // Convert values
-                            weightLbs = Int(Double(weightKg) / 0.453592)
-                            let totalInches = Int(Double(heightCm) / 2.54)
-                            heightFeet = totalInches / 12
-                            heightInches = totalInches % 12
-                        }
-                        updateValues()
-                    }
-
-                Text("Metric")
-                    .font(.system(size: 16, weight: useMetricSystem ? .semibold : .regular))
-                    .foregroundColor(useMetricSystem ? .black : .gray)
-            }
-
-            // Height and Weight labels
-            HStack {
-                Text("Height")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                Text("Weight")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, 20)
-            }
-
-            // Pickers
-            HStack(spacing: 0) {
-                if useMetricSystem {
-                    // Metric: Height in cm
-                    Picker("Height", selection: $heightCm) {
-                        ForEach(100...250, id: \.self) { cm in
-                            Text("\(cm) cm")
-                                .tag(cm)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(maxWidth: .infinity)
-                    .clipped()
-                    .onChange(of: heightCm) { _, _ in updateValues() }
-
-                    // Weight in kg
-                    Picker("Weight", selection: $weightKg) {
-                        ForEach(30...200, id: \.self) { kg in
-                            Text("\(kg) kg")
-                                .tag(kg)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(maxWidth: .infinity)
-                    .clipped()
-                    .onChange(of: weightKg) { _, _ in updateValues() }
-                } else {
-                    // Imperial: Height in ft/in
-                    Picker("Feet", selection: $heightFeet) {
-                        ForEach(3...8, id: \.self) { ft in
-                            Text("\(ft) ft")
-                                .tag(ft)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(width: 70)
-                    .clipped()
-                    .onChange(of: heightFeet) { _, _ in updateValues() }
-
-                    Picker("Inches", selection: $heightInches) {
-                        ForEach(0...11, id: \.self) { inch in
-                            Text("\(inch) in")
-                                .tag(inch)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(width: 70)
-                    .clipped()
-                    .onChange(of: heightInches) { _, _ in updateValues() }
-
-                    // Weight in lbs
-                    Picker("Weight", selection: $weightLbs) {
-                        ForEach(80...400, id: \.self) { lb in
-                            Text("\(lb) lb")
-                                .tag(lb)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(maxWidth: .infinity)
-                    .clipped()
-                    .onChange(of: weightLbs) { _, _ in updateValues() }
-                }
-            }
-            .frame(height: 200)
-        }
-        .onAppear {
-            // Initialize local state from bindings
-            if heightUnit == .cm {
-                useMetricSystem = true
-                heightCm = Int(height)
-                weightKg = Int(weight)
-            } else {
-                useMetricSystem = false
-                heightFeet = Int(height) / 12
-                heightInches = Int(height) % 12
-                weightLbs = Int(weight)
-            }
-        }
-    }
-
-    private func updateValues() {
-        if useMetricSystem {
-            height = Double(heightCm)
-            weight = Double(weightKg)
-        } else {
-            height = Double(heightFeet * 12 + heightInches)
-            weight = Double(weightLbs)
-        }
     }
 }
 

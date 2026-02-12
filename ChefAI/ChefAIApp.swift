@@ -7,6 +7,7 @@
 
 import SwiftUI
 import GoogleSignIn
+import Auth
 // TODO: Add SuperwallKit package in Xcode before uncommenting
 // import SuperwallKit
 
@@ -14,13 +15,9 @@ import GoogleSignIn
 struct ChefAIApp: App {
     @AppStorage(StorageKeys.hasCompletedOnboarding)
     private var hasCompletedOnboarding = false
+    @StateObject private var supabase = SupabaseManager.shared
 
     init() {
-        // Initialize Superwall with your API key
-        // Get your API key from: https://superwall.com/dashboard
-        // TODO: Uncomment after adding SuperwallKit package
-        // Superwall.configure(apiKey: "pk_l2iDq2lf10Bfq7lnjPTFE")
-
         // Configure Google Sign-In
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: Config.googleClientID)
     }
@@ -41,6 +38,25 @@ struct ChefAIApp: App {
                 // Handle Supabase OAuth callback
                 Task {
                     await SupabaseManager.shared.handleOAuthCallback(url: url)
+                }
+            }
+            .onAppear {
+                // On launch, if user has a persisted session, check per-user onboarding flag
+                // (covers case where global flag was cleared but per-user flag persists)
+                if let userId = supabase.currentUser?.id.uuidString {
+                    UserDefaults.standard.set(userId, forKey: StorageKeys.currentUserId)
+                    if StorageService.shared.hasCompletedOnboarding(for: userId) {
+                        hasCompletedOnboarding = true
+                    }
+                }
+            }
+            .onChange(of: supabase.isAuthenticated) { _, isAuth in
+                if isAuth, let userId = supabase.currentUser?.id.uuidString {
+                    // User just logged in — check if they've already completed onboarding
+                    UserDefaults.standard.set(userId, forKey: StorageKeys.currentUserId)
+                    if StorageService.shared.hasCompletedOnboarding(for: userId) {
+                        hasCompletedOnboarding = true
+                    }
                 }
             }
         }

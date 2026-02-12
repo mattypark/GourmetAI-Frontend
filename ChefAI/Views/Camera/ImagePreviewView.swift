@@ -94,6 +94,7 @@ struct ImagePreviewView: View {
             if viewModel.isAnalyzing {
                 AnalysisLoadingView(
                     image: viewModel.selectedImage,
+                    cameraViewModel: viewModel,
                     onBack: {
                         viewModel.cancel()
                     }

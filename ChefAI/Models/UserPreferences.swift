@@ -472,6 +472,63 @@ enum AspirationalGoal: String, Codable, CaseIterable {
     }
 }
 
+// MARK: - Health Improvement Goal (new onboarding Q14)
+
+enum HealthImprovementGoal: String, Codable, CaseIterable {
+    case energy = "Energy"
+    case confidence = "Confidence"
+    case skin = "Skin"
+    case strength = "Strength"
+    case family = "Family"
+
+    var icon: String {
+        switch self {
+        case .energy: return "bolt.fill"
+        case .confidence: return "star.fill"
+        case .skin: return "sparkles"
+        case .strength: return "figure.strengthtraining.traditional"
+        case .family: return "heart.circle.fill"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .energy: return "Feel more energized throughout the day"
+        case .confidence: return "Feel more confident in yourself"
+        case .skin: return "Clearer, healthier skin"
+        case .strength: return "Build strength and fitness"
+        case .family: return "Set a healthy example for your family"
+        }
+    }
+}
+
+// MARK: - Commitment Priority (new onboarding Q15)
+
+enum CommitmentPriority: String, Codable, CaseIterable {
+    case visibleResults = "Visible results fast"
+    case longTermHabits = "Building long-term habits"
+    case learnToCook = "Learning to cook properly"
+    case eatOrganic = "Eating more organic"
+
+    var icon: String {
+        switch self {
+        case .visibleResults: return "chart.line.uptrend.xyaxis"
+        case .longTermHabits: return "calendar.badge.checkmark"
+        case .learnToCook: return "frying.pan.fill"
+        case .eatOrganic: return "leaf.fill"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .visibleResults: return "See changes quickly with focused meal plans"
+        case .longTermHabits: return "Build sustainable cooking and eating habits"
+        case .learnToCook: return "Master cooking fundamentals step by step"
+        case .eatOrganic: return "Transition to whole, organic ingredients"
+        }
+    }
+}
+
 // MARK: - NEW: Activity Level
 
 enum ActivityLevel: String, Codable, CaseIterable {

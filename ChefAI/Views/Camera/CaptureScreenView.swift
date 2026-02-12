@@ -197,7 +197,7 @@ struct CapturePreviewView: View {
 
                 // Analyze button
                 Button {
-                    cameraViewModel.selectedImage = image
+                    cameraViewModel.selectedImages = [image]
                     Task {
                         await cameraViewModel.analyzeImage()
                     }
@@ -226,6 +226,7 @@ struct CapturePreviewView: View {
             if cameraViewModel.isAnalyzing || cameraViewModel.analysisStatus.isFinished {
                 AnalysisLoadingView(
                     image: image,
+                    cameraViewModel: cameraViewModel,
                     onBack: {
                         cameraViewModel.resetAfterAnalysis()
                         onDismiss()

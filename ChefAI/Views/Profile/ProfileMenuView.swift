@@ -22,6 +22,7 @@ struct ProfileMenuView: View {
     @State private var isSigningIn = false
     @State private var signInError: String?
     @State private var currentNonce: String?
+    @State private var showingRedoOnboarding = false
 
     var body: some View {
         NavigationStack {
@@ -71,14 +72,22 @@ struct ProfileMenuView: View {
                 Button("Log Out", role: .destructive) {
                     Task {
                         try? await supabase.signOut()
-                        // Reset onboarding flag to return to welcome screen
-                        UserDefaults.standard.set(false, forKey: StorageKeys.hasCompletedOnboarding)
-                        // Clear local data
-                        StorageService.shared.clearAllData()
+                        // Clear session data but preserve per-user onboarding flags
+                        StorageService.shared.clearSessionData()
                     }
                 }
             } message: {
-                Text("You will be signed out and returned to the welcome screen. All local data will be cleared.")
+                Text("You will be signed out and returned to the welcome screen.")
+            }
+            .alert("Redo Onboarding", isPresented: $showingRedoOnboarding) {
+                Button("Cancel", role: .cancel) {}
+                Button("Redo", role: .destructive) {
+                    if let userId = supabase.currentUser?.id.uuidString {
+                        StorageService.shared.resetOnboarding(for: userId)
+                    }
+                }
+            } message: {
+                Text("This will reset your preferences and take you through the onboarding questions again.")
             }
         }
     }
@@ -382,6 +391,15 @@ struct ProfileMenuView: View {
                 subtitle: "Notifications, data management"
             ) {
                 showingAppSettings = true
+            }
+
+            // Redo Onboarding
+            MenuButton(
+                icon: "arrow.counterclockwise",
+                title: "Redo Onboarding",
+                subtitle: "Retake the onboarding questions"
+            ) {
+                showingRedoOnboarding = true
             }
         }
     }
