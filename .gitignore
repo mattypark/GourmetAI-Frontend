@@ -92,6 +92,9 @@ iOSInjectionProject/
 # IMPORTANT: Config file with API keys
 ChefAI/Utilities/Config.swift
 
+# Secrets xcconfig (contains API keys — only the .template is committed)
+ChefAI/Configuration/Secrets.xcconfig
+
 # Backend environment variables (contains API keys)
 ChefAI-Backend/.env
 .env
